@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid Background="White">
-            <TextBlock Text="Đây là trang Tổng" 
+            <TextBlock Text="Đây là trang Tổng quan" 
                FontSize="30" 
                HorizontalAlignment="Center" 
                VerticalAlignment="Center"/>
