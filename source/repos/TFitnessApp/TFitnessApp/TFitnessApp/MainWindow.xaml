@@ -45,26 +45,66 @@
             </Setter>
         </Style>
 
+        <Style TargetType="ToolTip">
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+
+            <Setter Property="Padding" Value="12,8"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="White"
+                        BorderBrush="#EEEEEE"
+                        BorderThickness="1"
+                        CornerRadius="5" 
+                        Padding="{TemplateBinding Padding}"
+                        Margin="20">
+
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="15" 
+                                          ShadowDepth="3" 
+                                          Opacity="0.2" 
+                                          Color="Black" 
+                                          Direction="270"/>
+                            </Border.Effect>
+
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="MenuListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="20,15"/>
-            <Setter Property="Margin" Value="5,5,5,5"/>
+            <Setter Property="Margin" Value="5,5,5,0"/>
             <Setter Property="Foreground" Value="{StaticResource TFitness.White}"/>
             <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="ToolTipService.Placement" Value="Right"/>
+            <Setter Property="ToolTipService.VerticalOffset" Value="-14"/>
+            <Setter Property="ToolTipService.HorizontalOffset" Value="-10"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="10"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="5000"/>
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
+
+            <Setter Property="ToolTip" Value="{x:Null}"/>
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Border" 
-                                CornerRadius="7" 
-                                Padding="{TemplateBinding Padding}" 
-                                Background="Transparent">
+                        <Border x:Name="Border" CornerRadius="7" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
                             <ContentPresenter x:Name="ItemContentPresenter" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
+
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource TFitness.White}"/>
-                                <Setter Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Trigger>
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="IsMouseOver" Value="True"/>
@@ -72,15 +112,26 @@
                                 </MultiTrigger.Conditions>
                                 <Setter TargetName="Border" Property="Background" Value="#33FFFFFF"/>
                             </MultiTrigger>
-                            <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
-                                <Setter TargetName="ItemContentPresenter" Property="HorizontalAlignment" Value="Center"/>
 
-                                <Setter Property="Padding" Value="15,15"/>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ContextMenu.IsOpen}" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#33FFFFFF"/>
                             </DataTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource TFitness.White}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Tag}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="MenuIcon" TargetType="fa:IconImage">
@@ -150,8 +201,8 @@
 
         <Style TargetType="MenuItem">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="-5,8"/>
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
@@ -205,7 +256,9 @@
               Grid.Column="1" 
               Width="40" Height="40" 
               VerticalAlignment="Center" 
-              Foreground="White" FontSize="18">
+              Foreground="White" FontSize="18"
+              Checked="HamburgerButton_Checked"     
+              Unchecked="HamburgerButton_Unchecked">
 
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource NoHoverToggleButton}">
@@ -306,67 +359,221 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          SelectionChanged="MenuListBox_SelectionChanged">
 
-                    <ListBoxItem x:Name="ItemTongQuan">
+                    <ListBoxItem x:Name="ItemTongQuan" Tag="Tổng quan">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="House" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Tổng quan" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemGoiTap">
+                    <ListBoxItem x:Name="ItemGoiTap" Tag="Gói tập">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="Archive" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Gói tập" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemLichTap">
+                    <ListBoxItem x:Name="ItemLichTap" Tag="Lịch tập">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="Calendar" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Lịch tập" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemHocVien">
+                    <ListBoxItem x:Name="ItemHocVien" Tag="Học viên">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="Users" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Học viên" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemHopDong">
+                    <ListBoxItem x:Name="ItemChiSoSucKhoe" Tag="Chỉ số sức khỏe">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="FileAlt" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Hợp đồng" Style="{StaticResource MenuText}"/>
+                            <fa:IconImage Icon="Heartbeat" Style="{StaticResource MenuIcon}"/>
+                            <TextBlock Text="Chỉ số sức khỏe" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemGiaoDich">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="CreditCard" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Giao dịch" Style="{StaticResource MenuText}"/>
-                        </StackPanel>
-                    </ListBoxItem>
-
-                    <ListBoxItem x:Name="ItemTaiKhoan">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="User" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Tài khoản" Style="{StaticResource MenuText}"/>
-                        </StackPanel>
-                    </ListBoxItem>
-
-                    <ListBoxItem x:Name="ItemDiemDanh">
+                    <ListBoxItem x:Name="ItemDiemDanh" Tag="Điểm danh">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="CheckSquare" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Điểm danh" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemChiSoSucKhoe">
+                    <ListBoxItem x:Name="ItemHopDong" Tag="Hợp đồng">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="Heartbeat" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Chỉ số sức khỏe" Style="{StaticResource MenuText}"/>
+                            <fa:IconImage Icon="FileAlt" Style="{StaticResource MenuIcon}"/>
+                            <TextBlock Text="Hợp đồng" Style="{StaticResource MenuText}"/>
                         </StackPanel>
+                    </ListBoxItem>
+
+                    <ListBoxItem x:Name="ItemGiaoDich" Tag="Giao dịch">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <fa:IconImage Icon="CreditCard" Style="{StaticResource MenuIcon}"/>
+                            <TextBlock Text="Giao dịch" Style="{StaticResource MenuText}"/>
+                        </StackPanel>
+                    </ListBoxItem>
+
+                    <ListBoxItem x:Name="ItemTaiKhoan" Tag="Tài khoản">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <fa:IconImage Icon="User" Style="{StaticResource MenuIcon}"/>
+                            <TextBlock Text="Tài khoản" Style="{StaticResource MenuText}"/>
+                        </StackPanel>
+                    </ListBoxItem>
+
+                    <ListBoxItem x:Name="ItemBaoCao"
+             MouseEnter="ItemBaoCao_MouseEnter"
+             PreviewMouseLeftButtonDown="ItemBaoCao_PreviewMouseLeftButtonDown">
+
+                        <ListBoxItem.Style>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MenuListBoxItemStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ItemBaoCaoDoanhThu, Path=IsSelected}" Value="True">
+                                        <Setter Property="Background" Value="#33FFFFFF"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding ElementName=ItemBaoCaoHocVien, Path=IsSelected}" Value="True">
+                                        <Setter Property="Background" Value="#33FFFFFF"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBoxItem.Style>
+
+                        <ListBoxItem.ContextMenu>
+                            <ContextMenu x:Name="MenuBaoCaoFlyout"
+                                         Padding="0"
+                                         Background="Transparent">
+
+                                <ContextMenu.Template>
+                                    <ControlTemplate TargetType="ContextMenu">
+                                        <Border Background="White" 
+                                                CornerRadius="6" 
+                                                BorderThickness="0" 
+                                                Margin="10"
+                                                Width="180">
+
+                                            <Border.Effect>
+                                                <DropShadowEffect ShadowDepth="2" 
+                                      BlurRadius="12" 
+                                      Color="#AAA" 
+                                      Opacity="0.3"/>
+                                            </Border.Effect>
+
+                                            <StackPanel IsItemsHost="True" 
+                            KeyboardNavigation.DirectionalNavigation="Cycle" 
+                            Background="Transparent"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ContextMenu.Template>
+                                <ContextMenu.Resources>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="FontSize" Value="14"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="#333333"/>
+                                        <Setter Property="Padding" Value="25,10,10,15"/>
+                                        <Setter Property="Margin" Value="0"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="MenuItem">
+                                                    <Border x:Name="Border" Background="Transparent" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="0"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <ContentPresenter ContentSource="Icon" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                            <ContentPresenter Grid.Column="1" ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="#33FFE1E1"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter Property="Foreground" Value="#999999"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ContextMenu.Resources>
+
+                                <MenuItem Header="Báo cáo" FontSize="16" FontWeight="DemiBold" IsHitTestVisible="False" Cursor="Arrow"/>
+                                <Separator>
+                                    <Separator.Template>
+                                        <ControlTemplate TargetType="Separator">
+                                            <Border Height="1" Background="#EEEEEE" Margin="0,2,0,2" SnapsToDevicePixels="True"/>
+                                        </ControlTemplate>
+                                    </Separator.Template>
+                                </Separator>
+
+                                <MenuItem x:Name="MenuConDoanhThu" Header="Báo cáo doanh thu" IsCheckable="True" Click="MenuBaoCaoItem_Click"/>
+                                <MenuItem x:Name="MenuConHocVien" Header="Báo cáo học viên" IsCheckable="True" Click="MenuBaoCaoItem_Click"/>
+                            </ContextMenu>
+                        </ListBoxItem.ContextMenu>
+
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Width" Value="190"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
+                                            <Setter Property="Width" Value="Auto"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
+                                                <Setter Property="Grid.ColumnSpan" Value="2"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <fa:IconImage Icon="ChartLine" Style="{StaticResource MenuIcon}"/>
+                                <TextBlock Text="Báo cáo" Style="{StaticResource MenuText}"/>
+                            </StackPanel>
+                            <fa:IconImage x:Name="IconChevronBaoCao" Icon="ChevronRight" Grid.Column="1" Width="15" Height="15" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <fa:IconImage.Style>
+                                    <Style TargetType="fa:IconImage">
+                                        <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"/>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </fa:IconImage.Style>
+                            </fa:IconImage>
+                        </Grid>
+                    </ListBoxItem>
+
+                    <ListBoxItem x:Name="ItemBaoCaoDoanhThu" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" Padding="30,10,15,10" Margin="30,6,20,3">
+                        <TextBlock Text="Báo cáo doanh thu" Style="{StaticResource MenuText}" FontSize="15"/>
+                    </ListBoxItem>
+
+                    <ListBoxItem x:Name="ItemBaoCaoHocVien" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" Padding="30,10,15,10" Margin="30,3,20,3">
+                        <TextBlock Text="Báo cáo học viên" Style="{StaticResource MenuText}" FontSize="15"/>
                     </ListBoxItem>
                 </ListBox>
             </Grid>
@@ -429,17 +636,45 @@
                             </StackPanel>
 
                             <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Tài khoản của tôi">
-                                        <MenuItem.Icon>
-                                            <fa:IconImage Icon="UserCircle" Width="16" Height="16" Foreground="#555555"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
+                                <ContextMenu MinWidth="170">
+                                    <MenuItem Header="Đăng xuất" 
+                                              Padding="15,10" 
+                                              FontSize="14" 
+                                              Click="Logout_Click"> 
+                                        <MenuItem.Template>
+                                            <ControlTemplate TargetType="MenuItem">
+                                                <Border x:Name="Border" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="30"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                    <MenuItem Header="Đăng xuất">
-                                        <MenuItem.Icon>
-                                            <fa:IconImage Icon="SignOutAlt" Width="16" Height="16" Foreground="#555555"/>
-                                        </MenuItem.Icon>
+                                                        <fa:IconImage x:Name="IconLogout" 
+                                  Icon="SignOutAlt" 
+                                  Width="16" Height="16" 
+                                  Foreground="#555555"
+                                  VerticalAlignment="Center" 
+                                  HorizontalAlignment="Center"/>
+
+                                                        <TextBlock Text="{TemplateBinding Header}" 
+                               Grid.Column="1"
+                               Foreground="#555555" 
+                               VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsHighlighted" Value="True">
+
+                                                        <Setter TargetName="Border" Property="Background" Value="#F5F5F5"/>
+
+                                                        <Setter TargetName="IconLogout" Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
+
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </MenuItem.Template>
                                     </MenuItem>
                                 </ContextMenu>
                             </Button.ContextMenu>

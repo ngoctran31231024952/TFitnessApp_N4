@@ -59,6 +59,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BaoCaoDoanhThuPage.xaml.cs">
+      <DependentUpon>BaoCaoDoanhThuPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="BaoCaoHocVienPage.xaml.cs">
+      <DependentUpon>BaoCaoHocVienPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CSSKPage.xaml.cs">
       <DependentUpon>CSSKPage.xaml</DependentUpon>
     </Compile>
@@ -71,6 +77,14 @@
     <Compile Include="TongQuanPage.xaml.cs">
       <DependentUpon>TongQuanPage.xaml</DependentUpon>
     </Compile>
+    <Page Include="BaoCaoDoanhThuPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BaoCaoHocVienPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CSSKPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
