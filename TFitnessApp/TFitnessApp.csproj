@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -59,61 +59,61 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BaoCaoDoanhThuPage.xaml.cs">
+    <Compile Include="Pages\BaoCaoDoanhThuPage.xaml.cs">
       <DependentUpon>BaoCaoDoanhThuPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BaoCaoHocVienPage.xaml.cs">
+    <Compile Include="Pages\BaoCaoHocVienPage.xaml.cs">
       <DependentUpon>BaoCaoHocVienPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CSSKPage.xaml.cs">
+    <Compile Include="Pages\CSSKPage.xaml.cs">
       <DependentUpon>CSSKPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DiemDanhPage.xaml.cs">
+    <Compile Include="Pages\DiemDanhPage.xaml.cs">
       <DependentUpon>DiemDanhPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TaiKhoanPage.xaml.cs">
+    <Compile Include="Pages\TaiKhoanPage.xaml.cs">
       <DependentUpon>TaiKhoanPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TongQuanPage.xaml.cs">
+    <Compile Include="Pages\TongQuanPage.xaml.cs">
       <DependentUpon>TongQuanPage.xaml</DependentUpon>
     </Compile>
-    <Page Include="BaoCaoDoanhThuPage.xaml">
+    <Page Include="Pages\BaoCaoDoanhThuPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="BaoCaoHocVienPage.xaml">
+    <Page Include="Pages\BaoCaoHocVienPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CSSKPage.xaml">
+    <Page Include="Pages\CSSKPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DiemDanhPage.xaml">
+    <Page Include="Pages\DiemDanhPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GiaoDichPage.xaml">
+    <Page Include="Pages\GiaoDichPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GoiTapPage.xaml">
+    <Page Include="Pages\GoiTapPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="HocVienPage.xaml">
+    <Page Include="Pages\HocVienPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="HopDongPage.xaml">
+    <Page Include="Pages\HopDongPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LichTapPage.xaml">
+    <Page Include="Pages\LichTapPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -121,30 +121,30 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GiaoDichPage.xaml.cs">
+    <Compile Include="Pages\GiaoDichPage.xaml.cs">
       <DependentUpon>GiaoDichPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GoiTapPage.xaml.cs">
+    <Compile Include="Pages\GoiTapPage.xaml.cs">
       <DependentUpon>GoiTapPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HocVienPage.xaml.cs">
+    <Compile Include="Pages\HocVienPage.xaml.cs">
       <DependentUpon>HocVienPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HopDongPage.xaml.cs">
+    <Compile Include="Pages\HopDongPage.xaml.cs">
       <DependentUpon>HopDongPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LichTapPage.xaml.cs">
+    <Compile Include="Pages\LichTapPage.xaml.cs">
       <DependentUpon>LichTapPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="TaiKhoanPage.xaml">
+    <Page Include="Pages\TaiKhoanPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TongQuanPage.xaml">
+    <Page Include="Pages\TongQuanPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
