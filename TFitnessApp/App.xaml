@@ -5,9 +5,9 @@
              StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
         <SolidColorBrush x:Key="TFitness.PrimaryRed" Color="#c71a1b"/>
+        <FontFamily x:Key="LatoFont">/Fonts/#Lato</FontFamily>
         <SolidColorBrush x:Key="TFitness.White" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="TFitness.SecondaryBackground" Color="#F7F8FC"/>
-
         <LinearGradientBrush x:Key="TFitness.HeaderGradient" StartPoint="0.5,0" EndPoint="0.5,1">
             <GradientStop Color="#c71a1b" Offset="0.5" />
             <GradientStop Color="#a51617" Offset="1.5" />
