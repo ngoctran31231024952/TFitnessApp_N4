@@ -3,10 +3,319 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TFitnessApp.Windows"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="TFitness Login" Height="550" Width="900"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseDown="Window_MouseDown">
+
+    <Window.Resources>
+        <Style x:Key="PillTextBox" TargetType="TextBox">
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="CaretBrush" Value="#c71a1b"/>
+            <Setter Property="Padding" Value="20,13"/>
+
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border CornerRadius="25" Background="{TemplateBinding Background}"
+                        BorderBrush="#EEEEEE" BorderThickness="1">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" 
+                                   Foreground="#AAAAAA"  
+                                   Margin="21,0,0,0" 
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="3" BlurRadius="15" Color="#DDD" Opacity="0.4"/>
+                            </Border.Effect>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PillPasswordBox" TargetType="PasswordBox">
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="CaretBrush" Value="#c71a1b"/>
+            <Setter Property="Padding" Value="20,13"/>
+
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border CornerRadius="25" Background="{TemplateBinding Background}"
+                        BorderBrush="#EEEEEE" BorderThickness="1">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" 
+                                   Foreground="#AAAAAA" 
+                                   Margin="21,0,0,0" 
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False" x:Name="Placeholder"/>
+
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="3" BlurRadius="15" Color="#DDD" Opacity="0.4"/>
+                            </Border.Effect>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RedPillButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource TFitness.PrimaryRed}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="25">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="3" BlurRadius="10" Color="#990000" Opacity="0.3"/>
+                            </Border.Effect>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#A51617"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#800000"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TopRightCloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="35"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PART_Border" 
+                        Background="{TemplateBinding Background}" 
+                        CornerRadius="0,15,0,0">
+
+                            <fa:IconImage x:Name="PART_Icon" 
+                                  Icon="Times" 
+                                  Foreground="#888" 
+                                  Width="13" Height="13"
+                                  VerticalAlignment="Center" 
+                                  HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PART_Border" Property="Background" Value="#c71a1b"/>
+                                <Setter TargetName="PART_Icon" Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="15" Background="White">
+        <Border.Clip>
+            <RectangleGeometry Rect="0,0,900,550" RadiusX="15" RadiusY="15"/>
+        </Border.Clip>
+
+        <Grid>
+            <Grid.Background>
+                <ImageBrush ImageSource="D:\Đồ án nhóm\TFitnessApp\Images\Dangnhap.jpg" Stretch="UniformToFill" Opacity="0.6"/>
+            </Grid.Background>
+
+            <Button Style="{StaticResource TopRightCloseButtonStyle}"
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" 
+                    Margin="0,0,0,0"
+                    Click="BtnExit_Click"/>     
+
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="420">
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
+                    <fa:IconImage Icon="Dumbbell" 
+                                  Width="92" Height="75" 
+                                  VerticalAlignment="Center" 
+                                  Margin="0,0,20,0">
+                        <fa:IconImage.Foreground>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Color="#C71A1B" Offset="0.5" />
+                                <GradientStop Color="#ED1A1B" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </fa:IconImage.Foreground>
+                    </fa:IconImage>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="TFitness" FontSize="48" FontWeight="UltraBold" LineHeight="50" Margin="-15,-5,0,0">
+                            <TextBlock.Foreground>
+                                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                    <GradientStop Color="#c71a1b" Offset="0.5" />
+                                    <GradientStop Color="#ED1A1B" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+
+                        <TextBlock Text="Khỏe hơn mỗi ngày" FontSize="22" Foreground="#c71a1b"
+                                   FontWeight="Regular" Margin="-15,-6,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Text="Đăng nhập vào hệ thống Gym của bạn"
+                           FontSize="18" Foreground="#212121" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" Margin="0,5,0,20"/>
+                
+                <TextBlock Text="Tên đăng nhập" FontWeight="SemiBold" Foreground="#212121" Margin="23,17,0,5" FontSize="15"/>
+                <TextBox x:Name="txtUsername" Style="{StaticResource PillTextBox}" Height="50" Tag="Nhập tên đăng nhập"
+                         TextChanged="txtUsername_TextChanged"/>
+
+                <StackPanel x:Name="errUserContainer" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
+                    <fa:IconImage Icon="ExclamationCircle" Foreground="#D32F2F" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="Vui lòng nhập tên đăng nhập" Foreground="#D32F2F" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <TextBlock Text="Mật khẩu" FontWeight="SemiBold" Foreground="#212121" Margin="23,20,0,5" FontSize="15"/>
+                <Grid>
+                    <PasswordBox x:Name="txtPassword" Style="{StaticResource PillPasswordBox}" Height="50" 
+                                 Tag="Nhập mật khẩu" Padding="20,13,50,13"
+                                 PasswordChanged="txtPassword_PasswordChanged"/>
+
+                    <TextBox x:Name="txtVisiblePassword" Style="{StaticResource PillTextBox}" Height="50" 
+                             Padding="20,13,50,13" Visibility="Collapsed" IsReadOnly="True"/>
+
+
+                    <Button Background="Transparent" BorderThickness="0" 
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,15,0" 
+                            Cursor="Hand"
+                            PreviewMouseLeftButtonDown="BtnEye_MouseDown"
+                            PreviewMouseLeftButtonUp="BtnEye_MouseUp"
+                            MouseLeave="BtnEye_MouseUp">
+
+                        <fa:IconImage Icon="Eye" Foreground="#888" Width="18" Height="18"/>
+
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+                
+                <StackPanel x:Name="errPassContainer" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
+                    <fa:IconImage Icon="ExclamationCircle" Foreground="#D32F2F" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="Vui lòng nhập mật khẩu" Foreground="#D32F2F" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock x:Name="lblHuongDan" 
+                           Text="Xem hướng dẫn"
+                           Background="Transparent"
+                           Foreground="#777" 
+                           HorizontalAlignment="Right" Margin="0,12,10,0" 
+                           Cursor="Hand" FontSize="13"
+                           MouseLeftButtonDown="txtHelp_Click"/>
+
+                <Popup x:Name="HelpPopup" 
+                       PlacementTarget="{Binding ElementName=lblHuongDan}" 
+                       Placement="Bottom"
+                       VerticalOffset="-20"
+                       HorizontalOffset="10"
+                       AllowsTransparency="True" 
+                       StaysOpen="True" 
+                       PopupAnimation="None">
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Background="White" CornerRadius="8" Width="275" Padding="0" Margin="20"
+                                MouseLeftButtonDown="Popup_MouseDown"
+                                MouseMove="Popup_MouseMove"
+                                MouseLeftButtonUp="Popup_MouseUp"
+                                Focusable="False">
+
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="15" 
+                          ShadowDepth="5" 
+                          Opacity="0.2" 
+                          RenderingBias="Quality"/>
+                            </Border.Effect>
+
+                            <StackPanel>
+                                <Grid Margin="15,15,15,10">
+                                    <TextBlock Text="Hướng dẫn đăng nhập" FontWeight="Bold" FontSize="16" Foreground="#c71a1b"/>
+                                    <fa:IconImage Icon="Times" Width="12" Foreground="#999" 
+                                  HorizontalAlignment="Right" Cursor="Hand"
+                                  MouseLeftButtonDown="BtnClosePopup_Click"/>
+                                </Grid>
+
+                                <Separator Background="#EEE" Margin="0"/>
+
+                                <StackPanel Margin="15,10,15,15">
+                                    <TextBlock Text="1. Người dùng đăng nhập bằng cách:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="• Sử dụng tài khoản đã được trung tâm cấp" 
+                               TextWrapping="Wrap" Margin="10,0,0,10" Foreground="#555"/>
+
+                                    <TextBlock Text="2. Lưu ý:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="• Quên mật khẩu vui lòng liên hệ quản trị viên: admin@tfitness.vn" 
+                               TextWrapping="Wrap" Margin="10,0,0,0" Foreground="#555"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Popup>
+
+                <Button Content="ĐĂNG NHẬP" Style="{StaticResource RedPillButton}"
+                        Height="50" Width="200" Margin="0,40,0,0" FontSize="18" FontWeight="Bold"
+                        Click="BtnLogin_Click" IsDefault="True"/>
+
+            </StackPanel>
+            <Grid x:Name="OverlayMask" Background="#33000000" Visibility="Collapsed"/>
+        </Grid>
+    </Border>
 </Window>
