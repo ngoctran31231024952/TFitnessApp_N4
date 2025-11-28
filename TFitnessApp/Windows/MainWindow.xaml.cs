@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using FontAwesome.Sharp;
 using System.Threading;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
