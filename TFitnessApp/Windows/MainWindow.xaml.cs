@@ -1,20 +1,80 @@
 ﻿using System;
+using System.Media;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using FontAwesome.Sharp;
-using System.Threading;
-using TFitnessApp.Database;
+using TFitnessApp.Windows;
+using TFitnessApp.Pages;
 
 namespace TFitnessApp
 {
     public partial class MainWindow : Window
     {
         private bool isMenuProcessing = false;
-        public MainWindow()
+        public MainWindow(string hoTen = "Admin", string quyen = "Quản trị viên")
         {
             InitializeComponent();
+            DisplayUserInfo(hoTen, quyen);
+            MainFrame.Navigate(new TongQuanPage());
+            MenuListBox.SelectedItem = ItemTongQuan;
+            PageTitle.Text = "Tổng quan";
+            this.Title = "TFitness - Tổng quan";
+        }
+
+        private void DisplayUserInfo(string hoTen, string quyen)
+        {
+            txtUserRole.Text = quyen;
+            if (!string.IsNullOrWhiteSpace(hoTen))
+            {
+                string[] parts = hoTen.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length >= 2)
+                {
+                    string ho = parts[0];                   
+                    string ten = parts[parts.Length - 1];  
+                    txtUserName.Text = $"{ho} {ten}";
+                    txtAvatarInitial.Text = ten.Substring(0, 1).ToUpper();
+                }
+                else if (parts.Length == 1)
+                {
+                    txtUserName.Text = parts[0];
+                    txtAvatarInitial.Text = parts[0].Substring(0, 1).ToUpper();
+                }
+            }
+            else
+            {
+                txtUserName.Text = "Người dùng";
+                txtAvatarInitial.Text = "?";
+            }
+
+            string roleCheck = quyen.Trim().ToLower();
+
+            if (roleCheck == "quản trị viên" || roleCheck == "admin")
+            {
+                ItemTaiKhoan.Visibility = Visibility.Visible;
+                ItemBaoCao.Visibility = Visibility.Visible;
+                BtnHelp.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                ItemTaiKhoan.Visibility = Visibility.Collapsed;
+                ItemBaoCao.Visibility = Visibility.Collapsed;
+                ItemBaoCaoDoanhThu.Visibility = Visibility.Collapsed;
+                ItemBaoCaoHocVien.Visibility = Visibility.Collapsed;
+                BtnHelp.Visibility = Visibility.Visible;
+
+                if (MainFrame.Content is TaiKhoanPage ||
+                    MainFrame.Content is BaoCaoDoanhThuPage ||
+                    MainFrame.Content is BaoCaoHocVienPage)
+                {
+                    MainFrame.Navigate(new TongQuanPage());
+                    PageTitle.Text = "Tổng quan";
+                    this.Title = "TFitness - Tổng quan";
+                    MenuListBox.SelectedItem = ItemTongQuan;
+                }
+            }
         }
 
         private void LogoButton_Click(object sender, RoutedEventArgs e)
@@ -28,11 +88,21 @@ namespace TFitnessApp
             contextMenu.PlacementTarget = AvatarButton;
             contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             contextMenu.IsOpen = true;
+            contextMenu.HorizontalOffset = -20;
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Đăng xuất thành công!", "Thông báo");
+            SystemSounds.Asterisk.Play();
+            var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận",
+                                         MessageBoxButton.OKCancel, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.OK)
+            {
+                LoginWindow loginScreen = new LoginWindow();
+                loginScreen.Show();
+                this.Close();
+            }
         }
 
         private void MenuListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -65,6 +135,11 @@ namespace TFitnessApp
                 case "ItemHocVien":
                     pageTitle = "Quản lý Học viên"; windowTitle = "Học viên";
                     MainFrame.Navigate(new HocVienPage());
+                    break;
+                case "ItemPT":
+                    pageTitle = "Quản lý PT";
+                    windowTitle = "PT";
+                    MainFrame.Navigate(new PTPage());
                     break;
                 case "ItemHopDong":
                     pageTitle = "Quản lý Hợp đồng"; windowTitle = "Hợp đồng";
@@ -269,6 +344,14 @@ namespace TFitnessApp
                 e.Handled = true;
             }
         }
+
+        private void BtnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            HelpPopup.HorizontalOffset = -100;
+            HelpPopup.VerticalOffset = 18;
+            HelpPopup.IsOpen = true;
+        }
+
 
     }
 }

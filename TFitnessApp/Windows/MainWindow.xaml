@@ -12,7 +12,11 @@
         MinHeight="600"
         MinWidth="900">
     <Window.Resources>
-
+        <Color x:Key="ColorRedMain">#C71A1B</Color>
+        <Color x:Key="ColorRedDark">#ED1A1B</Color>
+        <SolidColorBrush x:Key="BrushRedMain" Color="{StaticResource ColorRedMain}"/>
+        <SolidColorBrush x:Key="BrushTextDark" Color="#212121"/>
+        <SolidColorBrush x:Key="BrushError" Color="#D32F2F"/>
         <Style x:Key="NoHoverButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -373,10 +377,13 @@
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemLichTap" Tag="Lịch tập">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="Calendar" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Lịch tập" Style="{StaticResource MenuText}"/>
+                    <ListBoxItem x:Name="ItemLichTap" Tag="Lịch tập" Height="48" Padding="18,0">
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+
+                            <fa:IconImage Icon="Calendar" Style="{StaticResource MenuIcon}" Height="22" Width="23"/>
+                            <TextBlock Text="Lịch tập" Style="{StaticResource MenuText}" Height="19"/>
+
                         </StackPanel>
                     </ListBoxItem>
 
@@ -387,6 +394,17 @@
                         </StackPanel>
                     </ListBoxItem>
 
+                    <ListBoxItem x:Name="ItemPT" Tag="PT" Style="{StaticResource MenuListBoxItemStyle}" Height="48">
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+
+                            <fa:IconImage Icon="UserNinja" Style="{StaticResource MenuIcon}"/>
+
+                            <TextBlock Text="PT" Style="{StaticResource MenuText}" VerticalAlignment="Center"/>
+
+                        </StackPanel>
+                    </ListBoxItem>
+
                     <ListBoxItem x:Name="ItemChiSoSucKhoe" Tag="Chỉ số sức khỏe">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="Heartbeat" Style="{StaticResource MenuIcon}"/>
@@ -394,17 +412,22 @@
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemDiemDanh" Tag="Điểm danh">
+                    <ListBoxItem x:Name="ItemDiemDanh" Tag="Điểm danh" Height="48">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="CheckSquare" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Điểm danh" Style="{StaticResource MenuText}"/>
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemHopDong" Tag="Hợp đồng">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <fa:IconImage Icon="FileAlt" Style="{StaticResource MenuIcon}"/>
-                            <TextBlock Text="Hợp đồng" Style="{StaticResource MenuText}"/>
+                    <ListBoxItem x:Name="ItemHopDong" Tag="Hợp đồng" Height="48" Padding="18,0">
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+
+                            <fa:IconImage Icon="FileAlt" 
+                      Style="{StaticResource MenuIcon}" 
+                      Height="22" Width="23"/>
+
+                            <TextBlock Text="Hợp đồng" Style="{StaticResource MenuText}" Height="20"/>
                         </StackPanel>
                     </ListBoxItem>
 
@@ -415,7 +438,7 @@
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemTaiKhoan" Tag="Tài khoản">
+                    <ListBoxItem x:Name="ItemTaiKhoan" Tag="Tài khoản" Height="48">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <fa:IconImage Icon="User" Style="{StaticResource MenuIcon}"/>
                             <TextBlock Text="Tài khoản" Style="{StaticResource MenuText}"/>
@@ -512,7 +535,7 @@
                                 <Separator>
                                     <Separator.Template>
                                         <ControlTemplate TargetType="Separator">
-                                            <Border Height="1" Background="#EEEEEE" Margin="0,2,0,2" SnapsToDevicePixels="True"/>
+                                            <Border Height="1" Background="#EEEEEE" Margin="0,-8,0,2" SnapsToDevicePixels="True"/>
                                         </ControlTemplate>
                                     </Separator.Template>
                                 </Separator>
@@ -602,37 +625,83 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0">
 
-                        <Button Style="{StaticResource TopBarButton}">
+                        <Button x:Name="BtnHelp" Style="{StaticResource TopBarButton}" Click="BtnHelp_Click">
                             <StackPanel Orientation="Horizontal">
                                 <fa:IconImage Icon="QuestionCircle" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
                                 <TextBlock Text="Trợ giúp" Margin="5,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource TopBarButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <fa:IconImage Icon="Heart" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
-                                <TextBlock Text="Góp ý" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                        <Popup x:Name="HelpPopup" 
+       PlacementTarget="{Binding ElementName=BtnHelp}" 
+       Placement="Bottom"
+       VerticalOffset="5" 
+       HorizontalOffset="-200"
+       AllowsTransparency="True" 
+       StaysOpen="False" 
+       PopupAnimation="Fade">
+
+                            <Grid Margin="0,0,10,10">
+                                <Border Background="White" CornerRadius="8" Width="270" Padding="0" Margin="10"
+                                        Focusable="False">
+
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.2" RenderingBias="Quality"/>
+                                    </Border.Effect>
+
+                                    <StackPanel>
+                                        <Grid Margin="15,15,15,10">
+                                            <StackPanel Orientation="Horizontal">
+                                                <fa:IconImage Icon="Headset" Foreground="{StaticResource BrushRedMain}" Width="20" Margin="0,0,10,0"/>
+                                                <TextBlock Text="Trung tâm hỗ trợ" FontWeight="Bold" FontSize="16" Foreground="{StaticResource BrushRedMain}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Separator Background="#EEE" Margin="0"/>
+
+                                        <StackPanel Margin="20,15,20,20">
+                                            <TextBlock Text="Bạn đang gặp sự cố kỹ thuật?" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Vui lòng liên hệ bộ phận IT để được hỗ trợ:" Foreground="Black" TextWrapping="Wrap" Margin="0,0,0,15"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                <fa:IconImage Icon="PhoneAlt" Width="14" Foreground="Black" Margin="0,0,10,0"/>
+                                                <TextBlock Text="Hotline:" Foreground="Black" Margin="0,0,5,0"/>
+                                                <TextBlock Text="0123 456 789" FontWeight="Bold" Foreground="{StaticResource BrushTextDark}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                <fa:IconImage Icon="Envelope" Width="14" Foreground="Black" Margin="0,0,10,0"/>
+                                                <TextBlock Text="Email:" Foreground="Black" Margin="0,0,5,0"/>
+                                                <TextBlock Text="admin@tfitness.vn" FontWeight="Bold" Foreground="{StaticResource BrushTextDark}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <fa:IconImage Icon="Clock" Width="14" Foreground="Black" Margin="0,0,10,0"/>
+                                                <TextBlock Text="8:00 - 17:30 (Thứ 2 - Thứ 7)" FontSize="12" Foreground="Black" FontStyle="Italic"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Popup>
 
                         <Button x:Name="AvatarButton" 
-        Style="{StaticResource TopBarButton}"
-        Click="AvatarButton_Click">
+                                Style="{StaticResource TopBarButton}"
+                                Click="AvatarButton_Click">
 
                             <StackPanel Orientation="Horizontal">
                                 <Grid Width="32" Height="32" VerticalAlignment="Center">
                                     <Ellipse Fill="#007ACC"/>
-                                    <TextBlock Text="O" Foreground="White" FontSize="16" FontWeight="SemiBold"
-                       HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,-1,10,0"/>
+                                    <TextBlock x:Name="txtAvatarInitial" Text="O" Foreground="White" FontSize="16" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Grid>
 
-                                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
-                                    <TextBlock Text="Nguyễn Oanh" FontWeight="Bold" Foreground="Black"/>
-                                    <TextBlock Text="Quản trị viên" Foreground="Gray" FontSize="11" Margin="0,-2,0,0"/>
+                                <StackPanel VerticalAlignment="Center" Margin="7,0,0,0">
+                                    <TextBlock x:Name="txtUserName" Text="Admin"  FontWeight="Bold" Foreground="Black"/>
+                                    <TextBlock x:Name="txtUserRole" Text="Quản trị viên"  Foreground="Gray" FontSize="11" Margin="0,2,0,0"/>
                                 </StackPanel>
 
-                                <fa:IconImage Icon="ChevronDown" Foreground="Gray" Width="10" Height="10" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <fa:IconImage Icon="ChevronDown" Foreground="Gray" Width="10" Height="10" VerticalAlignment="Center" Margin="8,5,0,0"/>
                             </StackPanel>
 
                             <Button.ContextMenu>
@@ -640,7 +709,7 @@
                                     <MenuItem Header="Đăng xuất" 
                                               Padding="15,10" 
                                               FontSize="14" 
-                                              Click="Logout_Click"> 
+                                              Click="Logout_Click">
                                         <MenuItem.Template>
                                             <ControlTemplate TargetType="MenuItem">
                                                 <Border x:Name="Border" Background="Transparent" Padding="{TemplateBinding Padding}">
