@@ -17,42 +17,6 @@ namespace TFitnessApp.Database
             // Lưu ý: Cần thêm Package NuGet System.Configuration.ConfigurationManager
             // và đảm bảo nó được tham chiếu đúng.
             _connectionString = ConfigurationManager.ConnectionStrings["SQLiteConnection"].ConnectionString;
-
-            // Đảm bảo tệp database được tạo và schema được thiết lập
-            InitializeDatabase();
-        }
-
-        // Phương thức để đảm bảo các bảng CSDL đã được tạo
-        public void InitializeDatabase()
-        {
-            // Sử dụng một kết nối mới chỉ để kiểm tra và tạo schema
-            try
-            {
-                using (var connection = new SqliteConnection(_connectionString))
-                {
-                    connection.Open();
-
-                    // Lệnh SQL để kiểm tra xem bảng 'TaiKhoan' đã tồn tại chưa.
-                    // Nếu chưa, nó sẽ chạy toàn bộ script tạo bảng (ví dụ mẫu, bạn có thể thay bằng logic kiểm tra phức tạp hơn)
-                    using (var command = new SqliteCommand("SELECT name FROM sqlite_master WHERE type='table' AND name='TaiKhoan';", connection))
-                    {
-                        var result = command.ExecuteScalar();
-
-                        if (result == null)
-                        {
-                            // Nếu bảng chưa tồn tại, ta chạy toàn bộ script schema.
-                            Console.WriteLine("Cơ sở dữ liệu chưa được khởi tạo. Cần chạy script SQL.");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Xử lý lỗi kết nối hoặc truy vấn
-                Console.WriteLine($"Lỗi khởi tạo Database: {ex.Message}");
-                // Trong ứng dụng WPF, bạn có thể hiển thị MessageBox
-                System.Windows.MessageBox.Show($"Lỗi kết nối CSDL: {ex.Message}", "Lỗi Database", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
         }
 
         // Phương thức chung để thực thi các lệnh INSERT/UPDATE/DELETE
