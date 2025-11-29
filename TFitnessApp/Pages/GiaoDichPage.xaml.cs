@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using TFitnessApp.Interfaces;
 using TFitnessApp.Repositories;
 using TFitnessApp.Entities;
+using TFitnessApp.ViewModels;
 
 namespace TFitnessApp
 {
@@ -23,52 +24,28 @@ namespace TFitnessApp
     /// </summary>
     public partial class GiaoDichPage : Page
     {
-        // Khai báo Repository
-        private readonly IGiaoDichRepository _giaoDichRepository;
+        // Khai báo ViewModel
+        private readonly GiaoDichViewModel _viewModel;
         public GiaoDichPage()
         {
             InitializeComponent();
-            // Khởi tạo Repository
-            _giaoDichRepository = new GiaoDichRepository();
+            // Khởi tạo ViewModel
+            _viewModel = new GiaoDichViewModel();
+            // GÁN VIEWMODEL LÀM DATA CONTEXT CHO PAGE
+            this.DataContext = _viewModel;
 
-            // Thêm sự kiện Loaded để tải dữ liệu khi Page được hiển thị
+            // THAY THẾ: Chỉ đăng ký sự kiện Loaded để gọi phương thức tải dữ liệu trong ViewModel
             this.Loaded += GiaoDichPage_Loaded;
         }
-        // Sự kiện khi Page được tải xong
+        // Sự kiện khi Page được tải xong (gọi hàm tải dữ liệu trong ViewModel)
+        // Mục đích: Tải dữ liệu lần đầu khi vào Page
         private async void GiaoDichPage_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadGiaoDichAsync(); // Tải dữ liệu bất đồng bộ
-        }
-
-        /// <summary>
-        /// Tải dữ liệu giao dịch và gán cho DataGrid.
-        /// </summary>
-        private async Task LoadGiaoDichAsync()
-        {
-            // Hiển thị loading (nếu có UI loading)
-            // ...
-
-            try
+            // Dùng lệnh này để đảm bảo dữ liệu chỉ tải lại khi cần
+            if (_viewModel.Transactions.Count == 0)
             {
-                // Thực thi tác vụ lấy dữ liệu DB trên một Thread nền (Task.Run)
-                // để tránh chặn luồng UI, vì phương thức GetAll() là đồng bộ
-                List<GiaoDich> giaoDichList = await Task.Run(() => _giaoDichRepository.GetAll());
-
-                // Gán danh sách lấy được làm nguồn dữ liệu cho DataGrid
-                // Giả định DataGrid của bạn trong XAML có tên là 'dgGiaoDich'
-                if (dgGiaoDich != null)
-                {
-                    dgGiaoDich.ItemsSource = giaoDichList;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tải dữ liệu giao dịch: {ex.Message}", "Lỗi Tải Dữ Liệu", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                // Ẩn loading (nếu có UI loading)
-                // ...
+                // Gọi phương thức tải dữ liệu từ ViewModel
+                await _viewModel.LoadGiaoDichAsync();
             }
         }
         private void Button_Click(object sender, RoutedEventArgs e)

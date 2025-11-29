@@ -1,46 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TFitnessApp.Entities
 {
-    /// <summary>
-    /// Lớp Entity đại diện cho một bản ghi Giao Dịch (Transaction) trong CSDL SQLite.
-    /// </summary>
+    // Cần phải có lớp này để DataGrid và Repository hoạt động.
     public class GiaoDich
     {
-        // Mã Giao Dịch (MaGD) - Khóa chính
+        // Các cột Mã (string)
         public string MaGD { get; set; }
+        public string MaHV { get; set; }
+        public string MaGoi { get; set; }
+        public string MaTK { get; set; }
 
-        // Tổng Tiền (REAL trong SQLite)
+        // Các cột số (decimal)
         public decimal TongTien { get; set; }
-
-        // Đã Thanh Toán (REAL trong SQLite)
         public decimal DaThanhToan { get; set; }
-
-        // Số Tiền Nợ (REAL trong SQLite)
         public decimal SoTienNo { get; set; }
 
-        // Phương Thức Thanh Toán (Mới)
-        public string PhuongThuc { get; set; }
-
-        // Ngày Giao Dịch (NgayGD TEXT trong SQLite)
+        // Ngày giao dịch (DateTime)
         public DateTime NgayGD { get; set; }
 
-        // Trạng Thái (TEXT)
+        // Trạng thái (string)
         public string TrangThai { get; set; }
 
-        // --- Khóa Ngoại ---
-
-        // Mã Học Viên (MaHV) - Khóa ngoại tới HocVien
-        public string MaHV { get; set; }
-
-        // Mã Gói (MaGoi) - Khóa ngoại tới GoiTap
-        public string MaGoi { get; set; }
-
-        // Mã Tài Khoản (MaTK) - Khóa ngoại tới TaiKhoan (Mới)
-        public string MaTK { get; set; }
+        // Thuộc tính cần thiết cho CheckBox trong DataGrid
+        public bool IsSelected { get; set; }
     }
 }
