@@ -50,7 +50,7 @@ namespace TFitnessApp.Windows
             if (hasError) return;
 
  
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
             using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
             {
