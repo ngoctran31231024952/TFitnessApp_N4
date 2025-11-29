@@ -1,19 +1,299 @@
-﻿<Page x:Class="TFitnessApp.CSSKPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:TFitnessApp"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="CSSKPage">
+﻿<UserControl x:Class="TFitnessApp.CSSKPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style TargetType="Button" x:Key="ActionButton">
+            <Setter Property="Background" Value="#DC143C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#C41230"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button" x:Key="IconButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </UserControl.Resources>
 
-    <Grid>
-        <Grid Background="White">
-            <TextBlock Text="Đây là trang Quản lý CSSK" 
-               FontSize="30" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"/>
+    <Grid Background="White">
+        <!-- Main Content -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid Margin="30">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                    <TextBlock Text=" " FontSize="18" Foreground="#DC143C" Cursor="Hand" 
+                               MouseLeftButtonDown="BackButton_Click" VerticalAlignment="Center"/>
+                    <TextBlock Text="Quản lý Chỉ số sức khỏe" FontSize="20" FontWeight="Bold" 
+                               Foreground="#333" VerticalAlignment="Center"/>
+                    <TextBlock Text="Nguyễn Danh" FontSize="14" Foreground="#666" 
+                               Margin="15,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Action Bar -->
+                <Grid Grid.Row="1" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search and Filter -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBox x:Name="SearchBox" Width="250" Height="35" 
+                                 VerticalContentAlignment="Center" Padding="10,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 Text="Tên hoặc học viên" Foreground="#999"
+                                 GotFocus="SearchBox_GotFocus" LostFocus="SearchBox_LostFocus"
+                                 TextChanged="SearchBox_TextChanged"/>
+                        <Button Content="🔍" Width="35" Height="35" Margin="5,0" 
+                                Style="{StaticResource IconButton}" Background="#F5F5F5"
+                                Click="SearchButton_Click"/>
+                        <Button Content="🔽" Width="35" Height="35" Margin="5,0" 
+                                Style="{StaticResource IconButton}" Background="#F5F5F5"
+                                Click="FilterButton_Click"/>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="Chọn tất cả" Style="{StaticResource ActionButton}" 
+                                Background="White" Foreground="#DC143C" BorderThickness="1" 
+                                BorderBrush="#DC143C" Click="SelectAll_Click"/>
+                        <Button Content="Thêm" Style="{StaticResource ActionButton}" 
+                                Click="Add_Click"/>
+                        <Button Content="Xóa" Style="{StaticResource ActionButton}" 
+                                Background="#666" Click="Delete_Click"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Student List Table -->
+                <Border Grid.Row="2" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Table Header -->
+                        <Border Grid.Row="0" Background="#F9F9F9" BorderBrush="#E0E0E0" 
+                                BorderThickness="0,0,0,1" Padding="15,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" x:Name="SelectAllCheckBox" 
+                                          Checked="SelectAllCheckBox_Changed" 
+                                          Unchecked="SelectAllCheckBox_Changed" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Mã học viên" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="2" Text="Tên học viên" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="3" Text="Cân nặng" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="4" Text="Chiều cao" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="5" Text="BMI" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="6" Text="% lệ mỡ" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="7" Text="Cơ khối" FontWeight="SemiBold" Foreground="#333"/>
+                                <TextBlock Grid.Column="8" Text="" FontWeight="SemiBold" Foreground="#333"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Table Body -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
+                            <ItemsControl x:Name="StudentListControl">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1" 
+                                                Padding="15,12" Background="White">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#FAFAFA"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="50"/>
+                                                    <ColumnDefinition Width="80"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="80"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" 
+                                                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding StudentId}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding StudentName}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding DateOfBirth, StringFormat=dd-MM-yyyy}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Status}" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Sắp hết hạn">
+                                                                    <Setter Property="Foreground" Value="#FF6B6B"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Grid.Column="5" Text="{Binding BMI}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="6" Text="{Binding District}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="7" Text="{Binding PhoneNumber}" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="8" Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <Button Content="👁" Style="{StaticResource IconButton}" 
+                                                            ToolTip="Xem chi tiết" Click="ViewDetail_Click" Tag="{Binding}"/>
+                                                    <Button Content="✏" Style="{StaticResource IconButton}" 
+                                                            ToolTip="Chỉnh sửa" Click="Edit_Click" Tag="{Binding}"/>
+                                                    <Button Content="🗑" Style="{StaticResource IconButton}" 
+                                                            ToolTip="Xóa" Click="DeleteSingle_Click" Tag="{Binding}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Pagination -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" 
+                            Margin="0,20,0,0">
+                    <Button Content="◀" Width="35" Height="35" Style="{StaticResource IconButton}" 
+                            Background="#F5F5F5" Click="PreviousPage_Click" x:Name="PrevButton"/>
+                    <ItemsControl x:Name="PageNumbersControl" Margin="10,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding PageNumber}" Width="35" Height="35" 
+                                        Margin="2,0" Click="PageNumber_Click" Tag="{Binding PageNumber}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                            <Setter Property="Background" Value="#F5F5F5"/>
+                                            <Setter Property="Foreground" Value="#333"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrentPage}" Value="True">
+                                                    <Setter Property="Background" Value="#DC143C"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="▶" Width="35" Height="35" Style="{StaticResource IconButton}" 
+                            Background="#F5F5F5" Click="NextPage_Click" x:Name="NextButton"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Popup for Add/Edit -->
+        <Grid x:Name="PopupOverlay" Background="#80000000" Visibility="Collapsed">
+            <Border Background="White" Width="500" MaxHeight="600" CornerRadius="8" 
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid Margin="25">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Popup Header -->
+                    <TextBlock Grid.Row="0" x:Name="PopupTitle" Text="Thêm chỉ số sức khỏe" 
+                               FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                    <!-- Popup Content -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
+                        <StackPanel>
+                            <TextBlock Text="Học viên" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="StudentComboBox" Height="35" Margin="0,0,0,15" 
+                                      DisplayMemberPath="StudentName" SelectedValuePath="StudentId"/>
+
+                            <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="WeightTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="HeightTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="BMITextBox" Height="35" Padding="10,0" Margin="0,0,0,15" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+
+                            <TextBlock Text="% Mỡ cơ thể" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="BodyFatTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Cơ khối (kg)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="MuscleMassTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="TDEETextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Ngày đo" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="MeasurementDatePicker" Height="35" Margin="0,0,0,15"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Popup Actions -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" 
+                                Margin="0,20,0,0">
+                        <Button Content="Hủy" Width="100" Style="{StaticResource ActionButton}" 
+                                Background="White" Foreground="#666" BorderThickness="1" 
+                                BorderBrush="#DDD" Click="CancelPopup_Click"/>
+                        <Button Content="Lưu" Width="100" Style="{StaticResource ActionButton}" 
+                                Click="SavePopup_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
-</Page>
+</UserControl>

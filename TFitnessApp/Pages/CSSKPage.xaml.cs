@@ -15,14 +15,108 @@ using System.Windows.Shapes;
 
 namespace TFitnessApp
 {
-    /// <summary>
-    /// Interaction logic for CSSKPage.xaml
-    /// </summary>
-    public partial class CSSKPage : Page
+    public partial class CSSKPage : UserControl
     {
         public CSSKPage()
         {
             InitializeComponent();
+        }
+
+        private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BackButton_Click(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void SavePopup_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void PageNumber_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SelectAllCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SelectAll_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+        private void CancelPopup_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic xử lý khi người dùng nhấn nút chuyển sang trang tiếp theo
+        }
+        private void DeleteSingle_Click(object sender, RoutedEventArgs e)
+        {
+           
+            var button = sender as Button;
+            var dataItem = button?.Tag;          
+        }
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+      
+        private void FilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+          
+        }
+
+       
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+     
+        private void ViewDetail_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void PreviousPage_Click(object sender, RoutedEventArgs e)
+        {
         }
     }
 }
