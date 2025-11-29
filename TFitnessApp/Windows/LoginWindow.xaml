@@ -256,7 +256,7 @@
 
             </StackPanel>
 
-            <Grid x:Name="OverlayMask" Background="#33000000" Visibility="Collapsed"/>
+            <Grid x:Name="OverlayMask" Background="#33000000" Visibility="Collapsed"/> 
         </Grid>
     </Border>
 </Window>
