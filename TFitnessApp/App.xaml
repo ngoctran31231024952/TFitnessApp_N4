@@ -1,16 +1,30 @@
 ﻿<Application x:Class="TFitnessApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TFitnessApp"
-             StartupUri="Windows/MainWindow.xaml">
+             StartupUri="Windows/LoginWindow.xaml">
     <Application.Resources>
         <SolidColorBrush x:Key="TFitness.PrimaryRed" Color="#c71a1b"/>
-        <FontFamily x:Key="LatoFont">/Fonts/#Lato</FontFamily>
         <SolidColorBrush x:Key="TFitness.White" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="TFitness.SecondaryBackground" Color="#F7F8FC"/>
+
         <LinearGradientBrush x:Key="TFitness.HeaderGradient" StartPoint="0.5,0" EndPoint="0.5,1">
             <GradientStop Color="#c71a1b" Offset="0.5" />
             <GradientStop Color="#a51617" Offset="1.5" />
         </LinearGradientBrush>
+
+        <FontFamily x:Key="LatoFont">/Fonts/#Lato</FontFamily>
+
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="FontFamily" Value="{StaticResource LatoFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="{StaticResource LatoFont}"/>
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="FontFamily" Value="{StaticResource LatoFont}"/>
+        </Style>
+
     </Application.Resources>
 </Application>

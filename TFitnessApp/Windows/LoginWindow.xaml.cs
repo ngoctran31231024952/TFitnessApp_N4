@@ -1,27 +1,161 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Microsoft.Data.Sqlite;
 
 namespace TFitnessApp.Windows
 {
-    /// <summary>
-    /// Interaction logic for LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
         public LoginWindow()
         {
             InitializeComponent();
+            try { SQLitePCL.Batteries_V2.Init(); } catch { }
+
+            txtUsername.Focus();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed) DragMove();
+        }
+
+        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void BtnLogin_Click(object sender, RoutedEventArgs e)
+        {
+            string username = txtUsername.Text.Trim();
+            string password = txtPassword.Password;
+            bool hasError = false;
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                errUserContainer.Visibility = Visibility.Visible;
+                hasError = true;
+            }
+            else errUserContainer.Visibility = Visibility.Collapsed;
+
+            if (string.IsNullOrEmpty(password))
+            {
+                errPassContainer.Visibility = Visibility.Visible;
+                hasError = true;
+            }
+            else errPassContainer.Visibility = Visibility.Collapsed;
+
+            if (hasError) return;
+
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
+
+            using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
+            {
+                connection.Open();
+
+                string sql = "SELECT PhanQuyen FROM TaiKhoan WHERE TenDangNhap = @user AND MatKhau = @pass";
+
+                using (SqliteCommand command = new SqliteCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@user", username);
+                    command.Parameters.AddWithValue("@pass", password);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            new MainWindow().Show();
+                            this.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void txtUsername_TextChanged(object sender, TextChangedEventArgs e)
+            => errUserContainer.Visibility = Visibility.Collapsed;
+
+        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is PasswordBox passwordBox)
+            {
+                var placeholder = (TextBlock)passwordBox.Template.FindName("Placeholder", passwordBox);
+                if (placeholder != null)
+                {
+                    placeholder.Visibility = string.IsNullOrEmpty(passwordBox.Password)
+                                             ? Visibility.Visible : Visibility.Collapsed;
+                }
+
+                if (txtVisiblePassword != null)
+                    txtVisiblePassword.Text = passwordBox.Password;
+
+                if (errPassContainer != null)
+                    errPassContainer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BtnEye_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            txtPassword.Visibility = Visibility.Collapsed;
+            txtVisiblePassword.Visibility = Visibility.Visible;
+        }
+
+        private void BtnEye_MouseUp(object sender, MouseEventArgs e)
+        {
+            txtVisiblePassword.Visibility = Visibility.Collapsed;
+            txtPassword.Visibility = Visibility.Visible;
+            txtPassword.Focus();
+        }
+        private void txtHelp_Click(object sender, MouseButtonEventArgs e)
+        {
+            HelpPopup.HorizontalOffset = 10;
+            HelpPopup.VerticalOffset = -20;
+            HelpPopup.IsOpen = true;
+            OverlayMask.Visibility = Visibility.Visible;
+        }
+
+        private void BtnClosePopup_Click(object sender, MouseButtonEventArgs e)
+        {
+            HelpPopup.IsOpen = false;
+            OverlayMask.Visibility = Visibility.Collapsed;
+        }
+
+        private bool isDragging = false;
+        private Point startMousePos;
+        private double startHOffset, startVOffset;
+
+        private void Popup_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement border)
+            {
+                isDragging = true;
+                startMousePos = border.PointToScreen(e.GetPosition(border));
+                startHOffset = HelpPopup.HorizontalOffset;
+                startVOffset = HelpPopup.VerticalOffset;
+                border.CaptureMouse();
+            }
+        }
+
+        private void Popup_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && sender is UIElement border)
+            {
+                Point currentMousePos = border.PointToScreen(e.GetPosition(border));
+                HelpPopup.HorizontalOffset = startHOffset + (currentMousePos.X - startMousePos.X);
+                HelpPopup.VerticalOffset = startVOffset + (currentMousePos.Y - startMousePos.Y);
+            }
+        }
+
+        private void Popup_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = false;
+            (sender as UIElement)?.ReleaseMouseCapture();
         }
     }
 }
