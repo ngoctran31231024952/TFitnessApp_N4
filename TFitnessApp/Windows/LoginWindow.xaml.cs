@@ -49,13 +49,14 @@ namespace TFitnessApp.Windows
 
             if (hasError) return;
 
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
+ 
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
             using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
             {
                 connection.Open();
 
-                string sql = "SELECT PhanQuyen FROM TaiKhoan WHERE TenDangNhap = @user AND MatKhau = @pass";
+                string sql = "SELECT HoTen, PhanQuyen, TrangThai FROM TaiKhoan WHERE TenDangNhap = @user AND MatKhau = @pass";
 
                 using (SqliteCommand command = new SqliteCommand(sql, connection))
                 {
@@ -64,9 +65,24 @@ namespace TFitnessApp.Windows
 
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        if (reader.Read())
+                        if (reader.Read()) 
                         {
-                            new MainWindow().Show();
+                            string trangThai = reader["TrangThai"].ToString();
+
+                            if (trangThai == "Bị Khóa")
+                            {
+                                MessageBox.Show("Tài khoản của bạn đã bị khóa!\nVui lòng liên hệ quản trị viên: admin@tfitness.vn",
+                                                "Thông báo",
+                                                MessageBoxButton.OK,
+                                                MessageBoxImage.Stop);
+                                return;
+                            }
+
+                            string hoTenDB = reader["HoTen"].ToString();
+                            string quyenDB = reader["PhanQuyen"].ToString();
+
+                            MainWindow mainWin = new MainWindow(hoTenDB, quyenDB);
+                            mainWin.Show();
                             this.Close();
                         }
                         else
