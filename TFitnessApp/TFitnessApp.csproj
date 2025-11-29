@@ -149,6 +149,9 @@
     <Compile Include="Pages\DiemDanhPage.xaml.cs">
       <DependentUpon>DiemDanhPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\PTPage.xaml.cs">
+      <DependentUpon>PTPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\TaiKhoanPage.xaml.cs">
       <DependentUpon>TaiKhoanPage.xaml</DependentUpon>
     </Compile>
@@ -195,6 +198,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\LichTapPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\PTPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

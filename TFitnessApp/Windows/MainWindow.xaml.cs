@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using FontAwesome.Sharp;
 using TFitnessApp.Windows;
+using TFitnessApp.Pages;
 
 namespace TFitnessApp
 {
@@ -138,7 +139,7 @@ namespace TFitnessApp
                 case "ItemPT":
                     pageTitle = "Quản lý PT";
                     windowTitle = "PT";
-                    //MainFrame.Navigate(new PTPage());
+                    MainFrame.Navigate(new PTPage());
                     break;
                 case "ItemHopDong":
                     pageTitle = "Quản lý Hợp đồng"; windowTitle = "Hợp đồng";
