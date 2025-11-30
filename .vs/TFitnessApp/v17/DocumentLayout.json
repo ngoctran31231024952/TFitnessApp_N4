@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "D:\\t\u00E0i li\u1EC7u\\tfitness\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\pages\\hocvienpage.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
       "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\pages\\hocvienpage.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\windows\\themhocvienwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\windows\\themhocvienwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\windows\\themhocvienwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\windows\\themhocvienwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|D:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -25,11 +33,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "App.xaml",
               "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\App.xaml",
               "RelativeDocumentMoniker": "TFitnessApp\\App.xaml",
@@ -42,7 +50,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "RuntimeType.cs",
               "DocumentMoniker": "C:\\Users\\Dell\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
               "ToolTip": "C:\\Users\\Dell\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
@@ -50,31 +58,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-14T19:09:28.538Z",
               "IsPinned": true
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "HocVienPage.xaml.cs",
-              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs",
-              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml.cs",
-              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs",
-              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T07:07:29.494Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "HocVienPage.xaml",
-              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
-              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml",
-              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
-              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-30T07:07:25.202Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -91,6 +74,56 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ThemHocVienWindow.xaml.cs",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Windows\\ThemHocVienWindow.xaml.cs",
+              "RelativeDocumentMoniker": "TFitnessApp\\Windows\\ThemHocVienWindow.xaml.cs",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Windows\\ThemHocVienWindow.xaml.cs",
+              "RelativeToolTip": "TFitnessApp\\Windows\\ThemHocVienWindow.xaml.cs",
+              "ViewState": "AQIAABgAAAAAAAAAAAAAwEMAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T07:36:12.22Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ThemHocVienWindow.xaml",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Windows\\ThemHocVienWindow.xaml",
+              "RelativeDocumentMoniker": "TFitnessApp\\Windows\\ThemHocVienWindow.xaml",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Windows\\ThemHocVienWindow.xaml",
+              "RelativeToolTip": "TFitnessApp\\Windows\\ThemHocVienWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-30T07:26:32.834Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HocVienPage.xaml.cs",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs*",
+              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml.cs*",
+              "ViewState": "AQIAADsBAAAAAAAAAAAQwGcBAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T07:07:29.494Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "HocVienPage.xaml",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
+              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
+              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-30T07:07:25.202Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",

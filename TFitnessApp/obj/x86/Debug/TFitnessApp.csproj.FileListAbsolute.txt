@@ -24,6 +24,7 @@ D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\TFitnessApp.csproj.AssemblyRef
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\CSSKPage.baml
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\DiemDanhPage.baml
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\LoginWindow.baml
+D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\ThemHocVienWindow.baml
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\App.baml
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\BaoCaoDoanhThuPage.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\BaoCaoHocVienPage.g.cs
@@ -40,6 +41,7 @@ D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\MainWindow.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\TaiKhoanPage.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Pages\TongQuanPage.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\ThemGiaoDichWindow.g.cs
+D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\ThemHocVienWindow.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\Windows\XemGiaoDichWindow.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\App.g.cs
 D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\TFitnessApp_Content.g.cs
