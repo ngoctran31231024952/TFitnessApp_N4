@@ -4,18 +4,19 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TFitnessApp"
-      xmlns:utility="clr-namespace:TFitnessApp.Utilities"
       xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp" 
       mc:Ignorable="d" 
       d:DesignHeight="650" d:DesignWidth="1000"
-      Title="GiaoDichPage">
+      Title="GiaoDichPage"
+      Background="White">
 
     <Page.Resources>
-        <!-- CONVERTER DÙNG CHO PLACEHOLDER TEXTBOX -->
-        <utility:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <local:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:StatusToBorderBrushConverter x:Key="StatusToBorderBrushConverter"/>
 
-        <!-- Style các nút -->
-        <Style x:Key="RoundButtonControlTemplate" TargetType="Button">
+        <Style x:Key="RoundButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Padding" Value="15,5"/>
@@ -24,7 +25,6 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- CornerRadius mặc định 5, sẽ bị ghi đè nếu cần -->
                         <Border Background="{TemplateBinding Background}" CornerRadius="5">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -38,15 +38,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- ĐÃ XÓA STYLE ListButtonCornerStyle VÌ NÚT NÀY KHÔNG CÒN LÀ BUTTON NỮA -->
-
-        <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundButtonControlTemplate}"/>
-        <Style x:Key="ExportButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundButtonControlTemplate}">
-            <Setter Property="Background" Value="#C71A1B"/>
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-
-        <!-- Style cho Header của DataGrid -->
         <Style x:Key="CenteredHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -54,19 +45,25 @@
             <Setter Property="Background" Value="#E1E0E7"/>
             <Setter Property="BorderBrush" Value="#E1E0E7"/>
             <Setter Property="BorderThickness" Value="1,1,1,0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333"/>
         </Style>
 
-        <!-- Style cho Dòng DataGrid (Highlight) -->
         <Style x:Key="CustomRowStyle" TargetType="{x:Type DataGridRow}">
+            <Setter Property="Background" Value="White"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="#FFDDDD"/>
                     <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="BorderBrush" Value="#C71A1B"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F5F5F5"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Style cho Tab/Radio Buttons để mô phỏng dải phân đoạn (Segmented Control) -->
         <Style x:Key="PaymentTabStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -76,30 +73,28 @@
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="#666"/>
-            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Grid Background="{TemplateBinding Background}">
-                            <!-- Nội dung Tab (Header) -->
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                               Content="{TemplateBinding Content}"
                                               Margin="{TemplateBinding Padding}"
                                               TextElement.Foreground="{TemplateBinding Foreground}"/>
-                            <!-- Đường gạch chân khi được chọn -->
                             <Border x:Name="Underline" Height="3" VerticalAlignment="Bottom" Background="Transparent" Margin="0,0,-1,0"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Underline" Property="Background" Value="#C71A1B"/>
-                                <Setter Property="Foreground" Value="#333"/>
-                                <!-- Màu chữ khi được chọn -->
+                                <Setter Property="Foreground" Value="#C71A1B"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Foreground" Value="#C71A1B"/>
-                                <!-- Màu chữ khi hover -->
+                                <Setter Property="Cursor" Value="Hand"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -107,59 +102,87 @@
             </Setter>
         </Style>
 
-        <!-- Style để căn giữa nội dung DataGrid Cell (Chỉ sử dụng cho cột DataGridTextColumn) -->
         <Style x:Key="CenteredContentStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5,2"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridStyle" TargetType="{x:Type DataGrid}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E1E0E7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserReorderColumns" Value="False"/>
+            <Setter Property="CanUserResizeColumns" Value="True"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="True"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="SelectionMode" Value="Extended"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+        </Style>
+
+        <Style x:Key="PaginationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#F0F0F0"/>
+                    <Setter Property="Foreground" Value="#999999"/>
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
     </Page.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="20" Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Row 0: Chức năng chính: Danh sách, Tìm kiếm, Tạo GD, Làm mới -->
             <RowDefinition Height="Auto"/>
-            <!-- Row 1: Thanh trạng thái (Chưa TT, TT một phần, Đã TT) -->
-            <RowDefinition Height="Auto"/>
-            <!-- Row 2: Vị trí cũ của nút Xóa/Xuất (Giờ trống hoặc dùng cho Pagination/Header DataGrid nếu cần) -->
             <RowDefinition Height="*"/>
-            <!-- Row 3: DataGrid -->
             <RowDefinition Height="Auto"/>
-            <!-- Row 4: Nút Xóa/Xuất (MỚI) -->
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- ROW 0: CHỨC NĂNG CHÍNH -->
-        <Grid Grid.Row="0" Margin="0,0,0,15">
+        <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <!-- Column 0: Cho Khối Danh Sách (Width="Auto") -->
                 <ColumnDefinition Width="*"/>
-                <!-- Column 1: Cho Thanh tìm kiếm (Width="*") -->
-                <ColumnDefinition Width="120"/>
-                <!-- Column 2: Cho Nút Tạo Giao Dịch (Width="Auto") -->
-                <ColumnDefinition Width="100"/>
-                <!-- Column 3: Cho Nút Làm Mới (Width="Auto") -->
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- KHỐI THÔNG TIN DANH SÁCH GIAO DỊCH -->
-            <Border Grid.Column="0" CornerRadius="0,20,20,0" Margin="0,0,10,0" Background="#C71A1B">
+            <Border Grid.Column="0" CornerRadius="0,20,20,0" Margin="0,0,15,0" Background="#C71A1B">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
                 </Border.Effect>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="5"/>
-                        <!-- Thanh Indicator nhỏ bên trái (viền đen) -->
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
-                    <!-- Thanh Indicator nhỏ bên trái (Màu đen/xám đậm) -->
                     <Border Grid.Column="0" Background="#4B1718" Margin="-5,0,0,0"/>
-
-                    <!-- TextBlock thông tin -->
                     <TextBlock Grid.Column="1" Text="Danh sách Giao dịch" 
-                               Padding="20,10" 
+                               Padding="20,12" 
                                FontWeight="SemiBold" 
                                Foreground="White"
                                VerticalAlignment="Center"
@@ -168,8 +191,7 @@
                 </Grid>
             </Border>
 
-            <!-- Thanh tìm kiếm -->
-            <Border Grid.Column="1" CornerRadius="8" Background="#ECECEC" Height="40" VerticalAlignment="Center" Margin="0,0,10,0"
+            <Border Grid.Column="1" CornerRadius="8" Background="#ECECEC" Height="40" VerticalAlignment="Center" Margin="0,0,15,0"
                     BorderBrush="#CCCCCC" BorderThickness="1">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -180,121 +202,163 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- TextBox và Placeholder Text (Grid Column 0) -->
-                    <Grid Grid.Column="0" Margin="10,0,0,0">
+                    <!-- SỬA: Sử dụng Grid với ZIndex để kiểm soát thứ tự hiển thị -->
+                    <Grid Grid.Column="0" Margin="15,0,0,0">
                         <TextBox x:Name="SearchTextBox" 
-                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
                                  BorderThickness="0" 
                                  Background="Transparent" 
                                  VerticalContentAlignment="Center" 
                                  Foreground="#333" 
-                                 Padding="0"/>
-                        <!-- Placeholder Text: Sử dụng Converter -->
-                        <TextBlock IsHitTestVisible="False" 
-                                   Text="Tìm kiếm học viên" 
+                                 Padding="0"
+                                 FontSize="13"
+                                 GotFocus="SearchTextBox_GotFocus"
+                                 LostFocus="SearchTextBox_LostFocus"
+                                 KeyDown="SearchTextBox_KeyDown"
+                                 TextChanged="SearchTextBox_TextChanged"
+                                 Panel.ZIndex="2"/>
+                        <!-- TextBox trên cùng -->
+
+                        <TextBlock x:Name="SearchPlaceholder"
+                                   IsHitTestVisible="False" 
+                                   Text="Tìm kiếm học viên, mã giao dịch, gói tập..." 
                                    VerticalAlignment="Center" 
                                    Foreground="#999"
                                    FontStyle="Italic"
-                                   Visibility="{Binding Text, ElementName=SearchTextBox, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                   FontSize="13"
+                                   Panel.ZIndex="1"/>
+                        <!-- Placeholder ở dưới -->
                     </Grid>
 
-                    <!-- Icon Kính Lúp (SỬ DỤNG FONT AWESOME SHARP) -->
-                    <Button Grid.Column="1" Command="{Binding SearchCommand}" Background="Transparent" BorderThickness="0" Padding="0" Width="40" Height="40">
-                        <Viewbox Width="16" Height="16" Margin="0,0,10,0">
+                    <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="0" Width="40" Height="40"
+                            ToolTip="Tìm kiếm" Click="ThucHienTimKiem_Click">
+                        <Viewbox Width="16" Height="16" Margin="0,0,15,0">
                             <fa:IconImage Icon="Search" Foreground="#666" />
                         </Viewbox>
                     </Button>
                 </Grid>
             </Border>
 
-            <!-- Nút Tạo Giao dịch -->
             <Border Grid.Column="2" CornerRadius="5" Margin="0,0,10,0">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
                 </Border.Effect>
-                <Button Command="{Binding AddTransactionCommand}" Style="{StaticResource RoundButtonControlTemplate}" Padding="20,10" FontWeight="SemiBold" Height="40" VerticalAlignment="Top" Click="Button_Click">
+                <Button x:Name="btnAddTransaction"
+                        Padding="15,8" 
+                        FontWeight="SemiBold" 
+                        Height="40" 
+                        VerticalAlignment="Center"
+                        ToolTip="Tạo giao dịch mới"
+                        Style="{StaticResource RoundButtonStyle}"
+                        Click="AddTransactionCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <!-- Icon CirclePlus -->
                         <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Tạo Giao dịch" VerticalAlignment="Center"/>
+                        <TextBlock Text="Tạo GD" VerticalAlignment="Center" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
 
-            <!-- Nút Làm mới -->
             <Border Grid.Column="3" CornerRadius="5">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
                 </Border.Effect>
-                <Button Command="{Binding RefreshCommand}" Style="{StaticResource RoundButtonControlTemplate}" Padding="20,10" FontWeight="SemiBold">
+                <Button x:Name="btnRefresh"
+                        Padding="15,8" 
+                        FontWeight="SemiBold"
+                        Height="40"
+                        VerticalAlignment="Center"
+                        ToolTip="Làm mới dữ liệu"
+                        Style="{StaticResource RoundButtonStyle}"
+                        Click="RefreshCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <!-- Icon Refresh -->
                         <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Làm mới" VerticalAlignment="Center"/>
+                        <TextBlock Text="Làm mới" VerticalAlignment="Center" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
-
         </Grid>
 
-        <!-- ROW 1: Thanh trạng thái (Chưa TT, TT một phần, Đã TT) -->
-        <Grid Grid.Row="1" Margin="0,0,0,10">
-            <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+        <Border Grid.Row="1" 
+                CornerRadius="8" 
+                Background="White" 
+                BorderBrush="#E1E0E7" 
+                BorderThickness="1"
+                Margin="0,0,0,15"
+                Padding="0">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="270" Color="#000000" Opacity="0.1" BlurRadius="3"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <RadioButton Grid.Column="0" Content="Chưa thanh toán" Style="{StaticResource PaymentTabStyle}"/>
-                    <RadioButton Grid.Column="1" Content="Thanh toán một phần" Style="{StaticResource PaymentTabStyle}" IsChecked="True"/>
-                    <RadioButton Grid.Column="2" Content="Đã thanh toán" Style="{StaticResource PaymentTabStyle}"/>
-                </Grid>
-            </Border>
-        </Grid>
+                <RadioButton x:Name="rbChuaThanhToan"
+                             Grid.Column="0" 
+                             Content="Chưa thanh toán" 
+                             Style="{StaticResource PaymentTabStyle}"
+                             IsChecked="True" 
+                             Checked="RadioButton_Checked"/>
 
-        <!-- ROW 2: Header cho DataGrid (ĐÃ BỎ NỘI DUNG NÚT XÓA/XUẤT CŨ) -->
-        <!-- Đặt Row 2 vào đây để giữ cấu trúc RowDefinitions không bị thay đổi chỉ vì Row 2 không dùng nữa -->
-        <Grid Grid.Row="2" Height="0"/>
+                <RadioButton x:Name="rbThanhToanMotPhan"
+                             Grid.Column="1" 
+                             Content="Thanh toán một phần" 
+                             Style="{StaticResource PaymentTabStyle}"
+                             Checked="RadioButton_Checked"/>
 
-        <!-- ROW 3: DataGrid (Danh sách Giao dịch) -->
-        <Border Grid.Row="3" 
+                <RadioButton x:Name="rbDaThanhToan"
+                             Grid.Column="2" 
+                             Content="Đã thanh toán" 
+                             Style="{StaticResource PaymentTabStyle}"
+                             Checked="RadioButton_Checked"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" 
                 CornerRadius="10" 
                 BorderBrush="#E1E0E7" 
-                BorderThickness="4" 
+                BorderThickness="2" 
                 Background="White"
                 ClipToBounds="True"
-                Margin="0,0,0,10">
-            <!-- Thêm Margin dưới để cách nút Xóa/Xuất mới -->
+                Margin="0,0,0,15">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="3" Direction="270" Color="#000000" Opacity="0.1" BlurRadius="10"/>
+            </Border.Effect>
+
             <DataGrid x:Name="dgGiaoDich"
-                  ItemsSource="{Binding Transactions}" 
-                  SelectedItem="{Binding SelectedTransaction}"
-                  AutoGenerateColumns="False" 
-                  IsReadOnly="True"
-                  RowHeaderWidth="0"
-                  HeadersVisibility="Column"
-                  BorderThickness="1"
-                  BorderBrush="#CCCCCC"
-                  RowStyle="{StaticResource CustomRowStyle}"
-                  ColumnHeaderStyle="{StaticResource CenteredHeaderStyle}" Margin="-1,0,-1,0">
+                      Style="{StaticResource CustomDataGridStyle}"
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      HeadersVisibility="Column"
+                      RowStyle="{StaticResource CustomRowStyle}"
+                      ColumnHeaderStyle="{StaticResource CenteredHeaderStyle}">
 
                 <DataGrid.Columns>
-                    <!-- Cột 1: Checkbox + View Icon (Mắt) -->
-                    <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn Width="70" Header="Chọn">
                         <DataGridTemplateColumn.HeaderTemplate>
                             <DataTemplate>
-                                <CheckBox/>
+                                <CheckBox x:Name="chkSelectAll" 
+                                          Checked="SelectAllCheckBox_Checked" 
+                                          Unchecked="SelectAllCheckBox_Checked"
+                                          ToolTip="Chọn tất cả"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.HeaderTemplate>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <!-- Checkbox -->
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <!-- View Icon (Mắt) (SỬ DỤNG FONT AWESOME SHARP) -->
-                                    <Button Background="Transparent" BorderThickness="0" Padding="0" Command="{Binding DataContext.ViewTransactionCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}">
-                                        <!-- ĐÃ SỬA LỖI: Bọc IconImage trong Viewbox -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" 
+                                              VerticalAlignment="Center" 
+                                              Margin="0,0,8,0"
+                                              Checked="CheckBox_Checked"
+                                              Unchecked="CheckBox_Unchecked"
+                                              ToolTip="Chọn giao dịch này"/>
+                                    <Button Background="Transparent" 
+                                            BorderThickness="0" 
+                                            Padding="4" 
+                                            Click="ViewTransactionCommand_Click"
+                                            ToolTip="Xem chi tiết giao dịch">
                                         <Viewbox Width="14" Height="14">
                                             <fa:IconImage Icon="Eye" Foreground="#666" VerticalAlignment="Center"/>
                                         </Viewbox>
@@ -304,36 +368,70 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!-- Các cột dữ liệu (Giả định Binding) -->
-                    <DataGridTextColumn Header="Mã GD" Binding="{Binding MaGD}" Width="0.5*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Mã HV" Binding="{Binding MaHV}" Width="0.5*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Mã Gói" Binding="{Binding MaGoi}" Width="0.5*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Mã TK" Binding="{Binding MaTK}" Width="0.5*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TongTien, StringFormat='N0'}" Width="0.8*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Đã Thanh Toán" Binding="{Binding DaThanhToan, StringFormat='N0'}" Width="0.8*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Số Tiền Nợ" Binding="{Binding SoTienNo, StringFormat='N0'}" Width="0.8*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
-                    <DataGridTextColumn Header="Ngày GD" Binding="{Binding NgayGD, StringFormat='dd-MM-yyyy HH:mm'}" Width="*" ElementStyle="{StaticResource CenteredContentStyle}" HeaderStyle="{StaticResource CenteredHeaderStyle}"/>
+                    <DataGridTextColumn Header="Mã GD" 
+                                        Binding="{Binding MaGD}" 
+                                        Width="90" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
 
-                    <!-- Cột Trạng Thái (Status) với màu sắc -->
-                    <DataGridTemplateColumn Header="Trạng Thái" Width="0.7*" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                    <DataGridTextColumn Header="Mã HV" 
+                                        Binding="{Binding MaHV}" 
+                                        Width="80" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Mã Gói" 
+                                        Binding="{Binding MaGoi}" 
+                                        Width="90" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Mã TK" 
+                                        Binding="{Binding MaTK}" 
+                                        Width="80" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Tổng Tiền" 
+                                        Binding="{Binding TongTienFormatted}" 
+                                        Width="120" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Đã Thanh Toán" 
+                                        Binding="{Binding DaThanhToanFormatted}" 
+                                        Width="130" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Số Tiền Nợ" 
+                                        Binding="{Binding SoTienNoFormatted}" 
+                                        Width="120" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTextColumn Header="Ngày GD" 
+                                        Binding="{Binding NgayGDFormatted}" 
+                                        Width="130" 
+                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <!-- Đã thêm Border và Padding để mô phỏng thẻ trạng thái (badge) -->
-                                <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding TrangThai}" FontWeight="SemiBold" FontSize="12">
+                                <Border CornerRadius="12" 
+                                        Padding="8,4" 
+                                        HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center"
+                                        BorderThickness="1">
+                                    <TextBlock Text="{Binding TrangThai}" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="11"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
-                                                    <!-- Màu Cam/Đỏ nhạt cho trạng thái Trả một phần/Chưa thanh toán -->
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Thanh toán một phần">
-                                                        <Setter Property="Foreground" Value="#FF7F00"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Trả Một Phần">
+                                                        <Setter Property="Foreground" Value="#D97706"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Chưa thanh toán">
-                                                        <Setter Property="Foreground" Value="#C71A1B"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Chưa Thanh Toán">
+                                                        <Setter Property="Foreground" Value="#DC2626"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Đã thanh toán">
-                                                        <Setter Property="Foreground" Value="#10B981"/>
-                                                        <!-- Màu xanh lá đậm hơn cho "Đã thanh toán" -->
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Đã Thanh Toán">
+                                                        <Setter Property="Foreground" Value="#059669"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -341,16 +439,18 @@
                                     </TextBlock>
                                     <Border.Style>
                                         <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Thanh toán một phần">
-                                                    <Setter Property="Background" Value="#FFF7ED"/>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Trả Một Phần">
+                                                    <Setter Property="Background" Value="#FEF3C7"/>
+                                                    <Setter Property="BorderBrush" Value="#F59E0B"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Chưa thanh toán">
-                                                    <Setter Property="Background" Value="#FEEAE9"/>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Chưa Thanh Toán">
+                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                    <Setter Property="BorderBrush" Value="#EF4444"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã thanh toán">
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã Thanh Toán">
                                                     <Setter Property="Background" Value="#D1FAE5"/>
+                                                    <Setter Property="BorderBrush" Value="#10B981"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -360,30 +460,156 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Làm mới" Click="MenuItem_Refresh_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Tạo giao dịch mới" Click="MenuItem_AddTransaction_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
             </DataGrid>
         </Border>
 
-        <!-- ROW 4: Nút Xóa và Xuất (ĐÃ DI CHUYỂN VÀ CĂN GIỮA) -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Command="{Binding DeleteTransactionCommand}" Style="{StaticResource DeleteButtonStyle}" Height="38" Width="100">
-                <StackPanel Orientation="Horizontal">
-                    <!-- Icon Xóa (Trash) -->
-                    <Viewbox Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center">
-                        <fa:IconImage Icon="Trash" Foreground="White"/>
-                    </Viewbox>
-                    <TextBlock Text="Xóa" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Command="{Binding ExportTransactionCommand}" Margin="10,0,0,0" Style="{StaticResource ExportButtonStyle}" Width="100" Height="38">
-                <StackPanel Orientation="Horizontal">
-                    <!-- Icon Xuất (Upload) -->
-                    <Viewbox Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center">
-                        <fa:IconImage Icon="Upload" Foreground="White"/>
-                    </Viewbox>
-                    <TextBlock Text="Xuất" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-        </StackPanel>
+        <Border Grid.Row="3" 
+                Background="#F5F5F5" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,1,0,0" 
+                Padding="10"
+                Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Hiển thị:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
+                <ComboBox x:Name="cboSoBanGhiMoiTrang" 
+                          Width="60" 
+                          SelectionChanged="cboSoBanGhiMoiTrang_SelectionChanged"
+                          FontSize="12"/>
 
+                <TextBlock x:Name="txtThongTinPhanTrang" 
+                           VerticalAlignment="Center" 
+                           Margin="20,0,0,0"
+                           FontSize="12"/>
+
+                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                    <Button x:Name="btnTrangDau" 
+                            Content="&lt;&lt;" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Click="btnTrangDau_Click" 
+                            ToolTip="Trang đầu"/>
+                    <Button x:Name="btnTrangTruoc" 
+                            Content="&lt;" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Click="btnTrangTruoc_Click" 
+                            ToolTip="Trang trước" 
+                            Margin="5,0,0,0"/>
+
+                    <TextBox x:Name="txtChuyenTrang" 
+                            Width="40" 
+                            TextAlignment="Center" 
+                            VerticalContentAlignment="Center"
+                            Margin="10,0,5,0" 
+                            ToolTip="Nhập số trang và Enter" 
+                            KeyDown="txtChuyenTrang_KeyDown"
+                            FontSize="12"/>
+                    <TextBlock x:Name="txtTrangHienTai" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,10,0"
+                               FontSize="12"/>
+
+                    <Button x:Name="btnTrangSau" 
+                            Content="&gt;" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Click="btnTrangSau_Click" 
+                            ToolTip="Trang sau"/>
+                    <Button x:Name="btnTrangCuoi" 
+                            Content="&gt;&gt;" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Click="btnTrangCuoi_Click" 
+                            ToolTip="Trang cuối" 
+                            Margin="5,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel x:Name="InfoStackPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="txtSoGiaoDichHienThi"
+                           Foreground="#666" 
+                           FontSize="12"
+                           Margin="5,0,0,0"/>
+                <TextBlock x:Name="txtSoGiaoDichDaChon"
+                           Foreground="#C71A1B" 
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="15,0,0,0"
+                           Visibility="Collapsed"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnDelete"
+                        Style="{StaticResource RoundButtonStyle}" 
+                        Height="36" 
+                        Width="90"
+                        Margin="0,0,10,0"
+                        ToolTip="Xóa giao dịch đã chọn"
+                        Click="DeleteTransactionCommand_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center">
+                            <fa:IconImage Icon="Trash" Foreground="White"/>
+                        </Viewbox>
+                        <TextBlock Text="Xóa" VerticalAlignment="Center" FontSize="12" />
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnExport"
+                        Style="{StaticResource RoundButtonStyle}" 
+                        Width="90" 
+                        Height="36"
+                        ToolTip="Xuất danh sách giao dịch"
+                        Click="ExportTransactionCommand_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center">
+                            <fa:IconImage Icon="Upload" Foreground="White"/>
+                        </Viewbox>
+                        <TextBlock Text="Xuất" VerticalAlignment="Center" FontSize="12" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="0" Grid.RowSpan="5" 
+                Background="#80000000" 
+                x:Name="LoadingIndicator"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Background="White" CornerRadius="8" Padding="20" Width="200" Height="100">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <fa:IconImage Icon="Refresh" Width="24" Height="24" Foreground="#C71A1B" 
+                                      HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <fa:IconImage.RenderTransform>
+                                <RotateTransform CenterX="12" CenterY="12"/>
+                            </fa:IconImage.RenderTransform>
+                            <fa:IconImage.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Angle"
+                                                             From="0" To="360" Duration="0:0:1" 
+                                                             RepeatBehavior="Forever"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </fa:IconImage.Triggers>
+                        </fa:IconImage>
+                        <TextBlock Text="Đang tải dữ liệu..." HorizontalAlignment="Center" Foreground="#333" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>
