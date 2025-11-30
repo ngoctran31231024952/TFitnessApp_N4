@@ -1,0 +1,175 @@
+﻿<Window x:Class="TFitnessApp.Windows.ThemHocVienWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="Thêm học viên mới" Height="550" Width="800"
+        WindowStartupLocation="CenterScreen" 
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="Lato">
+
+    <!-- Bo tròn cửa sổ và tạo bóng đổ -->
+    <Border Background="White" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="Black"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <!-- Header Đỏ -->
+                <RowDefinition Height="*"/>
+                <!-- Nội dung Form -->
+                <RowDefinition Height="80"/>
+                <!-- Footer chứa nút bấm -->
+            </Grid.RowDefinitions>
+
+            <!-- 1. Header Tùy Chỉnh - ĐÃ ĐỔI MÀU SANG #C71A1B -->
+            <Border Grid.Row="0" Background="#C71A1B" CornerRadius="10,10,0,0">
+                <Grid>
+                    <TextBlock Text="THÊM HỌC VIÊN MỚI" 
+                               Foreground="White" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Nút Đóng (X) -->
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" 
+                            Margin="0,0,15,0"
+                            Background="Transparent" BorderThickness="0"
+                            Click="BtnHuy_Click" Cursor="Hand">
+                        <fa:IconImage Icon="Times" Width="16" Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- 2. Nội dung Form -->
+            <Grid Grid.Row="1" Margin="30,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.5*"/>
+                    <!-- Cột Form nhập liệu -->
+                    <ColumnDefinition Width="40"/>
+                    <!-- Khoảng cách -->
+                    <ColumnDefinition Width="1*"/>
+                    <!-- Cột Ảnh -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Cột Trái: Form Nhập Liệu -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <StackPanel.Resources>
+                        <!-- Style cho TextBox dạng gạch chân (Underline) giống thiết kế -->
+                        <Style TargetType="TextBox">
+                            <Setter Property="Padding" Value="0,5"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Margin" Value="0,0,0,20"/>
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#333"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Margin" Value="0,0,0,5"/>
+                        </Style>
+                    </StackPanel.Resources>
+
+                    <!-- Mã HV (Dạng ReadOnly nền xám) -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Mã học viên" VerticalAlignment="Center" Width="100"/>
+                        <TextBox x:Name="txtMaHV" Grid.Column="1" 
+                                 Text="HV1135"
+                                 Background="#E0E0E0" 
+                                 BorderThickness="0"
+                                 Padding="10,5"
+                                 IsReadOnly="True"
+                                 Margin="0"/>
+                    </Grid>
+
+                    <!-- Họ tên -->
+                    <TextBlock Text="Họ tên học viên"/>
+                    <TextBox x:Name="txtHoTen"/>
+
+                    <!-- Ngày sinh & Giới tính -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Ngày sinh"/>
+                            <!-- DatePicker Style cơ bản -->
+                            <DatePicker x:Name="dpNgaySinh" 
+                                        Padding="2" 
+                                        BorderThickness="0,0,0,1" 
+                                        Margin="0,0,0,20"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Giới tính"/>
+                            <ComboBox x:Name="cmbGioiTinh" Padding="5" Margin="0,0,0,20" BorderThickness="0,0,0,1">
+                                <ComboBoxItem Content="Nam" IsSelected="True"/>
+                                <ComboBoxItem Content="Nữ"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Email -->
+                    <TextBlock Text="Email"/>
+                    <TextBox x:Name="txtEmail"/>
+
+                    <!-- SĐT -->
+                    <TextBlock Text="SĐT"/>
+                    <TextBox x:Name="txtSDT" Margin="0"/>
+                </StackPanel>
+
+                <!-- Cột Phải: Ảnh đại diện -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Ảnh học viên" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <!-- Placeholder Ảnh -->
+                    <Border Background="#E0E0E0" Height="200" Width="200" HorizontalAlignment="Left">
+                        <fa:IconImage Icon="User" Foreground="White" Height="100" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Nút tải ảnh (nếu cần sau này) -->
+                    <!-- <Button Content="Chọn ảnh" Margin="0,10,0,0" HorizontalAlignment="Left" Width="100"/> -->
+                </StackPanel>
+            </Grid>
+
+            <!-- 3. Footer (Nút Tạo) -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+                <!-- Nút Tạo Mới - CŨNG ĐÃ CẬP NHẬT MÀU NỀN THÀNH #C71A1B CHO ĐỒNG BỘ -->
+                <Button Click="BtnLuu_Click" 
+                        Background="#C71A1B" 
+                        Foreground="White" 
+                        FontWeight="Bold" 
+                        FontSize="14"
+                        BorderThickness="0" 
+                        Width="120" Height="40"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="20">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <fa:IconImage Icon="Plus" Width="14" Foreground="White" Margin="0,0,8,0"/>
+                                    <ContentPresenter/>
+                                </StackPanel>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <sys:String>Tạo</sys:String>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
