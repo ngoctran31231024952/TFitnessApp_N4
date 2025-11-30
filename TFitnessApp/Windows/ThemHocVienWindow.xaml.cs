@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 using TFitnessApp;
 
 namespace TFitnessApp.Windows
@@ -7,61 +10,167 @@ namespace TFitnessApp.Windows
     public partial class ThemHocVienWindow : Window
     {
         private HocVienRepository _repository;
-
-        // Property để báo cho cửa sổ cha biết là đã thêm thành công
         public bool IsSuccess { get; private set; } = false;
+        private string _selectedImagePath = null;
+        private bool _isEditMode = false; // Biến xác định chế độ
 
-        public ThemHocVienWindow()
+        // Constructor: tham số hv mặc định là null (Chế độ Thêm)
+        // Nếu hv != null -> Chế độ Sửa
+        public ThemHocVienWindow(HocVien hv = null)
         {
             InitializeComponent();
             _repository = new HocVienRepository();
+
+            if (hv != null)
+            {
+                // CHẾ ĐỘ SỬA
+                _isEditMode = true;
+                txtHeaderTitle.Text = "CẬP NHẬT THÔNG TIN"; // Cần đặt x:Name="txtHeaderTitle" trong XAML hoặc dùng Title
+                txtBtnAction.Text = "Lưu"; // Cần đặt x:Name cho TextBlock trong Button
+
+                // Điền dữ liệu cũ
+                txtMaHV.Text = hv.MaHV;
+                txtHoTen.Text = hv.HoTen;
+                txtEmail.Text = hv.Email;
+                txtSDT.Text = hv.SDT;
+                dpNgaySinh.SelectedDate = hv.NgaySinh;
+
+                foreach (System.Windows.Controls.ComboBoxItem item in cmbGioiTinh.Items)
+                {
+                    if (item.Content.ToString() == hv.GioiTinh)
+                    {
+                        cmbGioiTinh.SelectedItem = item;
+                        break;
+                    }
+                }
+
+                // Load ảnh cũ nếu có
+                LoadExistingImage(hv.MaHV);
+            }
+            else
+            {
+                // CHẾ ĐỘ THÊM
+                _isEditMode = false;
+                LoadNextMaHV();
+            }
+        }
+
+        private void LoadExistingImage(string maHV)
+        {
+            try
+            {
+                string[] extensions = { ".jpg", ".png", ".jpeg" };
+                string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
+
+                foreach (string ext in extensions)
+                {
+                    string filePath = Path.Combine(folderPath, $"{maHV}{ext}");
+                    if (File.Exists(filePath))
+                    {
+                        BitmapImage bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.UriSource = new Uri(filePath);
+                        bitmap.EndInit();
+                        imgAvatar.Source = bitmap;
+
+                        if (this.FindName("iconDefaultAvatar") is FrameworkElement icon)
+                            icon.Visibility = Visibility.Collapsed;
+                        break;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void LoadNextMaHV()
+        {
+            string newCode = _repository.GenerateNewMaHV();
+            txtMaHV.Text = newCode;
+        }
+
+        private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                _selectedImagePath = openFileDialog.FileName;
+                try
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(_selectedImagePath);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    imgAvatar.Source = bitmap;
+                    if (this.FindName("iconDefaultAvatar") is FrameworkElement icon) icon.Visibility = Visibility.Collapsed;
+                }
+                catch (Exception ex) { MessageBox.Show("Lỗi tải ảnh: " + ex.Message); }
+            }
         }
 
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Lấy dữ liệu từ giao diện
             string maHV = txtMaHV.Text.Trim();
             string hoTen = txtHoTen.Text.Trim();
 
-            // 2. Validate (Kiểm tra dữ liệu)
             if (string.IsNullOrEmpty(maHV) || string.IsNullOrEmpty(hoTen))
             {
-                MessageBox.Show("Vui lòng nhập Mã HV và Họ tên!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // 3. Kiểm tra trùng mã (Logic này nằm trong Repository)
-            if (_repository.CheckMaHVExists(maHV))
+            // Nếu là THÊM MỚI thì mới kiểm tra trùng mã
+            if (!_isEditMode && _repository.CheckMaHVExists(maHV))
             {
-                MessageBox.Show($"Mã học viên {maHV} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Mã học viên {maHV} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
+                LoadNextMaHV();
                 return;
             }
 
-            // 4. Tạo đối tượng HocVien mới
-            HocVien newItem = new HocVien
+            HocVien item = new HocVien
             {
                 MaHV = maHV,
                 HoTen = hoTen,
                 NgaySinh = dpNgaySinh.SelectedDate,
-                // Lấy giá trị từ ComboBox an toàn hơn
                 GioiTinh = (cmbGioiTinh.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content.ToString() ?? "Nam",
                 Email = txtEmail.Text.Trim(),
                 SDT = txtSDT.Text.Trim(),
                 DiaChi = ""
             };
 
-            // 5. Gọi Repository để lưu vào CSDL
-            if (_repository.AddHocVien(newItem))
+            bool result = false;
+            if (_isEditMode)
+                result = _repository.UpdateHocVien(item);
+            else
+                result = _repository.AddHocVien(item);
+
+            if (result)
             {
-                MessageBox.Show("Thêm học viên thành công!", "Thông báo");
-                IsSuccess = true; // Đánh dấu thành công
-                this.Close();     // Đóng cửa sổ
+                // Lưu ảnh (nếu có chọn ảnh mới)
+                if (!string.IsNullOrEmpty(_selectedImagePath))
+                {
+                    try
+                    {
+                        string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
+                        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+                        // Xóa ảnh cũ nếu có (để tránh rác) - tùy chọn
+
+                        string destFileName = $"{maHV}{Path.GetExtension(_selectedImagePath)}";
+                        string destPath = Path.Combine(folderPath, destFileName);
+                        File.Copy(_selectedImagePath, destPath, true);
+                    }
+                    catch { }
+                }
+
+                MessageBox.Show(_isEditMode ? "Cập nhật thành công!" : "Thêm thành công!", "Thông báo");
+                IsSuccess = true;
+                this.Close();
             }
         }
 
-        private void BtnHuy_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        private void BtnHuy_Click(object sender, RoutedEventArgs e) { this.Close(); }
     }
 }
