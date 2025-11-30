@@ -174,3 +174,4 @@ namespace TFitnessApp.Windows
         private void BtnHuy_Click(object sender, RoutedEventArgs e) { this.Close(); }
     }
 }
+
