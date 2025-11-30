@@ -1,25 +1,17 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\",
+  "WorkspaceRootPath": "D:\\t\u00E0i li\u1EC7u\\tfitness\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\tfitnessapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\pages\\hocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|c:\\users\\ngoc\\source\\repos\\tfitnessapp_n4\\tfitnessapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|d:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\pages\\hocvienpage.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\pages\\hocvienpage.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\tfitnessapp\\tongquanpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\tongquanpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\tfitnessapp\\baocaohocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\baocaohocvienpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\tfitnessapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|D:\\t\u00E0i li\u1EC7u\\tfitness\\tfitnessapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{E6DA951F-9F2C-4038-ADF9-4993DA123BB7}|TFitnessApp\\TFitnessApp.csproj|solutionrelative:tfitnessapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
@@ -33,15 +25,15 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "App.xaml",
-              "DocumentMoniker": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\App.xaml",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\App.xaml",
               "RelativeDocumentMoniker": "TFitnessApp\\App.xaml",
-              "ToolTip": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\App.xaml",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\App.xaml",
               "RelativeToolTip": "TFitnessApp\\App.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-11-14T05:00:40.011Z",
@@ -50,67 +42,59 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "RuntimeType.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\DELL\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
-              "ToolTip": "C:\\Users\\DELL\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
-              "RelativeToolTip": "..\\..\\..\\..\\DELL\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
+              "DocumentMoniker": "C:\\Users\\Dell\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
+              "ToolTip": "C:\\Users\\Dell\\AppData\\Local\\Temp\\.vsdbgsrc\\0c127a365c8211b835a6e272639aca6b30d12698fabcaeb2687b791ca6edcba1\\RuntimeType.cs",
               "ViewState": "AgIAABgQAAAAAAAAAAAswCUQAAACAAAAAQAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-14T19:09:28.538Z",
               "IsPinned": true
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
-            },
-            {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "BaoCaoHocVienPage.xaml",
-              "DocumentMoniker": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\BaoCaoHocVienPage.xaml",
-              "RelativeDocumentMoniker": "TFitnessApp\\BaoCaoHocVienPage.xaml",
-              "ToolTip": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\BaoCaoHocVienPage.xaml",
-              "RelativeToolTip": "TFitnessApp\\BaoCaoHocVienPage.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-20T17:24:08.461Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "TongQuanPage.xaml",
-              "DocumentMoniker": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\TongQuanPage.xaml",
-              "RelativeDocumentMoniker": "TFitnessApp\\TongQuanPage.xaml",
-              "ToolTip": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\TongQuanPage.xaml",
-              "RelativeToolTip": "TFitnessApp\\TongQuanPage.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-14T19:31:27.209Z"
+              "DocumentIndex": 1,
+              "Title": "HocVienPage.xaml.cs",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T07:07:29.494Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "TFitnessApp\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\MainWindow.xaml",
-              "RelativeToolTip": "TFitnessApp\\MainWindow.xaml",
+              "Title": "HocVienPage.xaml",
+              "DocumentMoniker": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
+              "RelativeDocumentMoniker": "TFitnessApp\\Pages\\HocVienPage.xaml",
+              "ToolTip": "D:\\t\u00E0i li\u1EC7u\\tfitness\\TFitnessApp\\Pages\\HocVienPage.xaml",
+              "RelativeToolTip": "TFitnessApp\\Pages\\HocVienPage.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-14T04:44:54.496Z",
+              "WhenOpened": "2025-11-30T07:07:25.202Z",
               "EditorCaption": ""
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "TFitnessApp\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\Ngoc\\source\\repos\\TFitnessApp_N4\\TFitnessApp\\MainWindow.xaml.cs",
-              "RelativeToolTip": "TFitnessApp\\MainWindow.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-14T04:44:54.11Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             }
           ]
         }

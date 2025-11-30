@@ -1,0 +1,20 @@
+﻿TFitnessApp
+
+
+winexe
+C#
+.cs
+D:\tài liệu\tfitness\TFitnessApp\obj\x86\Debug\
+TFitnessApp
+none
+false
+DEBUG;TRACE
+D:\tài liệu\tfitness\TFitnessApp\App.xaml
+161611825053
+11639371401
+21748379485
+28-1543273108
+Pages\BaoCaoDoanhThuPage.xaml;Pages\BaoCaoHocVienPage.xaml;Pages\CSSKPage.xaml;Pages\DiemDanhPage.xaml;Pages\GiaoDichPage.xaml;Pages\GoiTapPage.xaml;Pages\HocVienPage.xaml;Pages\HopDongPage.xaml;Pages\LichTapPage.xaml;Pages\PTPage.xaml;Windows\LoginWindow.xaml;Windows\MainWindow.xaml;Pages\TaiKhoanPage.xaml;Pages\TongQuanPage.xaml;Windows\ThemGiaoDichWindow.xaml;Windows\XemGiaoDichWindow.xaml;
+
+False
+
