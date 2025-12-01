@@ -164,12 +164,12 @@
 
                             <TextBlock Text="Họ tên:" Style="{StaticResource LabelStyle}"/>
                             <Border Height="35" Background="#E9ECEF" BorderThickness="0.5" CornerRadius="0">
-                                <TextBlock x:Name="txtLocHoTen" Style="{StaticResource ReadOnlyTextStyle}"/>
+                                <TextBlock x:Name="txtLocHoTen" Style="{StaticResource FilterReadOnlyTextStyle}"/>
                             </Border>
 
                             <TextBlock Text="Mã chi nhánh:" Style="{StaticResource LabelStyle}"/>
                             <Border Height="35" Background="#E9ECEF" BorderThickness="0.5" CornerRadius="0" Margin="0,0,0,10">
-                                <TextBlock x:Name="txtLocMaCN" Style="{StaticResource ReadOnlyTextStyle}"/>
+                                <TextBlock x:Name="txtLocMaCN" Style="{StaticResource FilterReadOnlyTextStyle}"/>
                             </Border>
 
                             <TextBlock Text="Từ ngày:" Style="{StaticResource LabelStyle}"/>
@@ -455,7 +455,7 @@
                               SelectionChanged="lvLichSuDiemDanh_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="220" Header="Họ tên">
+                                <GridViewColumn Width="250" Header="Họ tên">
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -509,7 +509,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="150" Header="Trạng thái">
+                                <GridViewColumn Width="200" Header="Trạng thái">
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -530,7 +530,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="70" Header="Chỉnh sửa">
+                                <GridViewColumn Width="150" Header="Chỉnh sửa">
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Center"/>
