@@ -3,7 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using TFitnessApp;
-using Microsoft.Data.Sqlite; // Cần thiết để kết nối CSDL
+using Microsoft.Data.Sqlite; 
 
 namespace TFitnessApp.Windows
 {
@@ -15,7 +15,6 @@ namespace TFitnessApp.Windows
         {
             InitializeComponent();
 
-            // Khởi tạo đường dẫn CSDL
             _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
             if (!File.Exists(_dbPath))
             {
@@ -24,7 +23,6 @@ namespace TFitnessApp.Windows
 
             if (hv != null)
             {
-                // Hiển thị thông tin cơ bản từ đối tượng HocVien
                 txtMaHV.Text = hv.MaHV;
                 txtHoTen.Text = hv.HoTen;
                 txtNgaySinh.Text = hv.NgaySinh?.ToString("dd/MM/yyyy");
@@ -32,15 +30,12 @@ namespace TFitnessApp.Windows
                 txtEmail.Text = hv.Email;
                 txtSDT.Text = hv.SDT;
 
-                // Tải ảnh
                 LoadImage(hv.MaHV);
 
-                // Tải thông tin bổ sung từ CSDL (Hợp đồng, Gói, PT, Chi nhánh)
                 LoadThongTinHopDong(hv.MaHV);
             }
         }
 
-        // Hàm truy xuất thông tin bổ sung từ CSDL
         private void LoadThongTinHopDong(string maHV)
         {
             try
@@ -49,7 +44,6 @@ namespace TFitnessApp.Windows
                 {
                     connection.Open();
 
-                    // 1. Lấy Ngày tham gia (Ngày bắt đầu của hợp đồng loại 'Mới' đầu tiên)
                     string sqlNgayThamGia = "SELECT NgayBatDau FROM HopDong WHERE MaHV = @MaHV AND LoaiHopDong = 'Mới' ORDER BY NgayBatDau ASC LIMIT 1";
                     using (var cmd = new SqliteCommand(sqlNgayThamGia, connection))
                     {
@@ -57,7 +51,6 @@ namespace TFitnessApp.Windows
                         var result = cmd.ExecuteScalar();
                         if (result != null && result != DBNull.Value)
                         {
-                            // Chuyển đổi format ngày tháng cho đẹp (giả sử DB lưu yyyy-MM-dd)
                             if (DateTime.TryParse(result.ToString(), out DateTime date))
                             {
                                 txtNgayThamGia.Text = date.ToString("dd-MM-yyyy");
@@ -72,9 +65,7 @@ namespace TFitnessApp.Windows
                             txtNgayThamGia.Text = "Chưa có";
                         }
                     }
-
-                    // 2. Lấy thông tin Hợp đồng gần nhất (Gói tập, PT, Chi nhánh)
-                    // Kết nối bảng HopDong với GoiTap, PT, ChiNhanh để lấy tên
+                   
                     string sqlThongTinGanNhat = @"
                         SELECT 
                             g.TenGoi, 
@@ -111,7 +102,6 @@ namespace TFitnessApp.Windows
             }
             catch (Exception ex)
             {
-                // Nếu lỗi thì hiện thông báo debug hoặc set giá trị mặc định
                 System.Diagnostics.Debug.WriteLine("Lỗi load thông tin hợp đồng: " + ex.Message);
                 txtNgayThamGia.Text = "Lỗi tải";
                 txtGoiTap.Text = "Lỗi tải";

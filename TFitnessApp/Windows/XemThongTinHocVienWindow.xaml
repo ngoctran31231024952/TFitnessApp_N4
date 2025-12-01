@@ -23,7 +23,6 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <!-- Khi di chuột vào: Màu đỏ đậm hơn để nổi bật trên nền đỏ của Header -->
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#A01516"/>
                 </Trigger>
@@ -55,18 +54,13 @@
                 </Grid>
             </Border>
 
-            <!-- 2. NỘI DUNG CHI TIẾT -->
             <Grid Grid.Row="1" Margin="40,30">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.2*"/>
-                    <!-- Cột Trái: Thông tin cá nhân -->
-                    <ColumnDefinition Width="40"/>
-                    <!-- Khoảng cách -->
-                    <ColumnDefinition Width="1*"/>
-                    <!-- Cột Phải: Ảnh và thông tin hợp đồng -->
+                    <ColumnDefinition Width="1.2*"/>                  <!-- Cột Trái: Thông tin cá nhân -->
+                    <ColumnDefinition Width="40"/>                    <!-- Khoảng cách -->
+                    <ColumnDefinition Width="1*"/>                    <!-- Cột Phải: Ảnh và thông tin hợp đồng -->
                 </Grid.ColumnDefinitions>
 
-                <!-- SỬA LỖI TẠI ĐÂY: Đổi StackPanel.Resources thành Grid.Resources -->
                 <Grid.Resources>
                     <!-- Style chung cho Label -->
                     <Style TargetType="TextBlock" x:Key="LabelStyle">
@@ -135,7 +129,7 @@
                         </Border>
                     </Grid>
 
-                    <!-- Thông tin Hợp đồng (Lấy từ CSDL) -->
+                    <!-- Thông tin Hợp đồng -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.5*"/>

@@ -9,37 +9,41 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        FontFamily="Lato">
+        FontFamily="Lato"
+        Language="vi-VN">
+
     <Window.Resources>
-        <!-- Style cho nút Đóng (Close Button) -->
-        <Style x:Key="CloseButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="30"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        <Style TargetType="{x:Type DatePickerTextBox}">
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                    <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Chọn ngày" Foreground="#999" 
+                                       VerticalAlignment="Center" Margin="4,0,0,0" 
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <!-- Khi di chuột vào: Màu đỏ đậm hơn để nổi bật -->
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#A01516"/>
-                </Trigger>
-                <!-- Khi nhấn: Màu đỏ tối -->
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#750C0D"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
     </Window.Resources>
-    <!-- Bo tròn cửa sổ và tạo bóng đổ -->
+
     <Border Background="White" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="Black"/>
@@ -79,18 +83,14 @@
             <!-- 2. Nội dung Form -->
             <Grid Grid.Row="1" Margin="30,20">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.5*"/>
-                    <!-- Cột Form nhập liệu -->
-                    <ColumnDefinition Width="40"/>
-                    <!-- Khoảng cách -->
-                    <ColumnDefinition Width="1*"/>
-                    <!-- Cột Ảnh -->
+                    <ColumnDefinition Width="1.5*"/>                    <!-- Cột Form nhập liệu -->
+                    <ColumnDefinition Width="40"/>                      <!-- Khoảng cách -->
+                    <ColumnDefinition Width="1*"/>                      <!-- Cột Ảnh -->
                 </Grid.ColumnDefinitions>
 
                 <!-- Cột Trái: Form Nhập Liệu -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <StackPanel.Resources>
-                        <!-- Style cho TextBox dạng gạch chân -->
                         <Style TargetType="TextBox">
                             <Setter Property="Padding" Value="0,5"/>
                             <Setter Property="BorderThickness" Value="0,0,0,1"/>
@@ -105,7 +105,6 @@
                         </Style>
                     </StackPanel.Resources>
 
-                    <!-- Mã HV (Tự động) -->
                     <Grid Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -162,10 +161,7 @@
                     <!-- Khung hiển thị ảnh -->
                     <Border Width="180" Height="180" BorderBrush="#CCC" BorderThickness="1" CornerRadius="5" Background="#F5F5F5">
                         <Grid>
-                            <!-- Icon mặc định (ẩn đi khi có ảnh) -->
                             <fa:IconImage x:Name="iconDefaultAvatar" Icon="User" Foreground="#CCC" Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-
-                            <!-- Ảnh được chọn -->
                             <Image x:Name="imgAvatar" Stretch="UniformToFill"/>
                         </Grid>
                     </Border>
@@ -179,7 +175,6 @@
 
             <!-- Footer -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <!-- SỬA LỖI Ở ĐÂY: Đưa StackPanel chứa Icon và TextBlock ra ngoài Template để code-behind truy cập được -->
                 <Button Click="BtnLuu_Click" 
                         Background="#C71A1B" 
                         Foreground="White" 
@@ -189,20 +184,16 @@
                         Width="120" Height="40"
                         Cursor="Hand">
 
-                    <!-- Template chỉ chịu trách nhiệm vẽ khung bo tròn -->
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" CornerRadius="20">
-                                <!-- ContentPresenter sẽ hiển thị nội dung bên dưới -->
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </ControlTemplate>
                     </Button.Template>
 
-                    <!-- Nội dung của nút (Content) -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <fa:IconImage Icon="Plus" Width="14" Foreground="White" Margin="0,0,8,0"/>
-                        <!-- Bây giờ TextBlock này nằm trong phạm vi của Window nên code C# sẽ nhìn thấy -->
                         <TextBlock x:Name="txtBtnAction" Text="Tạo" Foreground="White" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
@@ -210,4 +201,3 @@
         </Grid>
     </Border>
 </Window>
-

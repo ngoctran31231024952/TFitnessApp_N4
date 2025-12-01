@@ -183,7 +183,6 @@
                                  Panel.ZIndex="2"/>
                         <TextBlock x:Name="SearchPlaceholder"
                                    IsHitTestVisible="False" 
-                                   Text="Tìm kiếm mã TK, tên đăng nhập, họ tên..." 
                                    VerticalAlignment="Center" 
                                    Foreground="#999"
                                    FontStyle="Italic"
@@ -214,8 +213,8 @@
                         Style="{StaticResource RoundButtonStyle}"
                         Click="AddAccountCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Tạo TK" VerticalAlignment="Center" FontSize="13"/>
+                        <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Tạo TK" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
@@ -234,8 +233,8 @@
                         Style="{StaticResource RoundButtonStyle}"
                         Click="RefreshCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Làm mới" VerticalAlignment="Center" FontSize="13"/>
+                        <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Làm mới" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
@@ -301,36 +300,35 @@
                     <!-- CÁC CỘT DỮ LIỆU TÀI KHOẢN -->
                     <DataGridTextColumn Header="Mã TK" 
                                         Binding="{Binding MaTK}" 
-                                        Width="90" 
+                                        Width="100" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Họ tên" 
                                         Binding="{Binding HoTen}" 
-                                        Width="*" 
-                                        ElementStyle="{StaticResource CenteredContentStyle}"/>
+                                        Width="200"/>
 
                     <DataGridTextColumn Header="Phân quyền" 
                                         Binding="{Binding PhanQuyen}" 
-                                        Width="100" 
+                                        Width="140" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Tên đăng nhập" 
                                         Binding="{Binding TenDangNhap}" 
-                                        Width="150" 
+                                        Width="180" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mật khẩu" 
                                         Binding="{Binding MatKhau}" 
-                                        Width="100" 
+                                        Width="180" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Ngày tạo" 
                                         Binding="{Binding NgayTaoFormatted}" 
-                                        Width="120" 
+                                        Width="160" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <!-- CỘT TRẠNG THÁI -->
-                    <DataGridTemplateColumn Header="Trạng thái" Width="120">
+                    <!--<DataGridTemplateColumn Header="Trạng thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="12" 
@@ -373,6 +371,50 @@
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>-->
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="12" 
+                                        Padding="8,4" 
+                                        HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center"
+                                        BorderThickness="1">
+                                    <TextBlock Text="{Binding TrangThai}" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="11"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Bị Khóa">
+                                                        <Setter Property="Foreground" Value="#DC2626"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt Động">
+                                                        <Setter Property="Foreground" Value="#059669"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Bị Khóa">
+                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                    <Setter Property="BorderBrush" Value="#EF4444"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt Động">
+                                                    <Setter Property="Background" Value="#D1FAE5"/>
+                                                    <Setter Property="BorderBrush" Value="#10B981"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                 </DataGrid.Columns>
@@ -399,6 +441,7 @@
                 <ComboBox x:Name="cboSoBanGhiMoiTrang" 
                           Width="60" 
                           SelectionChanged="cboSoBanGhiMoiTrang_SelectionChanged"
+                          VerticalAlignment="Center"
                           FontSize="12"/>
 
                 <TextBlock x:Name="txtThongTinPhanTrang" 
