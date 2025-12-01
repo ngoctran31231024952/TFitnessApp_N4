@@ -944,7 +944,7 @@ namespace TFitnessApp
                 MessageBox.Show("Vui lòng chọn đầy đủ Ngày điểm danh và Trạng thái.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
- 
+
             string ngayDD_DB = ngayDDDate.Value.ToString("yyyy-MM-dd");
 
             var chiTietDDGoc = LayChiTietDiemDanh(maDD);
