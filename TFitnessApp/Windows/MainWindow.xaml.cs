@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using FontAwesome.Sharp;
 using TFitnessApp.Windows;
-using TFitnessApp.Pages;
+//using TFitnessApp.Pages;
 
 namespace TFitnessApp
 {

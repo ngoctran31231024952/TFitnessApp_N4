@@ -165,7 +165,11 @@
 
         <!-- HEADER (ROW 0) -->
         <Grid Grid.Row="0" Margin="20,20,20,10">
-            <Border Background="White" CornerRadius="5" Padding="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="389*"/>
+                <ColumnDefinition Width="141*"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="White" CornerRadius="5" Padding="20" BorderBrush="{DynamicResource TextColor}" Grid.ColumnSpan="2">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -196,21 +200,21 @@
                             <Button Click="BtnFilter_Click" Style="{DynamicResource PrimaryActionButtonStyle}">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Filter" Width="18" Margin="0,0,5,0" Foreground="White"/>
-                                    <TextBlock Text="Lọc" Foreground="White"/>
+                                    <TextBlock Text="Lọc" Foreground="White" FontSize="15"/>
                                 </StackPanel>
                             </Button>
 
                             <Button Click="BtnThem_Click" Style="{DynamicResource PrimaryActionButtonStyle}">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Plus" Width="18" Margin="0,0,5,0" Foreground="White"/>
-                                    <TextBlock Text="Thêm" Foreground="White"/>
+                                    <TextBlock Text="Thêm" Foreground="White" FontSize="15"/>
                                 </StackPanel>
                             </Button>
 
                             <Button Click="BtnXoa_Click" Style="{DynamicResource PrimaryActionButtonStyle}" Margin="0">
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="TrashAlt" Width="18" Margin="0,0,5,0" Foreground="White"/>
-                                    <TextBlock Text="Xóa" Foreground="White"/>
+                                    <fa:IconImage Icon="TrashAlt" Width="16" Margin="0,0,5,0" Foreground="White"/>
+                                    <TextBlock Text="Xóa" Foreground="White" FontSize="15"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
