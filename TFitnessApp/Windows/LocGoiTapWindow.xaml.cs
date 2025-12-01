@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Text.RegularExpressions; // Thêm namespace cho Regex
+using System.Text.RegularExpressions; 
 
 namespace TFitnessApp.Windows
 {

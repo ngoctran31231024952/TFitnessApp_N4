@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using TFitnessApp;
-using System.Text.RegularExpressions; // Cần thêm cái này để dùng Regex
+using System.Text.RegularExpressions; 
 
 namespace TFitnessApp.Windows
 {
@@ -50,13 +50,11 @@ namespace TFitnessApp.Windows
             }
         }
 
-        // --- HÀM KIỂM TRA ĐỊNH DẠNG ---
         private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
             try
             {
-                // Regex kiểm tra email cơ bản
                 return Regex.IsMatch(email,
                     @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
                     RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
@@ -72,8 +70,34 @@ namespace TFitnessApp.Windows
             return Regex.IsMatch(text, @"^\d+$");
         }
 
-        // ... (Các hàm LoadExistingImage, LoadNextMaHV, BtnChonAnh_Click giữ nguyên) ...
-        private void LoadExistingImage(string maHV) { /* Giữ nguyên code cũ */ }
+        private void LoadExistingImage(string maHV)
+        {
+            try
+            {
+                string[] extensions = { ".jpg", ".png", ".jpeg" };
+                string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
+
+                foreach (string ext in extensions)
+                {
+                    string filePath = Path.Combine(folderPath, $"{maHV}{ext}");
+                    if (File.Exists(filePath))
+                    {
+                        BitmapImage bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.UriSource = new Uri(filePath);
+                        bitmap.EndInit();
+                        imgAvatar.Source = bitmap;
+
+                        if (this.FindName("iconDefaultAvatar") is FrameworkElement icon)
+                            icon.Visibility = Visibility.Collapsed;
+                        break;
+                    }
+                }
+            }
+            catch { }
+        }
+
         private void LoadNextMaHV() { txtMaHV.Text = _repository.GenerateNewMaHV(); }
         private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
         {
@@ -104,16 +128,12 @@ namespace TFitnessApp.Windows
             string email = txtEmail.Text.Trim();
             string sdt = txtSDT.Text.Trim();
 
-            // --- 1. KIỂM TRA DỮ LIỆU ĐẦU VÀO (VALIDATION) ---
-
-            // Kiểm tra rỗng
             if (string.IsNullOrEmpty(maHV) || string.IsNullOrEmpty(hoTen))
             {
                 MessageBox.Show("Vui lòng nhập Mã HV và Họ tên!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Kiểm tra Email
             if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
             {
                 MessageBox.Show("Định dạng Email không hợp lệ! Vui lòng kiểm tra lại.\nVí dụ: user@example.com", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -121,7 +141,6 @@ namespace TFitnessApp.Windows
                 return;
             }
 
-            // Kiểm tra SĐT (phải là số và độ dài hợp lý, ví dụ 9-11 số)
             if (!string.IsNullOrEmpty(sdt))
             {
                 if (!IsNumber(sdt))
@@ -138,15 +157,12 @@ namespace TFitnessApp.Windows
                 }
             }
 
-            // Kiểm tra trùng mã (chỉ khi thêm mới)
             if (!_isEditMode && _repository.CheckMaHVExists(maHV))
             {
                 MessageBox.Show($"Mã học viên {maHV} đã tồn tại! Đang tải lại mã mới...", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
                 LoadNextMaHV();
                 return;
             }
-
-            // --- HẾT PHẦN VALIDATION ---
 
             HocVien item = new HocVien
             {
