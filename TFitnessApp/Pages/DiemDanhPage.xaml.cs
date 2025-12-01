@@ -251,6 +251,21 @@ namespace TFitnessApp
         // Overload: Cập nhật trạng thái của một lịch tập trong CSDL dựa trên ngày (dùng cho Chỉnh sửa)
         private void CapNhatTrangThaiLichTap(string maHV, string tenBuoiTap, string ngayDD_DB, string trangThaiMoi)
         {
+            // Chuyển trạng thái hiển thị trên UI thành trạng thái lưu trong CSDL
+            string trangThaiLuuDB = trangThaiMoi;
+            if (trangThaiMoi == "Đang tập")
+            {
+                trangThaiLuuDB = "Đang tập";
+            }
+            else if (trangThaiMoi == "Đã hoàn thành")
+            {
+                trangThaiLuuDB = "Đã Hoàn Thành";
+            }
+            else if (trangThaiMoi.Contains("hủy"))
+            {
+                trangThaiLuuDB = "Đã Hủy";
+            }
+
             try
             {
                 using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
@@ -262,7 +277,7 @@ namespace TFitnessApp
                                    AND date(ThoiGianBatDau) = date(@ngayDD_DB)";
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue("@trangThaiMoi", trangThaiMoi);
+                        cmd.Parameters.AddWithValue("@trangThaiMoi", trangThaiLuuDB);
                         cmd.Parameters.AddWithValue("@maHV", maHV);
                         cmd.Parameters.AddWithValue("@tenBuoiTap", tenBuoiTap);
                         cmd.Parameters.AddWithValue("@ngayDD_DB", ngayDD_DB);
@@ -356,17 +371,17 @@ namespace TFitnessApp
                     conn.Open();
 
                     string sql = @"
-                 SELECT 
-                     d.MaHV, 
-                     d.NgayDD, 
-                     lt.MaCN, 
-                     lt.TenBuoiTap 
-                 FROM DiemDanh d
-                 INNER JOIN LichTap lt ON 
-                     d.MaHV = lt.MaHV AND 
-                     date(d.NgayDD) = date(lt.ThoiGianBatDau)
-                 WHERE d.MaDD = @maDD
-                 LIMIT 1";
+                     SELECT 
+                         d.MaHV, 
+                         d.NgayDD, 
+                         lt.MaCN, 
+                         lt.TenBuoiTap 
+                     FROM DiemDanh d
+                     LEFT JOIN LichTap lt ON 
+                         d.MaHV = lt.MaHV AND 
+                         date(d.NgayDD) = date(lt.ThoiGianBatDau)
+                     WHERE d.MaDD = @maDD
+                     LIMIT 1";
 
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
@@ -538,7 +553,7 @@ namespace TFitnessApp
                         txtDangTapLuyen.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                     }
 
-                    // 3. Đã hoàn thành (Sử dụng CSDL)
+                    // 3. Đã hoàn thành (Sử dụng CSDL) - Vẫn giữ logic cũ để tránh thay đổi quá nhiều cấu trúc
                     string sql3 = "SELECT COUNT(*) FROM LichTap WHERE TrangThai = 'Đã Hoàn Thành'";
                     using (SqliteCommand cmd = new SqliteCommand(sql3, conn))
                     {
@@ -590,6 +605,7 @@ namespace TFitnessApp
                 {
                     conn.Open();
 
+                    // Sử dụng LEFT JOIN để đảm bảo bản ghi DiemDanh vẫn được hiển thị dù không có LichTap tương ứng
                     string sql = @"
                         SELECT d.MaDD, d.MaHV, h.HoTen, d.NgayDD, d.ThoiGianVao, d.ThoiGianRa,
                                lt.TrangThai AS LichTapTrangThai, lt.ThoiGianBatDau, lt.ThoiGianKetThuc
@@ -603,17 +619,13 @@ namespace TFitnessApp
                     {
                         while (reader.Read())
                         {
-                            // --- SỬA LỖI STRING WAS NOT RECOGNIZED AS VALID DATETIME ---
-                            // Đảm bảo parse chuỗi ngày tháng từ CSDL theo định dạng lưu trữ (yyyy-MM-dd)
                             string ngayDD_DB = reader["NgayDD"].ToString();
                             DateTime ngayDiemDanhDate;
 
                             if (!DateTime.TryParseExact(ngayDD_DB, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate))
                             {
-                                // Nếu định dạng yyyy-MM-dd thất bại, thử định dạng dd-MM-yyyy (theo dữ liệu mẫu)
                                 if (!DateTime.TryParseExact(ngayDD_DB, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate))
                                 {
-                                    // Bỏ qua bản ghi này nếu không thể Parse
                                     continue;
                                 }
                             }
@@ -622,60 +634,53 @@ namespace TFitnessApp
                             {
                                 MaDiemDanh = reader["MaDD"].ToString(),
                                 MaHocVien = reader["MaHV"].ToString(),
-                                HoTen = reader["HoTen"].ToString(),
-                                // Định dạng lại cho hiển thị UI
+                                HoTen = reader["HoTen"]?.ToString() ?? "Không tìm thấy",
                                 NgayDiemDanh = ngayDiemDanhDate.ToString("dd/MM/yyyy"),
                                 ThoiGianVao = reader["ThoiGianVao"]?.ToString() ?? "--:--",
                                 ThoiGianRa = reader["ThoiGianRa"]?.ToString() ?? "--:--",
+                                // Lấy trạng thái từ LichTap, nhưng sẽ bị ghi đè bởi logic Check-in/out dưới đây
                                 TrangThai = reader["LichTapTrangThai"]?.ToString() ?? ""
                             };
 
-                            // Logic xác định trạng thái hiển thị
-                            if (string.IsNullOrEmpty(item.TrangThai) || item.TrangThai == "Đang tập")
+                            // Logic xác định trạng thái hiển thị (Chỉ dựa trên DiemDanh)
+                            if (item.ThoiGianVao != "--:--" && item.ThoiGianRa != "--:--")
                             {
-                                if (reader["ThoiGianBatDau"] != DBNull.Value && reader["ThoiGianKetThuc"] != DBNull.Value)
+                                // TH1: Có giờ vào và giờ ra -> Đã hoàn thành
+                                item.TrangThai = "Đã hoàn thành";
+                                item.MauTrangThai = "#51E689"; // Xanh lá
+                            }
+                            else if (item.ThoiGianVao != "--:--" && item.ThoiGianRa == "--:--")
+                            {
+                                // TH2: Có giờ vào, chưa có giờ ra -> Đang tập
+                                item.TrangThai = "Đang tập";
+                                item.MauTrangThai = "#DC3545"; // Đỏ (Dùng màu đỏ như yêu cầu)
+                            }
+                            else
+                            {
+                                // TH3: Chưa có giờ vào (hoặc cả 2 rỗng) -> Vẫn hiển thị trạng thái LichTap nếu có, nếu không là "Chưa hoàn thành"
+                                if (item.TrangThai.Contains("Hủy"))
                                 {
-                                    DateTime tgBatDau = DateTime.Parse(reader["ThoiGianBatDau"].ToString());
-                                    DateTime tgKetThuc = DateTime.Parse(reader["ThoiGianKetThuc"].ToString());
-                                    item.TrangThai = TinhTrangThaiLichTap(tgBatDau, tgKetThuc);
+                                    item.TrangThai = "Đã hủy";
+                                    item.MauTrangThai = "#DC3545";
                                 }
-                                else if (item.ThoiGianVao != "--:--" && item.ThoiGianRa == "--:--")
-                                {
-                                    item.TrangThai = "Đang tập";
-                                }
-                                else if (item.ThoiGianVao != "--:--" && item.ThoiGianRa != "--:--")
+                                else if (item.TrangThai.Contains("Hoàn Thành"))
                                 {
                                     item.TrangThai = "Đã hoàn thành";
+                                    item.MauTrangThai = "#51E689";
+                                }
+                                else if (item.TrangThai.Contains("Chưa bắt đầu"))
+                                {
+                                    item.TrangThai = "Chưa bắt đầu";
+                                    item.MauTrangThai = "#7AAEFF";
                                 }
                                 else
                                 {
                                     item.TrangThai = "Chưa hoàn thành";
+                                    item.MauTrangThai = "#7AAEFF";
                                 }
                             }
 
                             item.ChuCaiDau = string.IsNullOrEmpty(item.HoTen) ? "?" : item.HoTen[0].ToString().ToUpper();
-
-                            // Set màu badge dựa trên trạng thái
-                            if (item.TrangThai == "Đã Hoàn Thành" || item.TrangThai == "Đã hoàn thành")
-                            {
-                                item.MauTrangThai = "#51E689"; // Xanh lá
-                            }
-                            else if (item.TrangThai == "Đang tập" || item.TrangThai == "Chưa hoàn thành")
-                            {
-                                item.MauTrangThai = "#FF974E"; // Cam
-                            }
-                            else if (item.TrangThai == "Chưa bắt đầu")
-                            {
-                                item.MauTrangThai = "#7AAEFF"; // Xanh dương nhạt
-                            }
-                            else if (item.TrangThai == "Đã hủy")
-                            {
-                                item.MauTrangThai = "#DC3545"; // Đỏ
-                            }
-                            else
-                            {
-                                item.MauTrangThai = "#7AAEFF";
-                            }
 
                             tatCaDiemDanh.Add(item);
                         }
@@ -686,7 +691,6 @@ namespace TFitnessApp
             }
             catch (Exception ex)
             {
-                // Thống nhất thông báo lỗi
                 MessageBox.Show($"Lỗi khi tải danh sách: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -832,7 +836,7 @@ namespace TFitnessApp
                             if (cmdCheck.ExecuteScalar() != null)
                             {
                                 MessageBox.Show($"Học viên {maHV} đã Check-in và chưa Check-out.",
-                                                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                                                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                                 return;
                             }
                         }
@@ -877,7 +881,7 @@ namespace TFitnessApp
                         if (string.IsNullOrWhiteSpace(maDDCanUpdate))
                         {
                             MessageBox.Show($"Không tìm thấy lần Check-in chưa hoàn thành nào của học viên {maHV} trong ngày này.",
-                                                 "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                             return;
                         }
 
@@ -934,6 +938,7 @@ namespace TFitnessApp
 
             string maDD = _maDiemDanhDangChinhSua;
             string maHV = txtMaHV_ChinhSua.Text.Trim();
+            // MaCN lấy từ biến tạm
             string MaCN = _maCNDangChinhSua;
 
             string trangThai = (cmbTrangThai_ChinhSua.SelectedItem as ComboBoxItem)?.Content.ToString();
@@ -962,46 +967,44 @@ namespace TFitnessApp
             string phutRa = cmbPhutRa_ChinhSua.IsEnabled && cmbPhutRa_ChinhSua.SelectedIndex > 0 ? cmbPhutRa_ChinhSua.SelectedValue.ToString() : null;
             string tgRa = (gioRa != null && phutRa != null) ? $"{gioRa}:{phutRa}" : null;
 
+            var diemDanhGoc = tatCaDiemDanh.FirstOrDefault(d => d.MaDiemDanh == maDD);
 
-            if (trangThai == "Đã hủy")
+            // Logic xử lý trạng thái chỉnh sửa
+            if (trangThai == "Đang tập")
             {
-                var diemDanhGoc = tatCaDiemDanh.FirstOrDefault(d => d.MaDiemDanh == maDD);
-                if (diemDanhGoc != null)
-                {
-                    // Giữ nguyên thời gian vào/ra gốc, chỉ update trạng thái LichTap
-                    tgVaoDeLuu = diemDanhGoc.ThoiGianVao == "--:--" ? null : diemDanhGoc.ThoiGianVao;
-                    tgRaDeLuu = diemDanhGoc.ThoiGianRa == "--:--" ? null : diemDanhGoc.ThoiGianRa;
-                }
-            }
-            else if (trangThai == "Chưa hoàn thành" || trangThai == "Đang tập" || trangThai == "Chưa bắt đầu")
-            {
-                // Yêu cầu mới: Giữ nguyên tgVao (có thể chỉnh sửa) và reset tgRa (disabled)
-
-                // Lấy tgVao từ ComboBox nếu có, hoặc lấy tgVao cũ nếu người dùng không chạm vào ComboBox
+                // 1. Xử lý Thời gian vào: Ưu tiên giá trị mới (nếu người dùng chọn), nếu không, lấy giá trị gốc.
                 if (tgVao == null)
                 {
-                    var diemDanhGoc = tatCaDiemDanh.FirstOrDefault(d => d.MaDiemDanh == maDD);
-                    if (diemDanhGoc != null)
-                    {
-                        // Nếu ComboBox Giờ vào bị reset (selectedIndex = 0) và người dùng không chọn,
-                        // ta vẫn phải lấy giá trị cũ từ CSDL để lưu lại nếu trạng thái là đang tập (hoặc tương đương)
-                        tgVaoDeLuu = diemDanhGoc.ThoiGianVao == "--:--" ? null : diemDanhGoc.ThoiGianVao;
-                    }
+                    // Lấy giá trị gốc từ danh sách đã tải
+                    tgVaoDeLuu = diemDanhGoc.ThoiGianVao == "--:--" ? null : diemDanhGoc.ThoiGianVao;
                 }
                 else
                 {
+                    // Dùng giá trị mới mà người dùng đã chọn
                     tgVaoDeLuu = tgVao;
                 }
 
-                tgRaDeLuu = null; // Luôn là NULL đối với trạng thái này (giờ ra bị reset và disabled)
+                // 2. Xử lý Thời gian ra: Luôn là NULL đối với trạng thái Đang tập
+                // Điều này sẽ xóa ThoiGianRa khỏi DB, làm cho ListView hiển thị "Đang tập"
+                tgRaDeLuu = null;
+
+                // Yêu cầu: Nếu TG VÀO rỗng, không cho phép lưu trạng thái ĐANG TẬP
+                if (tgVaoDeLuu == null)
+                {
+                    MessageBox.Show("Không thể chuyển sang trạng thái 'Đang tập' khi chưa có Thời gian vào.", "Lỗi dữ liệu", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
             else if (trangThai == "Đã hoàn thành")
             {
+                // Kiểm tra bắt buộc: Đã hoàn thành phải có TG Vào và TG Ra hợp lệ.
                 if (tgVao == null || tgRa == null)
                 {
-                    MessageBox.Show("Vui lòng chọn đầy đủ thời gian vào và thời gian ra.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Trạng thái 'Đã hoàn thành' yêu cầu phải có đầy đủ thời gian vào và thời gian ra.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+
+                // Kiểm tra logic thời gian
                 if (TimeSpan.TryParse(tgVao, out TimeSpan tsVao) && TimeSpan.TryParse(tgRa, out TimeSpan tsRa))
                 {
                     if (tsVao > tsRa)
@@ -1015,8 +1018,17 @@ namespace TFitnessApp
             }
             else
             {
-                MessageBox.Show("Trạng thái không hợp lệ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                // Đối với các trạng thái khác ("Chọn trạng thái")
+                // Giữ nguyên thời gian vào/ra gốc
+                tgVaoDeLuu = diemDanhGoc?.ThoiGianVao == "--:--" ? null : diemDanhGoc?.ThoiGianVao;
+                tgRaDeLuu = diemDanhGoc?.ThoiGianRa == "--:--" ? null : diemDanhGoc?.ThoiGianRa;
+
+                if (trangThai == "Chọn trạng thái")
+                {
+                    MessageBox.Show("Vui lòng chọn trạng thái hợp lệ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                // Nếu là 'Đã hủy' hoặc các trạng thái không được hỗ trợ, ta vẫn cập nhật DB nhưng giữ thời gian
             }
 
 
@@ -1024,6 +1036,7 @@ namespace TFitnessApp
             {
                 if (!string.IsNullOrWhiteSpace(tenBuoiTapGoc))
                 {
+                    // Cập nhật trạng thái trong LichTap.
                     CapNhatTrangThaiLichTap(maHV, tenBuoiTapGoc, ngayDD_DB, trangThai);
                 }
 
@@ -1033,7 +1046,7 @@ namespace TFitnessApp
                 _maDiemDanhDangChinhSua = null;
                 _maCNDangChinhSua = null;
                 TaiThongKe();
-                TaiDanhSachDiemDanh();
+                TaiDanhSachDiemDanh(); // Tải lại listview với logic trạng thái mới
             }
         }
 
@@ -1079,54 +1092,68 @@ namespace TFitnessApp
             }
 
             // 3. Set Trạng thái và gọi CapNhatTrangThaiThoiGianChinhSua để thiết lập Enabled
-            string trangThaiText = "";
+            string trangThaiText = item.TrangThai; // Lấy trạng thái đã được xác định ở TaiDanhSachDiemDanh
 
-            var selectedItem = cmbTrangThai_ChinhSua.Items.Cast<ComboBoxItem>().FirstOrDefault(i => i.Content.ToString() == item.TrangThai);
+            var selectedItem = cmbTrangThai_ChinhSua.Items.Cast<ComboBoxItem>().FirstOrDefault(i => i.Content.ToString() == trangThaiText);
             if (selectedItem != null)
             {
                 cmbTrangThai_ChinhSua.SelectedItem = selectedItem;
-                trangThaiText = item.TrangThai;
             }
             else
             {
+                // Nếu trạng thái phức tạp (ví dụ: "Chưa bắt đầu"), đặt về Đang tập (để sửa) hoặc Chọn trạng thái
                 cmbTrangThai_ChinhSua.SelectedIndex = 0;
                 trangThaiText = (cmbTrangThai_ChinhSua.SelectedItem as ComboBoxItem)?.Content.ToString();
             }
 
-            // GỌI HÀM NÀY ĐỂ THIẾT LẬP ENABLED/DISABLED VÀ RESET INDEX = 0 CHO TG RA
-            // (Đồng thời cũng thực hiện reset index = 0 cho tất cả ComboBox)
+            // GỌI HÀM NÀY ĐỂ THIẾT LẬP ENABLED/DISABLED và reset TG Ra
             CapNhatTrangThaiThoiGianChinhSua(trangThaiText);
 
-            // 4. Set Giờ Vào/Ra (CHỈ ÁP DỤNG GIÁ TRỊ CŨ KHI CÁC ĐIỀU KHIỂN ĐƯỢC ENABLED hoặc là TG VÀO trong trạng thái Đang tập)
+            // 4. Set Giờ Vào/Ra 
 
-            // Thời gian vào: Luôn cố gắng điền giá trị cũ, vì nó luôn được Enabled trừ khi là "Đã hủy"
-            if (GridThoiGianVao_ChinhSua.IsEnabled)
+            // Thời gian vào: Luôn cố gắng điền giá trị cũ (vì luôn enabled, trừ khi trạng thái là 'Chọn trạng thái')
+            if (GridThoiGianVao_ChinhSua.IsEnabled && item.ThoiGianVao != "--:--")
             {
-                if (item.ThoiGianVao != "--:--")
+                if (DateTime.TryParseExact(item.ThoiGianVao, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgVao))
                 {
-                    if (DateTime.TryParseExact(item.ThoiGianVao, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgVao))
-                    {
-                        cmbGioVao_ChinhSua.SelectedValue = tgVao.Hour.ToString("00");
-                        cmbPhutVao_ChinhSua.SelectedValue = tgVao.Minute.ToString("00");
-                    }
+                    cmbGioVao_ChinhSua.SelectedValue = tgVao.Hour.ToString("00");
+                    cmbPhutVao_ChinhSua.SelectedValue = tgVao.Minute.ToString("00");
                 }
+            }
+            else if (GridThoiGianVao_ChinhSua.IsEnabled)
+            {
+                // Nếu enabled nhưng không có giá trị cũ (hoặc giá trị cũ là '--:--'), đặt về thời gian hiện tại
+                DatThoiGianMacDinhChoPopup();
             }
 
             // Thời gian ra: Chỉ điền giá trị cũ nếu được enabled (chỉ khi là Đã hoàn thành)
-            if (GridThoiGianRa_ChinhSua.IsEnabled)
+            if (GridThoiGianRa_ChinhSua.IsEnabled && item.ThoiGianRa != "--:--")
             {
-                if (item.ThoiGianRa != "--:--")
+                if (DateTime.TryParseExact(item.ThoiGianRa, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgRa))
                 {
-                    if (DateTime.TryParseExact(item.ThoiGianRa, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgRa))
-                    {
-                        cmbGioRa_ChinhSua.SelectedValue = tgRa.Hour.ToString("00");
-                        cmbPhutRa_ChinhSua.SelectedValue = tgRa.Minute.ToString("00");
-                    }
+                    cmbGioRa_ChinhSua.SelectedValue = tgRa.Hour.ToString("00");
+                    cmbPhutRa_ChinhSua.SelectedValue = tgRa.Minute.ToString("00");
                 }
             }
 
 
             popupChinhSua.Visibility = Visibility.Visible;
+        }
+
+        // Helper để đặt thời gian hiện tại cho ComboBox (chỉ dùng khi nạp dữ liệu lần đầu nếu không có giá trị cũ)
+        private void DatThoiGianMacDinhChoPopup()
+        {
+            DateTime now = DateTime.Now;
+            string currentHour = now.Hour.ToString("00");
+            string currentMinute = now.Minute.ToString("00");
+
+            // Chỉ set cho TG vào nếu nó enabled
+            if (GridThoiGianVao_ChinhSua.IsEnabled && cmbGioVao_ChinhSua != null && cmbGioVao_ChinhSua.Items.Count > 0) cmbGioVao_ChinhSua.SelectedValue = currentHour;
+            if (GridThoiGianVao_ChinhSua.IsEnabled && cmbPhutVao_ChinhSua != null && cmbPhutVao_ChinhSua.Items.Count > 0) cmbPhutVao_ChinhSua.SelectedValue = currentMinute;
+
+            // Chỉ set cho TG ra nếu nó enabled
+            if (GridThoiGianRa_ChinhSua.IsEnabled && cmbGioRa_ChinhSua != null && cmbGioRa_ChinhSua.Items.Count > 0) cmbGioRa_ChinhSua.SelectedValue = currentHour;
+            if (GridThoiGianRa_ChinhSua.IsEnabled && cmbPhutRa_ChinhSua != null && cmbPhutRa_ChinhSua.Items.Count > 0) cmbPhutRa_ChinhSua.SelectedValue = currentMinute;
         }
 
         // Xử lý đóng Popup chỉnh sửa
@@ -1140,48 +1167,40 @@ namespace TFitnessApp
 
         /// <summary>
         /// Đặt trạng thái Enabled cho các ComboBox Giờ/Phút trong popup chỉnh sửa theo yêu cầu.
-        /// Khi là "Đang tập" hoặc trạng thái tương đương: TG Vào Enabled, TG Ra Disabled/Reset.
-        /// Khi là "Đã hoàn thành": Cả 2 Enabled.
         /// </summary>
         private void CapNhatTrangThaiThoiGianChinhSua(string trangThai)
         {
             if (GridThoiGianVao_ChinhSua == null || GridThoiGianRa_ChinhSua == null) return;
 
-            // B1: Reset ComboBox TG RA về mặc định ("Giờ"/"Phút")
-            // Luôn reset TG Ra (index 0 là "Giờ"/"Phút")
+            // B1: Luôn reset ComboBox TG RA về mặc định ("Giờ"/"Phút")
             cmbGioRa_ChinhSua.SelectedIndex = 0;
             cmbPhutRa_ChinhSua.SelectedIndex = 0;
 
-            // Reset TG VÀO về mặc định (index 0 là "Giờ"/"Phút") chỉ khi không phải trạng thái hoạt động (Đã hủy)
-            if (trangThai == "Đã hủy" || trangThai == "Chọn trạng thái")
+            if (trangThai == "Chọn trạng thái")
             {
+                // Disabled cả 2 và reset TG Vào
                 cmbGioVao_ChinhSua.SelectedIndex = 0;
                 cmbPhutVao_ChinhSua.SelectedIndex = 0;
-            }
-
-
-            if (trangThai == "Đã hủy" || trangThai == "Chọn trạng thái")
-            {
-                // Disabled cả 2
                 GridThoiGianVao_ChinhSua.IsEnabled = false;
                 GridThoiGianRa_ChinhSua.IsEnabled = false;
             }
-            // THAY ĐỔI THEO YÊU CẦU MỚI: TG Vào Enabled, TG Ra Disabled/Reset
-            else if (trangThai == "Chưa hoàn thành" || trangThai == "Đang tập" || trangThai == "Chưa bắt đầu")
+            else if (trangThai == "Đang tập")
             {
-                // TG Vào: Enabled (có thể chỉnh sửa)
+                // TG Vào: Enabled. TG Ra: Disabled và reset
                 GridThoiGianVao_ChinhSua.IsEnabled = true;
-
-                // TG Ra: Disabled và đã được reset Index = 0 ở trên
                 GridThoiGianRa_ChinhSua.IsEnabled = false;
             }
             else if (trangThai == "Đã hoàn thành")
             {
-                // Cho phép chỉnh sửa cả 2
+                // Cho phép chỉnh sửa cả 2.
                 GridThoiGianVao_ChinhSua.IsEnabled = true;
                 GridThoiGianRa_ChinhSua.IsEnabled = true;
-
-                // Lưu ý: Sau bước này, HienThiChiTietDiemDanh sẽ nạp lại giá trị cũ của TG Vào/Ra
+            }
+            else
+            {
+                // Các trạng thái khác (Chưa hoàn thành/Chưa bắt đầu)
+                GridThoiGianVao_ChinhSua.IsEnabled = true;
+                GridThoiGianRa_ChinhSua.IsEnabled = false;
             }
         }
 
@@ -1483,7 +1502,7 @@ namespace TFitnessApp
             }
 
             // Lọc theo Họ tên (sử dụng biến tạm _hoTenLoc đã được điền tự động)
-            if (!string.IsNullOrWhiteSpace(_hoTenLoc))
+            if (!string.IsNullOrWhiteSpace(_hoTenLoc) && txtLocHoTen.Text != "Không tìm thấy học viên")
             {
                 string hoTenLoc = BoQuyenDau(_hoTenLoc).ToLower();
                 ketQuaLoc = ketQuaLoc.Where(d =>
@@ -1533,6 +1552,7 @@ namespace TFitnessApp
                 ketQuaLoc = ketQuaLoc.Where(d =>
                 {
                     string normalizedDD = d.TrangThai.Replace(" ", "").ToLower();
+                    // So sánh trạng thái
                     return normalizedDD.Equals(normalizedLoc);
                 });
             }
