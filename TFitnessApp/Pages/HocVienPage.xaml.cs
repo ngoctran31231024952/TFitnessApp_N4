@@ -15,7 +15,6 @@ namespace TFitnessApp
     public partial class HocVienPage : Page
     {
         private HocVienRepository _hocVienRepository;
-
         private List<HocVien> _danhSachGoc = new List<HocVien>();
         private ObservableCollection<HocVien> _danhSachHienThi = new ObservableCollection<HocVien>();
 
@@ -31,11 +30,10 @@ namespace TFitnessApp
             InitializeComponent();
             _hocVienRepository = new HocVienRepository();
             if (cboSoBanGhi != null && cboSoBanGhi.Items.Count > 2)
-                cboSoBanGhi.SelectedIndex = 2; // Chọn 50
+                cboSoBanGhi.SelectedIndex = 2;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e) { LoadHocVienData(); }
-
         private void LoadHocVienData() { PerformSearch(); }
 
         private void PerformSearch()
@@ -44,7 +42,6 @@ namespace TFitnessApp
             {
                 string keyword = txtSearch.Text.Trim();
                 _danhSachGoc = _hocVienRepository.FindHocVienAdvanced(keyword, _currentFilter);
-
                 _trangHienTai = 1;
                 HienThiDuLieuPhanTrang();
             }
@@ -110,7 +107,6 @@ namespace TFitnessApp
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) { PerformSearch(); }
         private void HocVienDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
-        // --- ACTIONS ---
         private void BtnThem_Click(object sender, RoutedEventArgs e)
         {
             ThemHocVienWindow addWindow = new ThemHocVienWindow(); addWindow.ShowDialog();
@@ -132,20 +128,12 @@ namespace TFitnessApp
         {
             LocHocVienWindow filterWindow = new LocHocVienWindow();
             filterWindow.ShowDialog();
-
-            if (filterWindow.IsApply)
-            {
-                _currentFilter = filterWindow.FilterData;
-                PerformSearch();
-            }
+            if (filterWindow.IsApply) { _currentFilter = filterWindow.FilterData; PerformSearch(); }
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            txtSearch.Text = "";
-            _currentFilter = new HocVienFilterData();
-            _trangHienTai = 1;
-            LoadHocVienData();
+            txtSearch.Text = ""; _currentFilter = new HocVienFilterData(); _trangHienTai = 1; LoadHocVienData();
         }
 
         private void BtnXem_Click(object sender, RoutedEventArgs e) { if (sender is Button btn && btn.Tag is HocVien hv) { XemThongTinHocVienWindow view = new XemThongTinHocVienWindow(hv); view.ShowDialog(); } }
@@ -153,7 +141,7 @@ namespace TFitnessApp
         private void BtnXoaRow_Click(object sender, RoutedEventArgs e) { if (sender is Button btn && btn.Tag is HocVien hv && MessageBox.Show($"Xóa {hv.HoTen}?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes) { _hocVienRepository.DeleteHocVien(hv.MaHV); LoadHocVienData(); } }
     }
 
-    // --- CLASSES ---
+    // --- CLASS ---
     public class HocVienFilterData
     {
         public string GioiTinh { get; set; } = "Tất cả";
@@ -220,7 +208,8 @@ namespace TFitnessApp
         public List<HocVien> FindHocVienAdvanced(string keyword, HocVienFilterData filter)
         {
             List<HocVien> list = new List<HocVien>();
-            
+
+            // Chuỗi chuyển đổi ngày tháng cho SQLite (dd-MM-yyyy -> yyyy-MM-dd)
             string dateConvert_NgaySinh = "(substr(hv.NgaySinh, 7, 4) || '-' || substr(hv.NgaySinh, 4, 2) || '-' || substr(hv.NgaySinh, 1, 2))";
             string dateConvert_NgayBD = "(substr(hd.NgayBatDau, 7, 4) || '-' || substr(hd.NgayBatDau, 4, 2) || '-' || substr(hd.NgayBatDau, 1, 2))";
 
@@ -231,13 +220,10 @@ namespace TFitnessApp
                 WHERE (hv.MaHV LIKE @k OR hv.HoTen LIKE @k OR hv.SDT LIKE @k OR hv.Email LIKE @k)";
 
             if (filter.GioiTinh != "Tất cả") sql += " AND hv.GioiTinh = @gt";
-
             if (filter.NamSinhTu.HasValue) sql += $" AND {dateConvert_NgaySinh} >= @nsTu";
             if (filter.NamSinhDen.HasValue) sql += $" AND {dateConvert_NgaySinh} <= @nsDen";
-
             if (filter.NgayThamGiaTu.HasValue) sql += $" AND {dateConvert_NgayBD} >= @ngThamGiaTu";
             if (filter.NgayThamGiaDen.HasValue) sql += $" AND {dateConvert_NgayBD} <= @ngThamGiaDen";
-
             if (filter.MaGoi != "Tất cả" && !string.IsNullOrEmpty(filter.MaGoi)) sql += " AND hd.MaGoi = @maGoi";
             if (filter.MaCN != "Tất cả" && !string.IsNullOrEmpty(filter.MaCN)) sql += " AND hd.MaCN = @maCN";
             if (filter.MaPT != "Tất cả" && !string.IsNullOrEmpty(filter.MaPT)) sql += " AND hd.MaPT = @maPT";
@@ -252,15 +238,11 @@ namespace TFitnessApp
                     using (var cmd = new SqliteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@k", $"%{keyword}%");
-
                         if (filter.GioiTinh != "Tất cả") cmd.Parameters.AddWithValue("@gt", filter.GioiTinh);
-
                         if (filter.NamSinhTu.HasValue) cmd.Parameters.AddWithValue("@nsTu", filter.NamSinhTu.Value.ToString("yyyy-MM-dd"));
                         if (filter.NamSinhDen.HasValue) cmd.Parameters.AddWithValue("@nsDen", filter.NamSinhDen.Value.ToString("yyyy-MM-dd"));
-
                         if (filter.NgayThamGiaTu.HasValue) cmd.Parameters.AddWithValue("@ngThamGiaTu", filter.NgayThamGiaTu.Value.ToString("yyyy-MM-dd"));
                         if (filter.NgayThamGiaDen.HasValue) cmd.Parameters.AddWithValue("@ngThamGiaDen", filter.NgayThamGiaDen.Value.ToString("yyyy-MM-dd"));
-
                         if (filter.MaGoi != "Tất cả" && !string.IsNullOrEmpty(filter.MaGoi)) cmd.Parameters.AddWithValue("@maGoi", filter.MaGoi);
                         if (filter.MaCN != "Tất cả" && !string.IsNullOrEmpty(filter.MaCN)) cmd.Parameters.AddWithValue("@maCN", filter.MaCN);
                         if (filter.MaPT != "Tất cả" && !string.IsNullOrEmpty(filter.MaPT)) cmd.Parameters.AddWithValue("@maPT", filter.MaPT);
@@ -271,12 +253,20 @@ namespace TFitnessApp
                             {
                                 DateTime? ns = null;
                                 string nsStr = reader["NgaySinh"]?.ToString();
-                                string[] formats = { "dd-MM-yyyy", "dd/MM/yyyy", "yyyy-MM-dd", "d-M-yyyy", "d/M/yyyy" };
+                                // CẬP NHẬT: Danh sách định dạng phong phú hơn để bắt mọi trường hợp
+                                string[] formats = { "dd-MM-yyyy", "dd/MM/yyyy", "yyyy-MM-dd", "d-M-yyyy", "d/M/yyyy", "M/d/yyyy", "yyyy/MM/dd", "dd.MM.yyyy" };
 
-                                if (DateTime.TryParseExact(nsStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime d))
-                                    if (d.Year > 1900) ns = d;
-                                    else if (DateTime.TryParse(nsStr, out DateTime d2))
+                                if (!string.IsNullOrEmpty(nsStr))
+                                {
+                                    if (DateTime.TryParseExact(nsStr, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime d))
+                                    {
+                                        if (d.Year > 1900) ns = d;
+                                    }
+                                    else if (DateTime.TryParse(nsStr, out DateTime d2)) // Thử parse tự động nếu format không khớp
+                                    {
                                         if (d2.Year > 1900) ns = d2;
+                                    }
+                                }
 
                                 list.Add(new HocVien
                                 {
@@ -314,10 +304,7 @@ namespace TFitnessApp
                         if (result != null && result != DBNull.Value)
                         {
                             string maxMa = result.ToString();
-                            if (maxMa.Length > 2 && int.TryParse(maxMa.Substring(2), out int currentNum))
-                            {
-                                newMa = $"HV{(currentNum + 1).ToString("D4")}";
-                            }
+                            if (maxMa.Length > 2 && int.TryParse(maxMa.Substring(2), out int currentNum)) { newMa = $"HV{(currentNum + 1).ToString("D4")}"; }
                         }
                     }
                 }

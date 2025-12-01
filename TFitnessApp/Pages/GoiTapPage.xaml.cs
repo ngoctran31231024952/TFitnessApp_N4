@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Data.Sqlite;
 using System.Globalization;
+using System.ComponentModel; // Cần thiết cho INotifyPropertyChanged
 using TFitnessApp.Windows;
 
 namespace TFitnessApp
@@ -25,7 +26,7 @@ namespace TFitnessApp
         private int _tongSoTrang = 1;
         private int _tongSoBanGhi = 0;
 
-        // Các biến lưu trạng thái lọc (MỚI THÊM)
+        // Các biến lưu trạng thái lọc
         private double? _filterMinPrice = null;
         private double? _filterMaxPrice = null;
         private string _filterPT = "Tất cả";
@@ -121,6 +122,24 @@ namespace TFitnessApp
         }
 
         // --- EVENTS ---
+
+        // Sự kiện Chọn Tất Cả
+        private void SelectAll_Checked(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in _danhSachHienThi)
+            {
+                item.IsSelected = true;
+            }
+        }
+
+        private void SelectAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in _danhSachHienThi)
+            {
+                item.IsSelected = false;
+            }
+        }
+
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) { PerformSearch(); }
 
         private void cboSoBanGhi_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -161,16 +180,14 @@ namespace TFitnessApp
             }
         }
 
-        // --- CẬP NHẬT SỰ KIỆN LỌC ---
+        // --- SỰ KIỆN LỌC ---
         private void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
-            // Mở cửa sổ lọc
             LocGoiTapWindow filterWindow = new LocGoiTapWindow();
             filterWindow.ShowDialog();
 
             if (filterWindow.IsApply && filterWindow.FilterData != null)
             {
-                // Nhận dữ liệu từ popup
                 var data = filterWindow.FilterData;
                 _filterMinPrice = data.MinPrice;
                 _filterMaxPrice = data.MaxPrice;
@@ -178,9 +195,22 @@ namespace TFitnessApp
                 _filterMonths = data.Months;
                 _filterSpecial = data.SpecialService;
 
-                // Thực hiện tìm kiếm lại với bộ lọc mới
                 PerformSearch();
             }
+        }
+
+        // --- NÚT LÀM MỚI (MỚI THÊM) ---
+        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            txtSearch.Text = "";
+            _filterMinPrice = null;
+            _filterMaxPrice = null;
+            _filterPT = "Tất cả";
+            _filterMonths = null;
+            _filterSpecial = "Tất cả";
+
+            _trangHienTai = 1;
+            LoadData();
         }
 
         // --- Row Actions ---
@@ -218,20 +248,39 @@ namespace TFitnessApp
     }
 
     // ==========================================
-    // 1. MODEL GOI TAP
+    // 1. MODEL GOI TAP (CẬP NHẬT INotifyPropertyChanged)
     // ==========================================
-    public class GoiTap
+    public class GoiTap : INotifyPropertyChanged
     {
         public string MaGoi { get; set; }
         public string TenGoi { get; set; }
         public int ThoiHan { get; set; }
         public double GiaNiemYet { get; set; }
         public int SoBuoiPT { get; set; }
-        public string DichVuDacBiet { get; set; } // Có/Không
-        public string TrangThai { get; set; } // Hoạt Động/Ngừng Bán
-        public bool IsSelected { get; set; }
+        public string DichVuDacBiet { get; set; }
+        public string TrangThai { get; set; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(IsSelected));
+                }
+            }
+        }
 
         public string GiaNiemYetFormatted => GiaNiemYet.ToString("N0", CultureInfo.InvariantCulture);
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     // ==========================================

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using TFitnessApp;
-using System.Text.RegularExpressions; 
+using System.Text.RegularExpressions;
 
 namespace TFitnessApp.Windows
 {
@@ -50,19 +50,15 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // --- HÀM KIỂM TRA ĐỊNH DẠNG ---
         private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
             try
             {
-                return Regex.IsMatch(email,
-                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+                return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
             }
-            catch (RegexMatchTimeoutException)
-            {
-                return false;
-            }
+            catch { return false; }
         }
 
         private bool IsNumber(string text)
@@ -76,7 +72,6 @@ namespace TFitnessApp.Windows
             {
                 string[] extensions = { ".jpg", ".png", ".jpeg" };
                 string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
-
                 foreach (string ext in extensions)
                 {
                     string filePath = Path.Combine(folderPath, $"{maHV}{ext}");
@@ -88,9 +83,7 @@ namespace TFitnessApp.Windows
                         bitmap.UriSource = new Uri(filePath);
                         bitmap.EndInit();
                         imgAvatar.Source = bitmap;
-
-                        if (this.FindName("iconDefaultAvatar") is FrameworkElement icon)
-                            icon.Visibility = Visibility.Collapsed;
+                        if (this.FindName("iconDefaultAvatar") is FrameworkElement icon) icon.Visibility = Visibility.Collapsed;
                         break;
                     }
                 }
@@ -99,6 +92,7 @@ namespace TFitnessApp.Windows
         }
 
         private void LoadNextMaHV() { txtMaHV.Text = _repository.GenerateNewMaHV(); }
+
         private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -120,7 +114,6 @@ namespace TFitnessApp.Windows
             }
         }
 
-
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
             string maHV = txtMaHV.Text.Trim();
@@ -128,6 +121,7 @@ namespace TFitnessApp.Windows
             string email = txtEmail.Text.Trim();
             string sdt = txtSDT.Text.Trim();
 
+            // --- VALIDATION ---
             if (string.IsNullOrEmpty(maHV) || string.IsNullOrEmpty(hoTen))
             {
                 MessageBox.Show("Vui lòng nhập Mã HV và Họ tên!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -136,11 +130,12 @@ namespace TFitnessApp.Windows
 
             if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
             {
-                MessageBox.Show("Định dạng Email không hợp lệ! Vui lòng kiểm tra lại.\nVí dụ: user@example.com", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Định dạng Email không hợp lệ!", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
                 txtEmail.Focus();
                 return;
             }
 
+            // Kiểm tra SĐT: Phải là số và ĐÚNG 10 KÝ TỰ
             if (!string.IsNullOrEmpty(sdt))
             {
                 if (!IsNumber(sdt))
@@ -149,9 +144,11 @@ namespace TFitnessApp.Windows
                     txtSDT.Focus();
                     return;
                 }
-                if (sdt.Length < 9 || sdt.Length > 11)
+
+                // Yêu cầu: ít hơn hoặc không đủ 10 chữ số -> Báo lỗi
+                if (sdt.Length != 10)
                 {
-                    MessageBox.Show("Số điện thoại phải có từ 9 đến 11 chữ số!", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Số điện thoại phải có đúng 10 chữ số!", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
                     txtSDT.Focus();
                     return;
                 }
@@ -159,10 +156,11 @@ namespace TFitnessApp.Windows
 
             if (!_isEditMode && _repository.CheckMaHVExists(maHV))
             {
-                MessageBox.Show($"Mã học viên {maHV} đã tồn tại! Đang tải lại mã mới...", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Mã học viên {maHV} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
                 LoadNextMaHV();
                 return;
             }
+            // ------------------
 
             HocVien item = new HocVien
             {
@@ -175,11 +173,7 @@ namespace TFitnessApp.Windows
                 DiaChi = ""
             };
 
-            bool result = false;
-            if (_isEditMode)
-                result = _repository.UpdateHocVien(item);
-            else
-                result = _repository.AddHocVien(item);
+            bool result = _isEditMode ? _repository.UpdateHocVien(item) : _repository.AddHocVien(item);
 
             if (result)
             {
