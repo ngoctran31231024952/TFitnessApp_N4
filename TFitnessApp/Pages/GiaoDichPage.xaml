@@ -220,7 +220,6 @@
 
                         <TextBlock x:Name="SearchPlaceholder"
                                    IsHitTestVisible="False" 
-                                   Text="Tìm kiếm học viên, mã giao dịch, gói tập..." 
                                    VerticalAlignment="Center" 
                                    Foreground="#999"
                                    FontStyle="Italic"
@@ -251,8 +250,8 @@
                         Style="{StaticResource RoundButtonStyle}"
                         Click="AddTransactionCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Tạo GD" VerticalAlignment="Center" FontSize="13"/>
+                        <fa:IconImage Icon="CirclePlus" Width="15" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Tạo GD" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
@@ -270,8 +269,8 @@
                         Style="{StaticResource RoundButtonStyle}"
                         Click="RefreshCommand_Click">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Làm mới" VerticalAlignment="Center" FontSize="13"/>
+                        <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="6,0,1,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Làm mới" Margin="1,0,6,0" VerticalAlignment="Center" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
@@ -370,37 +369,37 @@
 
                     <DataGridTextColumn Header="Mã GD" 
                                         Binding="{Binding MaGD}" 
-                                        Width="90" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã HV" 
                                         Binding="{Binding MaHV}" 
-                                        Width="80" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã Gói" 
                                         Binding="{Binding MaGoi}" 
-                                        Width="90" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã TK" 
                                         Binding="{Binding MaTK}" 
-                                        Width="80" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Tổng Tiền" 
                                         Binding="{Binding TongTienFormatted}" 
-                                        Width="120" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Đã Thanh Toán" 
                                         Binding="{Binding DaThanhToanFormatted}" 
-                                        Width="130" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Số Tiền Nợ" 
                                         Binding="{Binding SoTienNoFormatted}" 
-                                        Width="120" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Ngày GD" 
@@ -408,7 +407,7 @@
                                         Width="130" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
-                    <DataGridTemplateColumn Header="Trạng Thái" Width="120">
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="12" 
@@ -481,6 +480,7 @@
                 <TextBlock Text="Hiển thị:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
                 <ComboBox x:Name="cboSoBanGhiMoiTrang" 
                           Width="60" 
+                          VerticalAlignment="Center"
                           SelectionChanged="cboSoBanGhiMoiTrang_SelectionChanged"
                           FontSize="12"/>
 

@@ -1,0 +1,125 @@
+﻿<Window x:Class="TFitnessApp.Windows.LocGoiTapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="Lọc gói tập" Height="450" Width="500"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" FontFamily="Lato">
+
+    <Window.Resources>
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#A01516"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="Black"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="70"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#C71A1B" CornerRadius="10,10,0,0">
+                <Grid>
+                    <TextBlock Text="LỌC GÓI TẬP" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" Style="{StaticResource CloseButtonStyle}" Click="BtnHuy_Click">
+                        <fa:IconImage Icon="Times" Width="14" Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Form Lọc -->
+            <StackPanel Grid.Row="1" Margin="30,20">
+
+                <!-- 1. Khoảng giá -->
+                <TextBlock Text="Khoảng giá (VNĐ)" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="txtGiaTu" Padding="5" ToolTip="Giá thấp nhất"/>
+                    <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="2" x:Name="txtGiaDen" Padding="5" ToolTip="Giá cao nhất"/>
+                </Grid>
+
+                <!-- 2. PT -->
+                <TextBlock Text="Huấn luyện viên (PT)" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                    <RadioButton x:Name="rbPTAll" Content="Tất cả" GroupName="PT" IsChecked="True" Margin="0,0,20,0"/>
+                    <RadioButton x:Name="rbPTCo" Content="Có PT" GroupName="PT" Margin="0,0,20,0"/>
+                    <RadioButton x:Name="rbPTKhong" Content="Không PT" GroupName="PT"/>
+                </StackPanel>
+
+                <!-- 3. Thời hạn -->
+                <TextBlock Text="Thời hạn gói" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <ComboBox x:Name="cmbThoiHan" Padding="5" Margin="0,0,0,20">
+                    <ComboBoxItem Content="Tất cả" IsSelected="True"/>
+                    <ComboBoxItem Content="1 tháng" Tag="1"/>
+                    <ComboBoxItem Content="3 tháng" Tag="3"/>
+                    <ComboBoxItem Content="6 tháng" Tag="6"/>
+                    <ComboBoxItem Content="12 tháng" Tag="12"/>
+                </ComboBox>
+
+                <!-- 4. Dịch vụ đặc biệt -->
+                <TextBlock Text="Dịch vụ đặc biệt" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="rbDVAll" Content="Tất cả" GroupName="DV" IsChecked="True" Margin="0,0,20,0"/>
+                    <RadioButton x:Name="rbDVCo" Content="Có" GroupName="DV" Margin="0,0,20,0"/>
+                    <RadioButton x:Name="rbDVKhong" Content="Không" GroupName="DV"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Footer -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Button Click="BtnApDung_Click" Background="#C71A1B" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0" Width="120" Height="40" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="Áp dụng" Foreground="White"/>
+                </Button>
+
+                <Button Click="BtnDatLai_Click" Background="White" BorderBrush="#CCC" BorderThickness="1" Foreground="#333" FontSize="14" Width="100" Height="40" Margin="15,0,0,0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="Đặt lại"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
