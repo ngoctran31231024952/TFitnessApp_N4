@@ -277,7 +277,7 @@ namespace TFitnessApp.Windows
                 {
                     var textBlock = stackPanel.Children[1] as TextBlock;
                     if (textBlock != null)
-                        textBlock.Text = isEdit ? "LƯU" : "SỬA";
+                        textBlock.Text = isEdit ? "Lưu" : "Sửa";
                 }
             }
         }

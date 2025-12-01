@@ -8,7 +8,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Thêm Tài khoản mới"
-        Height="600" Width="700"
+        Height="400" Width="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         AllowsTransparency="True"
@@ -196,8 +196,8 @@
                         Style="{DynamicResource RoundButtonControlTemplate}" 
                         Padding="30,10" FontWeight="Bold">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Plus" Width="16" Height="16" Margin="10,0,5,0" Foreground="White"/>
-                        <TextBlock Text="Tạo" FontSize="20" Width="45" Height="30"/>
+                        <fa:IconImage Icon="Plus" Width="18" Height="18" Margin="10,0,5,0" Foreground="White"/>
+                        <TextBlock Text="Tạo" Margin="0,0,0,0" FontSize="20" Width="45"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

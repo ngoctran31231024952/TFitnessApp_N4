@@ -174,14 +174,14 @@
                     </StackPanel>
 
                     <!-- DÒNG 4: Số điện thoại -->
-                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,20">
+                    <StackPanel Grid.Row="3" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Số điện thoại:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtSoDienThoai" Text="{Binding SDT}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}"/>
                     </StackPanel>
 
                     <!-- DÒNG 5: Phân quyền / Trạng thái -->
-                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,20">
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Phân quyền:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <ComboBox x:Name="cbPhanQuyen" 
                                   ItemsSource="{StaticResource PhanQuyenList}"
@@ -192,7 +192,7 @@
                                   IsEnabled="False"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="15,0,0,20">
+                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Trạng thái:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <ComboBox x:Name="cbTrangThai" 
                                   ItemsSource="{StaticResource TrangThaiList}"
@@ -207,15 +207,15 @@
             </ScrollViewer>
 
             <!-- FOOTER với các nút chức năng -->
-            <StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,10,0,20">
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,5,0,22">
 
                 <!-- Nút Sửa -->
                 <Button x:Name="btnSua" Click="btnSua_Click" 
                         Style="{DynamicResource RoundButtonControlTemplate}" 
                         Padding="20,10" FontWeight="Bold" Margin="10,0">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Edit" Width="16" Height="16" Margin="5,0,5,0" Foreground="White"/>
-                        <TextBlock Text="Sửa" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal" Width="75">
+                        <fa:IconImage Icon="Edit" Width="16" Height="16" Margin="10,0,5,0" Foreground="White"/>
+                        <TextBlock Text="Sửa" Margin="5,0,5,0" FontSize="16"/>
                     </StackPanel>
                 </Button>
 
@@ -223,9 +223,9 @@
                 <Button x:Name="btnXoa" Click="btnXoa_Click" 
                         Style="{DynamicResource RoundButtonControlTemplate}" 
                         Padding="20,10" FontWeight="Bold" Margin="10,0">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Trash" Width="16" Height="16" Margin="5,0,5,0" Foreground="White"/>
-                        <TextBlock Text="Xóa" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal" Width="75" Height="30">
+                        <fa:IconImage Icon="Trash" Width="16" Margin="10,0,5,0" Foreground="White"/>
+                        <TextBlock Text="Xóa" Margin="5,0,5,0" FontSize="16" Height="16" />
                     </StackPanel>
                 </Button>
 
