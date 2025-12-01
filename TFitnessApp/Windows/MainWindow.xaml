@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TFitnessApp"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Title="TFitness - Khỏe hơn mỗi ngày" Height="450" Width="800"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
@@ -632,14 +633,77 @@
                             </StackPanel>
                         </Button>
 
-                        <Popup x:Name="HelpPopup" 
-       PlacementTarget="{Binding ElementName=BtnHelp}" 
+                        <Button x:Name="BtnVideoHelp" Style="{StaticResource TopBarButton}" Click="BtnVideoHelp_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Video" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="Hướng dẫn" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Popup x:Name="VideoHelpPopup"
+       PlacementTarget="{Binding ElementName=BtnVideoHelp}"
        Placement="Bottom"
-       VerticalOffset="5" 
-       HorizontalOffset="-200"
-       AllowsTransparency="True" 
-       StaysOpen="False" 
-       PopupAnimation="Fade">
+       VerticalOffset="10"
+       HorizontalOffset="-300"
+       AllowsTransparency="True"
+       StaysOpen="False"
+       PopupAnimation="Fade"
+       Closed="VideoHelpPopup_Closed">
+
+                            <Border Background="Black" 
+            CornerRadius="8" 
+            Width="560" Height="315"  
+            BorderBrush="#333"
+            BorderThickness="1">
+
+                                <Grid>
+                                    <!-- Nút đóng -->
+                                    <Button Click="CloseVideoPopup_Click" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top"
+                    Width="30" Height="30"
+                    Panel.ZIndex="100" 
+                    Background="Transparent" 
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="0,-10,-10,0">
+                                        <fa:IconImage Icon="Times" 
+                             Foreground="White" 
+                             Width="15" 
+                             Opacity="0.7"/>
+                                    </Button>
+
+                                    <!-- Loading -->
+                                    <StackPanel x:Name="VideoLoadingText" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       Visibility="Visible">
+                                        <fa:IconImage Icon="Spinner" 
+                             Foreground="White" 
+                             Width="30" Height="30" 
+                             Margin="0,0,0,10"/>
+                                        <TextBlock Text="Đang tải..." 
+                          Foreground="White" 
+                          HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- WebView2 -->
+                                    <wv2:WebView2 x:Name="VideoWebView2" 
+                          Margin="0"
+                          Visibility="Collapsed"
+                          NavigationCompleted="VideoWebView2_NavigationCompleted"/>
+                                </Grid>
+                            </Border>
+                        </Popup>
+
+                        <Popup x:Name="HelpPopup" 
+                               PlacementTarget="{Binding ElementName=BtnHelp}" 
+                               Placement="Bottom"
+                               VerticalOffset="5" 
+                               HorizontalOffset="-200"
+                               AllowsTransparency="True" 
+                               StaysOpen="False" 
+                               PopupAnimation="Fade">
 
                             <Grid Margin="0,0,10,10">
                                 <Border Background="White" CornerRadius="8" Width="270" Padding="0" Margin="10"
@@ -771,3 +835,4 @@
         </Grid>
     </Grid>
 </Window>
+

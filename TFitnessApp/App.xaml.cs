@@ -13,5 +13,11 @@ namespace TFitnessApp
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            MainWindow mainWindow = new MainWindow("Nguyễn Văn A", "Nhân viên");
+            mainWindow.Show();
+        }
     }
 }

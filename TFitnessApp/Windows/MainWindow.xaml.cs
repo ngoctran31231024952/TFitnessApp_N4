@@ -7,12 +7,17 @@ using System.Windows.Input;
 using FontAwesome.Sharp;
 using TFitnessApp.Windows;
 using TFitnessApp.Pages;
+using System.IO;
+using Microsoft.Web.WebView2.Core;
+using System.Collections.Generic;
 
 namespace TFitnessApp
 {
     public partial class MainWindow : Window
     {
         private bool isMenuProcessing = false;
+        private System.Threading.CancellationTokenSource videoLoadCancellation;
+        private bool isVideoWebViewReady = false;
         public MainWindow(string hoTen = "Admin", string quyen = "Quản trị viên")
         {
             InitializeComponent();
@@ -32,8 +37,8 @@ namespace TFitnessApp
 
                 if (parts.Length >= 2)
                 {
-                    string ho = parts[0];                   
-                    string ten = parts[parts.Length - 1];  
+                    string ho = parts[0];
+                    string ten = parts[parts.Length - 1];
                     txtUserName.Text = $"{ho} {ten}";
                     txtAvatarInitial.Text = ten.Substring(0, 1).ToUpper();
                 }
@@ -352,6 +357,71 @@ namespace TFitnessApp
             HelpPopup.IsOpen = true;
         }
 
+        private async void BtnVideoHelp_Click(object sender, RoutedEventArgs e)
+        {
+            // Mở Popup
+            VideoHelpPopup.IsOpen = true;
 
+            // Hiện Loading, Ẩn WebView
+            VideoLoadingText.Visibility = Visibility.Visible;
+            VideoWebView2.Visibility = Visibility.Collapsed;
+
+            try
+            {
+                // Khởi tạo môi trường (Vẫn cần UserData để lưu cache giúp load nhanh hơn)
+                if (VideoWebView2.CoreWebView2 == null)
+                {
+                    string userDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TFitness_WebView2_Data");
+                    var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                    await VideoWebView2.EnsureCoreWebView2Async(env);
+                }
+
+                // URL Google Drive Preview
+                string driveFileId = "16xnsbuYDB0X3muSMok-qfx1jM5OXxQU3";
+                string url = $"https://drive.google.com/file/d/{driveFileId}/preview";
+
+                // Điều hướng
+                VideoWebView2.CoreWebView2.Navigate(url);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi: {ex.Message}");
+                VideoHelpPopup.IsOpen = false;
+            }
+        }
+
+        // 2. Sự kiện tải xong - ĐƠN GIẢN HÓA TỐI ĐA
+        private void VideoWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                // Chỉ cần hiện WebView lên thôi.
+                // KHÔNG chèn CSS, KHÔNG chèn Script click ảo nữa.
+                // Hãy để Google Drive tự lo phần hiển thị.
+                VideoLoadingText.Visibility = Visibility.Collapsed;
+                VideoWebView2.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Nếu tải thất bại (mất mạng, link lỗi)
+                MessageBox.Show("Không thể tải video. Vui lòng kiểm tra kết nối mạng.");
+            }
+        }
+
+        // 3. Đóng Popup (Giữ nguyên)
+        private void CloseVideoPopup_Click(object sender, RoutedEventArgs e)
+        {
+            VideoHelpPopup.IsOpen = false;
+            StopVideo();
+        }
+
+        private void VideoHelpPopup_Closed(object sender, EventArgs e) => StopVideo();
+
+        private void StopVideo()
+        {
+            if (VideoWebView2?.CoreWebView2 != null)
+                VideoWebView2.CoreWebView2.Navigate("about:blank");
+        }
     }
 }
+
