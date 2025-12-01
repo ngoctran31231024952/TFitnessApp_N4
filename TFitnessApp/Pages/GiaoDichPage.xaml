@@ -370,37 +370,37 @@
 
                     <DataGridTextColumn Header="Mã GD" 
                                         Binding="{Binding MaGD}" 
-                                        Width="90" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã HV" 
                                         Binding="{Binding MaHV}" 
-                                        Width="80" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã Gói" 
                                         Binding="{Binding MaGoi}" 
-                                        Width="90" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Mã TK" 
                                         Binding="{Binding MaTK}" 
-                                        Width="80" 
+                                        Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Tổng Tiền" 
                                         Binding="{Binding TongTienFormatted}" 
-                                        Width="120" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Đã Thanh Toán" 
                                         Binding="{Binding DaThanhToanFormatted}" 
-                                        Width="130" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Số Tiền Nợ" 
                                         Binding="{Binding SoTienNoFormatted}" 
-                                        Width="120" 
+                                        Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
                     <DataGridTextColumn Header="Ngày GD" 
@@ -408,7 +408,7 @@
                                         Width="130" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
-                    <DataGridTemplateColumn Header="Trạng Thái" Width="120">
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="12" 

@@ -1,0 +1,235 @@
+﻿<Window x:Class="TFitnessApp.Windows.Window4"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TFitnessApp.Windows"
+        xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Chi tiết Tài khoản"
+        Height="550" Width="700" 
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        Background="Transparent">
+
+    <Window.Resources>
+        <!-- Style cho RoundButtonControlTemplate (Màu đỏ chủ đề) -->
+        <Style x:Key="RoundButtonControlTemplate" TargetType="Button">
+            <Setter Property="Background" Value="#C71A1B"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#A51617"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style cho Nút Đóng (X) trên Header màu đỏ -->
+        <Style x:Key="CloseWindowButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#A51617"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Data cho ComboBox Phân quyền -->
+        <x:Array x:Key="PhanQuyenList" Type="{x:Type sys:String}">
+            <sys:String>Nhân Viên</sys:String>
+            <sys:String>Quản Trị Viên</sys:String>
+        </x:Array>
+
+        <!-- Data cho ComboBox Trạng thái -->
+        <x:Array x:Key="TrangThaiList" Type="{x:Type sys:String}">
+            <sys:String>Hoạt Động</sys:String>
+            <sys:String>Bị Khóa</sys:String>
+        </x:Array>
+
+        <!-- Style cho TextBox chỉ đọc -->
+        <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#F5F5F5"/>
+        </Style>
+
+        <!-- Style cho TextBox có thể chỉnh sửa -->
+        <Style x:Key="EditableTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Border CornerRadius="10" Background="White" BorderBrush="#C71A1B" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <Grid Grid.Row="0" Background="#C71A1B" Height="50" MouseDown="Header_MouseDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Chi tiết Tài khoản" 
+                           Foreground="White" FontWeight="Bold" FontSize="18"
+                           VerticalAlignment="Center" Margin="20,0,0,0"/>
+
+                <Button x:Name="btnClose" Grid.Column="1" Click="btnClose_Click" Background="Transparent" BorderThickness="0" 
+                        Width="50" Cursor="Hand" Style="{DynamicResource CloseWindowButtonStyle}">
+                    <fa:IconImage Icon="Xmark" Width="16" Height="16" Foreground="White"/>
+                </Button>
+            </Grid>
+
+            <!-- NỘI DUNG FORM -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- DÒNG 1: Mã tài khoản / Ngày tạo -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,20">
+                        <TextBlock Text="Mã tài khoản:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtMaTK" Text="{Binding MaTK}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,20">
+                        <TextBlock Text="Ngày tạo:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtNgayTao" Text="{Binding NgayTaoFormatted, Mode=OneWay}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <!-- DÒNG 2: Tên đăng nhập / Họ và tên -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,20">
+                        <TextBlock Text="Tên đăng nhập:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtTenDangNhap" Text="{Binding TenDangNhap}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,20">
+                        <TextBlock Text="Họ và tên:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtHoTen" Text="{Binding HoTen}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <!-- DÒNG 3: Mật khẩu / Email -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,20">
+                        <TextBlock Text="Mật khẩu:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtMatKhau" Text="{Binding MatKhau}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,20">
+                        <TextBlock Text="Email:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtEmail" Text="{Binding Email}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <!-- DÒNG 4: Số điện thoại -->
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,20">
+                        <TextBlock Text="Số điện thoại:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtSoDienThoai" Text="{Binding SDT}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <!-- DÒNG 5: Phân quyền / Trạng thái -->
+                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,20">
+                        <TextBlock Text="Phân quyền:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cbPhanQuyen" 
+                                  ItemsSource="{StaticResource PhanQuyenList}"
+                                  SelectedItem="{Binding PhanQuyen}" 
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" 
+                                  VerticalContentAlignment="Center"
+                                  IsEnabled="False"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="15,0,0,20">
+                        <TextBlock Text="Trạng thái:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cbTrangThai" 
+                                  ItemsSource="{StaticResource TrangThaiList}"
+                                  SelectedItem="{Binding TrangThai}" 
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" 
+                                  VerticalContentAlignment="Center"
+                                  IsEnabled="False"/>
+                    </StackPanel>
+
+                </Grid>
+            </ScrollViewer>
+
+            <!-- FOOTER với các nút chức năng -->
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,10,0,20">
+
+                <!-- Nút Sửa -->
+                <Button x:Name="btnSua" Click="btnSua_Click" 
+                        Style="{DynamicResource RoundButtonControlTemplate}" 
+                        Padding="20,10" FontWeight="Bold" Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="Edit" Width="16" Height="16" Margin="5,0,5,0" Foreground="White"/>
+                        <TextBlock Text="Sửa" FontSize="16"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Nút Xóa -->
+                <Button x:Name="btnXoa" Click="btnXoa_Click" 
+                        Style="{DynamicResource RoundButtonControlTemplate}" 
+                        Padding="20,10" FontWeight="Bold" Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="Trash" Width="16" Height="16" Margin="5,0,5,0" Foreground="White"/>
+                        <TextBlock Text="Xóa" FontSize="16"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
