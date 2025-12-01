@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Text.RegularExpressions; // Thêm namespace cho Regex
 
 namespace TFitnessApp.Windows
 {
-    // Class chứa dữ liệu lọc để trả về
     public class FilterGoiTapData
     {
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
-        public string PTOption { get; set; } // "Tất cả", "Có PT", "Không PT"
+        public string PTOption { get; set; }
         public int? Months { get; set; }
-        public string SpecialService { get; set; } // "Tất cả", "Có", "Không"
+        public string SpecialService { get; set; }
     }
 
     public partial class LocGoiTapWindow : Window
@@ -24,13 +24,49 @@ namespace TFitnessApp.Windows
             InitializeComponent();
         }
 
+        // Helper kiểm tra số thực dương
+        private bool IsValidNumber(string text)
+        {
+            // Cho phép số nguyên hoặc số thập phân, không âm
+            return Regex.IsMatch(text, @"^\d+(\.\d+)?$");
+        }
+
         private void BtnApDung_Click(object sender, RoutedEventArgs e)
         {
             FilterData = new FilterGoiTapData();
 
-            // 1. Giá
-            if (double.TryParse(txtGiaTu.Text, out double min)) FilterData.MinPrice = min;
-            if (double.TryParse(txtGiaDen.Text, out double max)) FilterData.MaxPrice = max;
+            // 1. Validate Giá
+            string minPriceText = txtGiaTu.Text.Trim();
+            string maxPriceText = txtGiaDen.Text.Trim();
+
+            if (!string.IsNullOrEmpty(minPriceText))
+            {
+                if (!IsValidNumber(minPriceText))
+                {
+                    MessageBox.Show("Giá thấp nhất phải là số hợp lệ!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtGiaTu.Focus();
+                    return;
+                }
+                FilterData.MinPrice = double.Parse(minPriceText);
+            }
+
+            if (!string.IsNullOrEmpty(maxPriceText))
+            {
+                if (!IsValidNumber(maxPriceText))
+                {
+                    MessageBox.Show("Giá cao nhất phải là số hợp lệ!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtGiaDen.Focus();
+                    return;
+                }
+                FilterData.MaxPrice = double.Parse(maxPriceText);
+            }
+
+            // Kiểm tra logic: Giá thấp nhất không được lớn hơn giá cao nhất
+            if (FilterData.MinPrice.HasValue && FilterData.MaxPrice.HasValue && FilterData.MinPrice > FilterData.MaxPrice)
+            {
+                MessageBox.Show("Khoảng giá không hợp lệ (Thấp nhất > Cao nhất)!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             // 2. PT
             if (rbPTCo.IsChecked == true) FilterData.PTOption = "Có PT";
@@ -45,7 +81,7 @@ namespace TFitnessApp.Windows
 
             // 4. Dịch vụ
             if (rbDVCo.IsChecked == true) FilterData.SpecialService = "Có";
-            else if (rbDVKhong.IsChecked == true) FilterData.SpecialService = "Không"; // Lưu ý DB lưu "không" hay "Không"
+            else if (rbDVKhong.IsChecked == true) FilterData.SpecialService = "Không";
             else FilterData.SpecialService = "Tất cả";
 
             IsApply = true;
