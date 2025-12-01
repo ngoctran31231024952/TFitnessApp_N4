@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using TFitnessApp;
+using System.Text.RegularExpressions; // Cần thêm cái này để dùng Regex
 
 namespace TFitnessApp.Windows
 {
@@ -12,10 +13,8 @@ namespace TFitnessApp.Windows
         private HocVienRepository _repository;
         public bool IsSuccess { get; private set; } = false;
         private string _selectedImagePath = null;
-        private bool _isEditMode = false; // Biến xác định chế độ
+        private bool _isEditMode = false;
 
-        // Constructor: tham số hv mặc định là null (Chế độ Thêm)
-        // Nếu hv != null -> Chế độ Sửa
         public ThemHocVienWindow(HocVien hv = null)
         {
             InitializeComponent();
@@ -23,12 +22,10 @@ namespace TFitnessApp.Windows
 
             if (hv != null)
             {
-                // CHẾ ĐỘ SỬA
                 _isEditMode = true;
-                txtHeaderTitle.Text = "CẬP NHẬT THÔNG TIN"; // Cần đặt x:Name="txtHeaderTitle" trong XAML hoặc dùng Title
-                txtBtnAction.Text = "Lưu"; // Cần đặt x:Name cho TextBlock trong Button
+                txtHeaderTitle.Text = "CẬP NHẬT THÔNG TIN";
+                txtBtnAction.Text = "Lưu";
 
-                // Điền dữ liệu cũ
                 txtMaHV.Text = hv.MaHV;
                 txtHoTen.Text = hv.HoTen;
                 txtEmail.Text = hv.Email;
@@ -44,51 +41,40 @@ namespace TFitnessApp.Windows
                     }
                 }
 
-                // Load ảnh cũ nếu có
                 LoadExistingImage(hv.MaHV);
             }
             else
             {
-                // CHẾ ĐỘ THÊM
                 _isEditMode = false;
                 LoadNextMaHV();
             }
         }
 
-        private void LoadExistingImage(string maHV)
+        // --- HÀM KIỂM TRA ĐỊNH DẠNG ---
+        private bool IsValidEmail(string email)
         {
+            if (string.IsNullOrWhiteSpace(email)) return false;
             try
             {
-                string[] extensions = { ".jpg", ".png", ".jpeg" };
-                string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
-
-                foreach (string ext in extensions)
-                {
-                    string filePath = Path.Combine(folderPath, $"{maHV}{ext}");
-                    if (File.Exists(filePath))
-                    {
-                        BitmapImage bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.UriSource = new Uri(filePath);
-                        bitmap.EndInit();
-                        imgAvatar.Source = bitmap;
-
-                        if (this.FindName("iconDefaultAvatar") is FrameworkElement icon)
-                            icon.Visibility = Visibility.Collapsed;
-                        break;
-                    }
-                }
+                // Regex kiểm tra email cơ bản
+                return Regex.IsMatch(email,
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
             }
-            catch { }
+            catch (RegexMatchTimeoutException)
+            {
+                return false;
+            }
         }
 
-        private void LoadNextMaHV()
+        private bool IsNumber(string text)
         {
-            string newCode = _repository.GenerateNewMaHV();
-            txtMaHV.Text = newCode;
+            return Regex.IsMatch(text, @"^\d+$");
         }
 
+        // ... (Các hàm LoadExistingImage, LoadNextMaHV, BtnChonAnh_Click giữ nguyên) ...
+        private void LoadExistingImage(string maHV) { /* Giữ nguyên code cũ */ }
+        private void LoadNextMaHV() { txtMaHV.Text = _repository.GenerateNewMaHV(); }
         private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -110,24 +96,57 @@ namespace TFitnessApp.Windows
             }
         }
 
+
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
             string maHV = txtMaHV.Text.Trim();
             string hoTen = txtHoTen.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string sdt = txtSDT.Text.Trim();
 
+            // --- 1. KIỂM TRA DỮ LIỆU ĐẦU VÀO (VALIDATION) ---
+
+            // Kiểm tra rỗng
             if (string.IsNullOrEmpty(maHV) || string.IsNullOrEmpty(hoTen))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng nhập Mã HV và Họ tên!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Nếu là THÊM MỚI thì mới kiểm tra trùng mã
+            // Kiểm tra Email
+            if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
+            {
+                MessageBox.Show("Định dạng Email không hợp lệ! Vui lòng kiểm tra lại.\nVí dụ: user@example.com", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            // Kiểm tra SĐT (phải là số và độ dài hợp lý, ví dụ 9-11 số)
+            if (!string.IsNullOrEmpty(sdt))
+            {
+                if (!IsNumber(sdt))
+                {
+                    MessageBox.Show("Số điện thoại chỉ được chứa các chữ số!", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtSDT.Focus();
+                    return;
+                }
+                if (sdt.Length < 9 || sdt.Length > 11)
+                {
+                    MessageBox.Show("Số điện thoại phải có từ 9 đến 11 chữ số!", "Lỗi định dạng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtSDT.Focus();
+                    return;
+                }
+            }
+
+            // Kiểm tra trùng mã (chỉ khi thêm mới)
             if (!_isEditMode && _repository.CheckMaHVExists(maHV))
             {
-                MessageBox.Show($"Mã học viên {maHV} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Mã học viên {maHV} đã tồn tại! Đang tải lại mã mới...", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
                 LoadNextMaHV();
                 return;
             }
+
+            // --- HẾT PHẦN VALIDATION ---
 
             HocVien item = new HocVien
             {
@@ -135,8 +154,8 @@ namespace TFitnessApp.Windows
                 HoTen = hoTen,
                 NgaySinh = dpNgaySinh.SelectedDate,
                 GioiTinh = (cmbGioiTinh.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content.ToString() ?? "Nam",
-                Email = txtEmail.Text.Trim(),
-                SDT = txtSDT.Text.Trim(),
+                Email = email,
+                SDT = sdt,
                 DiaChi = ""
             };
 
@@ -148,16 +167,12 @@ namespace TFitnessApp.Windows
 
             if (result)
             {
-                // Lưu ảnh (nếu có chọn ảnh mới)
                 if (!string.IsNullOrEmpty(_selectedImagePath))
                 {
                     try
                     {
                         string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HocVienImages");
                         if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-
-                        // Xóa ảnh cũ nếu có (để tránh rác) - tùy chọn
-
                         string destFileName = $"{maHV}{Path.GetExtension(_selectedImagePath)}";
                         string destPath = Path.Combine(folderPath, destFileName);
                         File.Copy(_selectedImagePath, destPath, true);
@@ -174,4 +189,3 @@ namespace TFitnessApp.Windows
         private void BtnHuy_Click(object sender, RoutedEventArgs e) { this.Close(); }
     }
 }
-

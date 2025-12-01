@@ -25,13 +25,21 @@ namespace TFitnessApp
         private int _tongSoTrang = 1;
         private int _tongSoBanGhi = 0;
 
+        // Các biến lưu trạng thái lọc (MỚI THÊM)
+        private double? _filterMinPrice = null;
+        private double? _filterMaxPrice = null;
+        private string _filterPT = "Tất cả";
+        private int? _filterMonths = null;
+        private string _filterSpecial = "Tất cả";
+
         public GoiTapPage()
         {
             InitializeComponent();
             _repository = new GoiTapRepository();
 
+            // Kiểm tra null trước khi gán
             if (cboSoBanGhi != null && cboSoBanGhi.Items.Count > 2)
-                cboSoBanGhi.SelectedIndex = 2;
+                cboSoBanGhi.SelectedIndex = 2; // Mặc định 50
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -49,7 +57,17 @@ namespace TFitnessApp
             try
             {
                 string keyword = txtSearch.Text.Trim();
-                _danhSachGoc = _repository.FindGoiTap(keyword);
+
+                // Gọi hàm tìm kiếm nâng cao
+                _danhSachGoc = _repository.FindGoiTapAdvanced(
+                    keyword,
+                    _filterMinPrice,
+                    _filterMaxPrice,
+                    _filterPT,
+                    _filterMonths,
+                    _filterSpecial
+                );
+
                 _trangHienTai = 1;
                 HienThiDuLieuPhanTrang();
             }
@@ -143,9 +161,26 @@ namespace TFitnessApp
             }
         }
 
+        // --- CẬP NHẬT SỰ KIỆN LỌC ---
         private void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Chức năng lọc Gói tập đang phát triển", "Thông báo");
+            // Mở cửa sổ lọc
+            LocGoiTapWindow filterWindow = new LocGoiTapWindow();
+            filterWindow.ShowDialog();
+
+            if (filterWindow.IsApply && filterWindow.FilterData != null)
+            {
+                // Nhận dữ liệu từ popup
+                var data = filterWindow.FilterData;
+                _filterMinPrice = data.MinPrice;
+                _filterMaxPrice = data.MaxPrice;
+                _filterPT = data.PTOption;
+                _filterMonths = data.Months;
+                _filterSpecial = data.SpecialService;
+
+                // Thực hiện tìm kiếm lại với bộ lọc mới
+                PerformSearch();
+            }
         }
 
         // --- Row Actions ---
@@ -216,10 +251,36 @@ namespace TFitnessApp
             _connectionString = $"Data Source={dbPath};";
         }
 
-        public List<GoiTap> FindGoiTap(string keyword)
+        // --- HÀM LỌC NÂNG CAO ---
+        public List<GoiTap> FindGoiTapAdvanced(string keyword, double? minPrice, double? maxPrice, string ptOption, int? months, string specialService)
         {
             List<GoiTap> list = new List<GoiTap>();
-            string sql = @"SELECT * FROM GoiTap WHERE (MaGoi LIKE @k OR TenGoi LIKE @k)";
+            string sql = "SELECT * FROM GoiTap WHERE (MaGoi LIKE @k OR TenGoi LIKE @k)";
+
+            // 1. Lọc theo Giá
+            if (minPrice.HasValue) sql += " AND GiaNiemYet >= @minP";
+            if (maxPrice.HasValue) sql += " AND GiaNiemYet <= @maxP";
+
+            // 2. Lọc theo PT (Có/Không)
+            if (!string.IsNullOrEmpty(ptOption))
+            {
+                if (ptOption == "Có PT") sql += " AND SoBuoiPT > 0";
+                else if (ptOption == "Không PT") sql += " AND SoBuoiPT = 0";
+            }
+
+            // 3. Lọc theo Thời hạn (tháng)
+            if (months.HasValue && months.Value > 0)
+            {
+                sql += " AND ThoiHan = @months";
+            }
+
+            // 4. Lọc Dịch vụ đặc biệt (Có/Không)
+            if (!string.IsNullOrEmpty(specialService) && specialService != "Tất cả")
+            {
+                // Trong DB lưu là "Có"/"Không" hoặc "có"/"không"
+                // Sử dụng LIKE để tìm không phân biệt hoa thường tương đối
+                sql += " AND DichVuDacBiet LIKE @special";
+            }
 
             try
             {
@@ -229,6 +290,13 @@ namespace TFitnessApp
                     using (var cmd = new SqliteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@k", $"%{keyword}%");
+
+                        if (minPrice.HasValue) cmd.Parameters.AddWithValue("@minP", minPrice.Value);
+                        if (maxPrice.HasValue) cmd.Parameters.AddWithValue("@maxP", maxPrice.Value);
+                        if (months.HasValue) cmd.Parameters.AddWithValue("@months", months.Value);
+                        if (!string.IsNullOrEmpty(specialService) && specialService != "Tất cả")
+                            cmd.Parameters.AddWithValue("@special", specialService);
+
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
@@ -249,36 +317,33 @@ namespace TFitnessApp
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải Gói tập: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Lỗi lọc Gói tập: " + ex.Message); }
             return list;
+        }
+
+        // Hàm tìm kiếm đơn giản (giữ lại để tương thích nếu cần)
+        public List<GoiTap> FindGoiTap(string keyword)
+        {
+            return FindGoiTapAdvanced(keyword, null, null, null, null, null);
         }
 
         public string GenerateNewMaGoi()
         {
-            // Mã gói thường là 3 chữ cái + số, ví dụ BAS01. Logic này cần tùy chỉnh theo quy tắc của bạn.
-            // Ở đây làm đơn giản là GT + số
             string newMa = "GT001";
             try
             {
                 using (var conn = new SqliteConnection(_connectionString))
                 {
                     conn.Open();
-                    // Logic sinh mã đơn giản
                     string sql = "SELECT MaGoi FROM GoiTap ORDER BY length(MaGoi) DESC, MaGoi DESC LIMIT 1";
                     using (var cmd = new SqliteCommand(sql, conn))
                     {
                         var res = cmd.ExecuteScalar();
-                        // Cần logic custom nếu mã gói phức tạp (VD: BAS, VIP, STA).
-                        // Tạm thời trả về rỗng để người dùng tự nhập hoặc sinh mã GTxxx
-                        if (res != null)
-                        {
-                            // Logic sinh mã tăng dần ở đây nếu muốn
-                        }
                     }
                 }
             }
             catch { }
-            return ""; // Để trống cho người dùng nhập vì mã gói thường có chữ cái đại diện loại (VIP/BAS)
+            return ""; // Để trống
         }
 
         public bool CheckMaGoiExists(string maGoi)

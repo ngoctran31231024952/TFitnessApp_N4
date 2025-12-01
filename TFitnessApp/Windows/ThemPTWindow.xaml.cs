@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using TFitnessApp;
+using System.Text.RegularExpressions;
 
 namespace TFitnessApp.Windows
 {
@@ -34,7 +35,6 @@ namespace TFitnessApp.Windows
                 txtEmail.Text = pt.Email;
                 txtSDT.Text = pt.SDT;
 
-                // Chọn giới tính
                 foreach (System.Windows.Controls.ComboBoxItem item in cmbGioiTinh.Items)
                 {
                     if (item.Content.ToString() == pt.GioiTinh)
@@ -43,10 +43,7 @@ namespace TFitnessApp.Windows
                         break;
                     }
                 }
-
-                // Chọn chi nhánh
                 cmbChiNhanh.SelectedValue = pt.MaCN;
-
                 LoadExistingImage(pt.MaPT);
             }
             else
@@ -55,8 +52,19 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void LoadExistingImage(string maPT)
+        // --- VALIDATION HELPERS ---
+        private bool IsValidEmail(string email)
         {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+            try { return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase); }
+            catch { return false; }
+        }
+
+        private bool IsNumber(string text) { return Regex.IsMatch(text, @"^\d+$"); }
+        // --------------------------
+
+        private void LoadExistingImage(string maPT)
+        { /* Giữ nguyên code cũ load ảnh */
             try
             {
                 string[] extensions = { ".jpg", ".png", ".jpeg" };
@@ -96,19 +104,47 @@ namespace TFitnessApp.Windows
         {
             string maPT = txtMaPT.Text;
             string hoTen = txtHoTen.Text.Trim();
-            if (string.IsNullOrEmpty(hoTen)) { MessageBox.Show("Vui lòng nhập tên PT"); return; }
+            string email = txtEmail.Text.Trim();
+            string sdt = txtSDT.Text.Trim();
+
+            // --- VALIDATION ---
+            if (string.IsNullOrEmpty(hoTen))
+            {
+                MessageBox.Show("Vui lòng nhập họ tên PT!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtHoTen.Focus();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
+            {
+                MessageBox.Show("Email không đúng định dạng!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(sdt))
+            {
+                if (!IsNumber(sdt) || sdt.Length < 9 || sdt.Length > 11)
+                {
+                    MessageBox.Show("Số điện thoại không hợp lệ (phải là số, 9-11 ký tự)!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtSDT.Focus();
+                    return;
+                }
+            }
 
             if (!_isEditMode && _repository.CheckMaPTExists(maPT))
             {
-                MessageBox.Show("Mã PT đã tồn tại!"); return;
+                MessageBox.Show("Mã PT đã tồn tại! Vui lòng tải lại trang.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+            // ------------------
 
             PT pt = new PT
             {
                 MaPT = maPT,
                 HoTen = hoTen,
-                Email = txtEmail.Text.Trim(),
-                SDT = txtSDT.Text.Trim(),
+                Email = email,
+                SDT = sdt,
                 GioiTinh = (cmbGioiTinh.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content.ToString(),
                 MaCN = cmbChiNhanh.SelectedValue?.ToString()
             };
@@ -128,7 +164,7 @@ namespace TFitnessApp.Windows
                     }
                     catch { }
                 }
-                MessageBox.Show("Thành công!");
+                MessageBox.Show(_isEditMode ? "Cập nhật PT thành công!" : "Thêm PT thành công!", "Thông báo");
                 IsSuccess = true;
                 this.Close();
             }
