@@ -1,0 +1,106 @@
+﻿<Window x:Class="TFitnessApp.Windows.XemThongTinGoiTapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        Title="Thông tin gói tập" Height="500" Width="700"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" FontFamily="Lato">
+
+    <Window.Resources>
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#A01516"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#C71A1B" CornerRadius="10,10,0,0">
+                <Grid>
+                    <TextBlock Text="XEM GÓI TẬP" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" Style="{StaticResource CloseButtonStyle}" Click="BtnDong_Click">
+                        <fa:IconImage Icon="Times" Width="14" Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="40,30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="45,0,0,0">
+                    <TextBlock Text="Mã gói" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtMaGoi" Text="BAS01" Style="{StaticResource ValueStyle}"/>
+
+                    <TextBlock Text="Tên gói" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtTenGoi" Text="BASIC 1 THANG" Style="{StaticResource ValueStyle}"/>
+
+                    <TextBlock Text="Thời hạn (tháng)" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtThoiHan" Text="1" Style="{StaticResource ValueStyle}"/>
+
+                    <TextBlock Text="Giá" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtGia" Text="299,000" Style="{StaticResource ValueStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="0,0,45,0">
+                    <TextBlock Text="Số buổi PT" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtSoBuoiPT" Text="0" Style="{StaticResource ValueStyle}"/>
+
+                    <TextBlock Text="Dịch vụ đặc biệt" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtDichVu" Text="không" Style="{StaticResource ValueStyle}"/>
+
+                    <TextBlock Text="Trạng thái" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock x:Name="txtTrangThai" Text="Hoạt Động" Style="{StaticResource ValueStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Button Content="Đóng" Click="BtnDong_Click" Width="120" Height="40" Background="#C71A1B" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

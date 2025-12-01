@@ -1,28 +1,366 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Data.Sqlite;
+using System.Globalization;
+using TFitnessApp.Windows;
 
 namespace TFitnessApp
 {
-    /// <summary>
-    /// Interaction logic for GoiTapPage.xaml
-    /// </summary>
     public partial class GoiTapPage : Page
     {
+        private GoiTapRepository _repository;
+
+        // Biến phân trang
+        private List<GoiTap> _danhSachGoc = new List<GoiTap>();
+        private ObservableCollection<GoiTap> _danhSachHienThi = new ObservableCollection<GoiTap>();
+
+        private int _trangHienTai = 1;
+        private int _soBanGhiMoiTrang = 50;
+        private int _tongSoTrang = 1;
+        private int _tongSoBanGhi = 0;
+
         public GoiTapPage()
         {
             InitializeComponent();
+            _repository = new GoiTapRepository();
+
+            if (cboSoBanGhi != null && cboSoBanGhi.Items.Count > 2)
+                cboSoBanGhi.SelectedIndex = 2;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadData();
+        }
+
+        private void LoadData()
+        {
+            PerformSearch();
+        }
+
+        private void PerformSearch()
+        {
+            try
+            {
+                string keyword = txtSearch.Text.Trim();
+                _danhSachGoc = _repository.FindGoiTap(keyword);
+                _trangHienTai = 1;
+                HienThiDuLieuPhanTrang();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi tìm kiếm: {ex.Message}");
+            }
+        }
+
+        private void HienThiDuLieuPhanTrang()
+        {
+            if (_danhSachGoc == null) return;
+
+            _tongSoBanGhi = _danhSachGoc.Count;
+            _tongSoTrang = (int)Math.Ceiling((double)_tongSoBanGhi / _soBanGhiMoiTrang);
+            if (_tongSoTrang == 0) _tongSoTrang = 1;
+
+            if (_trangHienTai > _tongSoTrang) _trangHienTai = _tongSoTrang;
+            if (_trangHienTai < 1) _trangHienTai = 1;
+
+            var dataPage = _danhSachGoc
+                .Skip((_trangHienTai - 1) * _soBanGhiMoiTrang)
+                .Take(_soBanGhiMoiTrang)
+                .ToList();
+
+            _danhSachHienThi.Clear();
+            foreach (var item in dataPage)
+            {
+                _danhSachHienThi.Add(item);
+            }
+
+            if (GoiTapDataGrid != null)
+            {
+                GoiTapDataGrid.ItemsSource = _danhSachHienThi;
+            }
+
+            UpdatePaginationUI();
+        }
+
+        private void UpdatePaginationUI()
+        {
+            if (txtThongTinPhanTrang == null || btnTrangTruoc == null || btnTrangSau == null) return;
+
+            int start = (_tongSoBanGhi == 0) ? 0 : (_trangHienTai - 1) * _soBanGhiMoiTrang + 1;
+            int end = Math.Min(_trangHienTai * _soBanGhiMoiTrang, _tongSoBanGhi);
+
+            txtThongTinPhanTrang.Text = $"Hiển thị {start}-{end} của {_tongSoBanGhi} gói tập";
+
+            btnTrangTruoc.IsEnabled = _trangHienTai > 1;
+            btnTrangSau.IsEnabled = _trangHienTai < _tongSoTrang;
+        }
+
+        // --- EVENTS ---
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) { PerformSearch(); }
+
+        private void cboSoBanGhi_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cboSoBanGhi == null) return;
+            if (cboSoBanGhi.SelectedItem != null)
+            {
+                _soBanGhiMoiTrang = (int)cboSoBanGhi.SelectedItem;
+                _trangHienTai = 1;
+                HienThiDuLieuPhanTrang();
+            }
+        }
+
+        private void btnTrangTruoc_Click(object sender, RoutedEventArgs e) { if (_trangHienTai > 1) { _trangHienTai--; HienThiDuLieuPhanTrang(); } }
+        private void btnTrangSau_Click(object sender, RoutedEventArgs e) { if (_trangHienTai < _tongSoTrang) { _trangHienTai++; HienThiDuLieuPhanTrang(); } }
+
+        private void GoiTapDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
+
+        // --- ACTIONS ---
+
+        private void BtnThem_Click(object sender, RoutedEventArgs e)
+        {
+            ThemGoiTapWindow addWindow = new ThemGoiTapWindow();
+            addWindow.ShowDialog();
+            if (addWindow.IsSuccess) LoadData();
+        }
+
+        private void BtnXoa_Click(object sender, RoutedEventArgs e)
+        {
+            var itemsToDelete = _danhSachHienThi.Where(x => x.IsSelected).ToList();
+            if (itemsToDelete.Count == 0) { MessageBox.Show("Vui lòng chọn gói tập để xóa!", "Thông báo"); return; }
+
+            if (MessageBox.Show($"Xóa {itemsToDelete.Count} gói tập đã chọn?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                foreach (var item in itemsToDelete) _repository.DeleteGoiTap(item.MaGoi);
+                LoadData();
+                MessageBox.Show("Đã xóa thành công!", "Thông báo");
+            }
+        }
+
+        private void BtnFilter_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Chức năng lọc Gói tập đang phát triển", "Thông báo");
+        }
+
+        // --- Row Actions ---
+
+        private void BtnXem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is GoiTap gt)
+            {
+                XemThongTinGoiTapWindow viewWindow = new XemThongTinGoiTapWindow(gt);
+                viewWindow.ShowDialog();
+            }
+        }
+
+        private void BtnSua_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is GoiTap gt)
+            {
+                ThemGoiTapWindow editWindow = new ThemGoiTapWindow(gt);
+                editWindow.ShowDialog();
+                if (editWindow.IsSuccess) LoadData();
+            }
+        }
+
+        private void BtnXoaRow_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is GoiTap gt)
+            {
+                if (MessageBox.Show($"Xóa gói tập: {gt.TenGoi}?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    _repository.DeleteGoiTap(gt.MaGoi);
+                    LoadData();
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // 1. MODEL GOI TAP
+    // ==========================================
+    public class GoiTap
+    {
+        public string MaGoi { get; set; }
+        public string TenGoi { get; set; }
+        public int ThoiHan { get; set; }
+        public double GiaNiemYet { get; set; }
+        public int SoBuoiPT { get; set; }
+        public string DichVuDacBiet { get; set; } // Có/Không
+        public string TrangThai { get; set; } // Hoạt Động/Ngừng Bán
+        public bool IsSelected { get; set; }
+
+        public string GiaNiemYetFormatted => GiaNiemYet.ToString("N0", CultureInfo.InvariantCulture);
+    }
+
+    // ==========================================
+    // 2. REPOSITORY GOI TAP
+    // ==========================================
+    public class GoiTapRepository
+    {
+        private readonly string _connectionString;
+
+        public GoiTapRepository()
+        {
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
+            if (!File.Exists(dbPath))
+            {
+                dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
+            }
+            _connectionString = $"Data Source={dbPath};";
+        }
+
+        public List<GoiTap> FindGoiTap(string keyword)
+        {
+            List<GoiTap> list = new List<GoiTap>();
+            string sql = @"SELECT * FROM GoiTap WHERE (MaGoi LIKE @k OR TenGoi LIKE @k)";
+
+            try
+            {
+                using (var conn = new SqliteConnection(_connectionString))
+                {
+                    conn.Open();
+                    using (var cmd = new SqliteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@k", $"%{keyword}%");
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                list.Add(new GoiTap
+                                {
+                                    MaGoi = reader["MaGoi"].ToString(),
+                                    TenGoi = reader["TenGoi"].ToString(),
+                                    ThoiHan = Convert.ToInt32(reader["ThoiHan"]),
+                                    GiaNiemYet = Convert.ToDouble(reader["GiaNiemYet"]),
+                                    SoBuoiPT = Convert.ToInt32(reader["SoBuoiPT"]),
+                                    DichVuDacBiet = reader["DichVuDacBiet"].ToString(),
+                                    TrangThai = reader["TrangThai"].ToString(),
+                                    IsSelected = false
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Lỗi tải Gói tập: " + ex.Message); }
+            return list;
+        }
+
+        public string GenerateNewMaGoi()
+        {
+            // Mã gói thường là 3 chữ cái + số, ví dụ BAS01. Logic này cần tùy chỉnh theo quy tắc của bạn.
+            // Ở đây làm đơn giản là GT + số
+            string newMa = "GT001";
+            try
+            {
+                using (var conn = new SqliteConnection(_connectionString))
+                {
+                    conn.Open();
+                    // Logic sinh mã đơn giản
+                    string sql = "SELECT MaGoi FROM GoiTap ORDER BY length(MaGoi) DESC, MaGoi DESC LIMIT 1";
+                    using (var cmd = new SqliteCommand(sql, conn))
+                    {
+                        var res = cmd.ExecuteScalar();
+                        // Cần logic custom nếu mã gói phức tạp (VD: BAS, VIP, STA).
+                        // Tạm thời trả về rỗng để người dùng tự nhập hoặc sinh mã GTxxx
+                        if (res != null)
+                        {
+                            // Logic sinh mã tăng dần ở đây nếu muốn
+                        }
+                    }
+                }
+            }
+            catch { }
+            return ""; // Để trống cho người dùng nhập vì mã gói thường có chữ cái đại diện loại (VIP/BAS)
+        }
+
+        public bool CheckMaGoiExists(string maGoi)
+        {
+            using (var conn = new SqliteConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT COUNT(*) FROM GoiTap WHERE MaGoi = @id";
+                using (var cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", maGoi);
+                    return (long)cmd.ExecuteScalar() > 0;
+                }
+            }
+        }
+
+        public bool AddGoiTap(GoiTap gt)
+        {
+            try
+            {
+                using (var conn = new SqliteConnection(_connectionString))
+                {
+                    conn.Open();
+                    string sql = @"INSERT INTO GoiTap (MaGoi, TenGoi, ThoiHan, GiaNiemYet, SoBuoiPT, DichVuDacBiet, TrangThai) 
+                                   VALUES (@MaGoi, @TenGoi, @ThoiHan, @Gia, @SoBuoi, @DV, @TrangThai)";
+                    using (var cmd = new SqliteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGoi", gt.MaGoi);
+                        cmd.Parameters.AddWithValue("@TenGoi", gt.TenGoi);
+                        cmd.Parameters.AddWithValue("@ThoiHan", gt.ThoiHan);
+                        cmd.Parameters.AddWithValue("@Gia", gt.GiaNiemYet);
+                        cmd.Parameters.AddWithValue("@SoBuoi", gt.SoBuoiPT);
+                        cmd.Parameters.AddWithValue("@DV", gt.DichVuDacBiet);
+                        cmd.Parameters.AddWithValue("@TrangThai", gt.TrangThai);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Lỗi thêm: " + ex.Message); return false; }
+        }
+
+        public bool UpdateGoiTap(GoiTap gt)
+        {
+            try
+            {
+                using (var conn = new SqliteConnection(_connectionString))
+                {
+                    conn.Open();
+                    string sql = @"UPDATE GoiTap SET TenGoi=@TenGoi, ThoiHan=@ThoiHan, GiaNiemYet=@Gia, SoBuoiPT=@SoBuoi, DichVuDacBiet=@DV, TrangThai=@TrangThai 
+                                   WHERE MaGoi=@MaGoi";
+                    using (var cmd = new SqliteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGoi", gt.MaGoi);
+                        cmd.Parameters.AddWithValue("@TenGoi", gt.TenGoi);
+                        cmd.Parameters.AddWithValue("@ThoiHan", gt.ThoiHan);
+                        cmd.Parameters.AddWithValue("@Gia", gt.GiaNiemYet);
+                        cmd.Parameters.AddWithValue("@SoBuoi", gt.SoBuoiPT);
+                        cmd.Parameters.AddWithValue("@DV", gt.DichVuDacBiet);
+                        cmd.Parameters.AddWithValue("@TrangThai", gt.TrangThai);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Lỗi cập nhật: " + ex.Message); return false; }
+        }
+
+        public bool DeleteGoiTap(string maGoi)
+        {
+            try
+            {
+                using (var conn = new SqliteConnection(_connectionString))
+                {
+                    conn.Open();
+                    string sql = "DELETE FROM GoiTap WHERE MaGoi = @id";
+                    using (var cmd = new SqliteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", maGoi);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Lỗi xóa: " + ex.Message); return false; }
         }
     }
 }
