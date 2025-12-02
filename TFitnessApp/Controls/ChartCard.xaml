@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="TFitnessApp.ChartCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TFitnessApp"
+             x:Name="Root">
+
+    <Border Background="White" CornerRadius="8" Margin="5" Padding="10">
+        <Border.Effect>
+            <DropShadowEffect Color="#DDD" Direction="270" ShadowDepth="3" BlurRadius="10" Opacity="0.5"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <local:DashboardFilter Grid.Row="0" Margin="0,0,0,10"
+                HienNutIn="{Binding HienNutIn, ElementName=Root}"
+                HienChonLoaiBD="{Binding HienChonLoaiBD, ElementName=Root}"
+                HienChonChiNhanh="{Binding HienChonChiNhanh, ElementName=Root}"
+                HienBoLocNgay="{Binding HienBoLocNgay, ElementName=Root}"
+                
+                BranchSource="{Binding DataContext.ListTenChiNhanh, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                
+                SelectedBranch="{Binding DataContext.FilterChiNhanh, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                SelectedChartType="{Binding DataContext.FilterLoaiBieuDo, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                FilterFromDate="{Binding DataContext.FilterTuNgay, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                FilterToDate="{Binding DataContext.FilterDenNgay, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"/>
+
+            <TextBlock Grid.Row="1" 
+                       Text="{Binding TieuDe, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       FontSize="16" FontWeight="Bold" Foreground="#333"
+                       HorizontalAlignment="Left" Margin="5,0,0,10"/>
+
+            <ContentPresenter Grid.Row="2" Content="{Binding NoiDungTrong, ElementName=Root}"/>
+
+        </Grid>
+    </Border>
+</UserControl>

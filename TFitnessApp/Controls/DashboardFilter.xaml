@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="TFitnessApp.DashboardFilter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TFitnessApp"
+             x:Name="Goc">
+
+    <Grid Margin="0,0,0,10">
+        <DockPanel LastChildFill="False">
+
+            <Border DockPanel.Dock="Left" Background="White" BorderThickness="1" CornerRadius="4" Margin="0,2,10,0"
+                    Visibility="{Binding HienChonChiNhanh, ElementName=Goc, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+                <ComboBox Width="120" Height="35" Style="{StaticResource CleanComboBox}"
+                          ItemsSource="{Binding BranchSource, ElementName=Goc}"
+                          SelectedValue="{Binding SelectedBranch, ElementName=Goc, Mode=TwoWay}"
+                          SelectedIndex="0"/>
+            </Border>
+
+            <Border DockPanel.Dock="Left" Background="White" BorderThickness="1" CornerRadius="4" Margin="0,2,10,0"
+                    Visibility="{Binding HienChonLoaiBD, ElementName=Goc, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+                <ComboBox Width="130" Height="35" Style="{StaticResource CleanComboBox}"
+                          SelectedIndex="{Binding SelectedChartType, ElementName=Goc, Mode=TwoWay}">
+                    <ComboBoxItem Content="Biểu đồ cột"/>
+                    <ComboBoxItem Content="Biểu đồ đường"/>
+                </ComboBox>
+            </Border>
+
+            <Border DockPanel.Dock="Left" Background="White" BorderThickness="1" CornerRadius="4" Margin="0,2,0,0"
+                    Visibility="{Binding HienBoLocNgay, ElementName=Goc, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+                <local:DateRangeFilter 
+                    TuNgay="{Binding FilterFromDate, ElementName=Goc, Mode=TwoWay}"
+                    DenNgay="{Binding FilterToDate, ElementName=Goc, Mode=TwoWay}"/>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Width="35" Height="35" Margin="0,0,10,0" Background="#e74c3c" BorderThickness="0"
+                        Visibility="{Binding HienNutIn, ElementName=Goc, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                    <TextBlock Text="🖨" Foreground="White" FontSize="16"/>
+                </Button>
+            </StackPanel>
+
+        </DockPanel>
+    </Grid>
+</UserControl>

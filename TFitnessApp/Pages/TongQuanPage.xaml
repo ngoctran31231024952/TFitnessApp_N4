@@ -278,7 +278,7 @@
                         <Grid x:Name="ColumnChartContainer">
                             <lvc:CartesianChart x:Name="ChartDoanhThu" Series="{Binding ChartSeries}" LegendLocation="None"
                                                 DataHover="Chart_DataHover" Hoverable="True" MouseLeave="Chart_MouseLeave"
-                                                DataTooltip="{x:Null}">
+                                                DataTooltip="{x:Null}" Loaded="ChartDoanhThu_Loaded">
                                 <lvc:CartesianChart.AxisX>
                                     <lvc:Axis Labels="{Binding ChartLabels}" FontSize="15" Foreground="Black" FontWeight="Regular">
                                         <lvc:Axis.Separator>
