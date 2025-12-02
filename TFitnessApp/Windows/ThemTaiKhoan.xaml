@@ -15,8 +15,9 @@
         WindowStyle="None"
         Background="Transparent">
 
+    <!-- KHỐI ĐỊNH NGHĨA TÀI NGUYÊN (WINDOW.RESOURCES) -->
     <Window.Resources>
-        <!-- Style cho RoundButtonControlTemplate (Màu đỏ chủ đề) -->
+        <!-- Style cho RoundButtonControlTemplate (Nút bo góc, màu chủ đề) -->
         <Style x:Key="RoundButtonControlTemplate" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -32,6 +33,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <!-- Trigger hiệu ứng khi di chuột qua -->
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#A51617"/>
@@ -39,7 +41,7 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style cho Nút Đóng (X) trên Header màu đỏ -->
+        <!-- Style cho Nút Đóng Window (Dùng trên Header) -->
         <Style x:Key="CloseWindowButtonStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -47,6 +49,7 @@
                         <Border Background="Transparent">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <!-- Trigger đổi màu nền khi di chuột qua -->
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#A51617"/>
@@ -69,7 +72,7 @@
             <sys:String>Bị Khóa</sys:String>
         </x:Array>
 
-        <!-- Style cho Label Field -->
+        <!-- Style chung cho TextBlock Label -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -77,7 +80,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-        <!-- Style cho Input TextBox -->
+        <!-- Style chung cho Input TextBox -->
         <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
             <Setter Property="Width" Value="300"/>
             <Setter Property="Height" Value="30"/>
@@ -88,7 +91,7 @@
             <Setter Property="Background" Value="White"/>
         </Style>
 
-        <!-- Style cho ComboBox -->
+        <!-- Style chung cho ComboBox Input -->
         <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Width" Value="300"/>
             <Setter Property="Height" Value="30"/>
@@ -101,34 +104,39 @@
 
     </Window.Resources>
 
+    <!-- KHUNG CHÍNH CỦA WINDOW (BORDER VÀ GRID CHÍNH) -->
     <Border CornerRadius="10" Background="White" BorderBrush="#C71A1B" BorderThickness="1">
         <Grid>
+            <!-- Định nghĩa 3 dòng: Header, Nội dung, Footer -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- HEADER -->
+            <!-- KHU VỰC HEADER (Grid.Row="0") -->
             <Grid Grid.Row="0" Background="#C71A1B" Height="50" MouseDown="Header_MouseDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Text Tiêu đề của Window -->
                 <TextBlock Grid.Column="0" Text="Thêm Tài khoản mới" 
                            Foreground="White" FontWeight="Bold" FontSize="18"
                            VerticalAlignment="Center" Margin="20,0,0,0"/>
 
+                <!-- Nút Đóng (Icon Xmark) -->
                 <Button x:Name="btnClose" Grid.Column="1" Click="btnClose_Click" Background="Transparent" BorderThickness="0" 
                         Width="50" Cursor="Hand" Style="{DynamicResource CloseWindowButtonStyle}">
                     <fa:IconImage Icon="Xmark" Width="16" Height="16" Foreground="White"/>
                 </Button>
             </Grid>
 
-            <!-- NỘI DUNG FORM -->
+            <!-- KHU VỰC NỘI DUNG FORM (Grid.Row="1") - Dùng ScrollViewer cho phép cuộn -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30">
                 <Grid>
+                    <!-- Định nghĩa các dòng cho từng cặp trường nhập liệu -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -136,40 +144,41 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
+                    <!-- Định nghĩa 2 cột cho các trường nằm song song -->
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- DÒNG 1: Họ tên -->
+                    <!-- DÒNG 1: Trường Họ tên -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Họ tên:" Style="{StaticResource LabelStyle}"/>
                         <TextBox x:Name="txtHoTen" Text="{Binding HoTen, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- DÒNG 1: Tên đăng nhập -->
+                    <!-- DÒNG 1: Trường Tên đăng nhập -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Tên đăng nhập:" Style="{StaticResource LabelStyle}"/>
                         <TextBox x:Name="txtTenDangNhap" Text="{Binding TenDangNhap, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- DÒNG 2: Email -->
+                    <!-- DÒNG 2: Trường Email -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Email:" Style="{StaticResource LabelStyle}"/>
                         <TextBox x:Name="txtEmail" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- DÒNG 2: Số điện thoại -->
+                    <!-- DÒNG 2: Trường Số điện thoại -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Số điện thoại:" Style="{StaticResource LabelStyle}"/>
                         <TextBox x:Name="txtSoDienThoai" Text="{Binding SDT, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- DÒNG 3: Phân quyền -->
+                    <!-- DÒNG 3: Trường Phân quyền (ComboBox) -->
                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Phân quyền:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox x:Name="cboPhanQuyen" 
@@ -178,7 +187,7 @@
                                   Style="{StaticResource InputComboBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- DÒNG 3: Trạng thái -->
+                    <!-- DÒNG 3: Trường Trạng thái (ComboBox) -->
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox x:Name="cboTrangThai" 
@@ -190,8 +199,9 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- FOOTER -->
+            <!-- KHU VỰC FOOTER (Grid.Row="2") - Chứa nút hành động chính -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,10,0,20">
+                <!-- Nút Tạo Tài khoản (Kích hoạt sự kiện TaoTaiKhoanButton_Click) -->
                 <Button x:Name="btnTao" Click="TaoTaiKhoanButton_Click" 
                         Style="{DynamicResource RoundButtonControlTemplate}" 
                         Padding="30,10" FontWeight="Bold">
