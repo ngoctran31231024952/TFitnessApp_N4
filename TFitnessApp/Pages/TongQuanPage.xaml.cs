@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +10,7 @@ using System.Windows.Navigation;
 using LiveCharts;
 using LiveCharts.Wpf;
 using Microsoft.Data.Sqlite;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Pages
 {
@@ -63,8 +63,7 @@ namespace TFitnessApp.Pages
 
     public partial class TongQuanPage : Page, System.ComponentModel.INotifyPropertyChanged
     {
-        private readonly string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-        private readonly DateTime currentToday = new DateTime(2025, 11, 14);
+        private readonly DateTime currentToday = new DateTime(2025, 11, 14); // Giữ nguyên ngày giả lập của bạn
         private readonly string[] dateFormats = { "d/M/yyyy", "dd/MM/yyyy", "d/MM/yyyy", "dd/M/yyyy", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd" };
 
         public SeriesCollection ChartSeries { get; set; }
@@ -159,9 +158,8 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
                     var cmd = new SqliteCommand("SELECT MaCN, TenCN FROM ChiNhanh", connection);
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -195,10 +193,8 @@ namespace TFitnessApp.Pages
                 var data = new DashboardKpi();
                 string todayStr = currentToday.ToString("dd/MM/yyyy");
 
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
-
                     // 1. Doanh thu
                     string sqlRevenue = "SELECT SUM(CAST(DaThanhToan AS REAL)) FROM GiaoDich WHERE NgayGD = @today";
                     if (!string.IsNullOrEmpty(maCN))
@@ -287,9 +283,8 @@ namespace TFitnessApp.Pages
 
             var rawData = new List<ChartDataPoint>();
 
-            using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+            using (var connection = DbAccess.CreateConnection())
             {
-                connection.Open();
                 string sql = string.IsNullOrEmpty(maCN)
                     ? @"SELECT NgayGD, CAST(DaThanhToan AS REAL) as Tien FROM GiaoDich"
                     : @"SELECT GD.NgayGD, CAST(GD.DaThanhToan AS REAL) as Tien FROM GiaoDich GD 
@@ -315,7 +310,6 @@ namespace TFitnessApp.Pages
                 }
             }
 
-          
             var chartValues = new ChartValues<double>();
             var labels = new List<string>();
             decimal totalRevenue = 0;
@@ -342,7 +336,6 @@ namespace TFitnessApp.Pages
                 }
             }
 
-        
             double colWidth = labels.Count > 12 ? 30 : 60;
             double colPadding = labels.Count > 12 ? 6 : 2;
             if (ChartDoanhThu.AxisX.Count > 0) ChartDoanhThu.AxisX[0].LabelsRotation = labels.Count > 12 ? 35 : 0;
@@ -370,7 +363,6 @@ namespace TFitnessApp.Pages
             PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs("ChartLabels"));
         }
 
-      
         private void LoadPieChartData()
         {
             string timeMode = (cboChartThoiGian.SelectedItem as ComboBoxItem)?.Tag.ToString();
@@ -380,9 +372,8 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
                     string sql = @"SELECT CN.TenCN, CAST(GD.DaThanhToan AS REAL) as Tien, GD.NgayGD
                                    FROM GiaoDich GD
                                    JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
@@ -456,9 +447,8 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
                     string filterCN = string.IsNullOrEmpty(maCN) ? "" : " AND HD.MaCN = @maCN ";
                     string sql = $@"SELECT DD.ThoiGianVao FROM DiemDanh DD
                                     LEFT JOIN HopDong HD ON DD.MaHV = HD.MaHV
@@ -535,9 +525,8 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
                     string filterCN = string.IsNullOrEmpty(maCN) ? "" : " AND HD.MaCN = @maCN ";
                     string sql = $@"SELECT DD.MaHV, HV.HoTen, GT.TenGoi, DD.ThoiGianVao, DD.ThoiGianRa, DD.NgayDD
                                     FROM DiemDanh DD
@@ -596,9 +585,9 @@ namespace TFitnessApp.Pages
             try
             {
                 var rawDataList = new List<string>();
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
                     string sqlTop = @"SELECT GT.TenGoi, HD.NgayBatDau FROM HopDong HD JOIN GoiTap GT ON HD.MaGoi = GT.MaGoi";
 
                     using (var cmd = new SqliteCommand(sqlTop, connection))
@@ -652,10 +641,8 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                using (var connection = DbAccess.CreateConnection())
                 {
-                    connection.Open();
-
                     string sql = @"
                         SELECT T.HoTen, T.MaTK, 'vừa đăng nhập hệ thống' AS NoiDung, L.ThoiGian
                         FROM LichSuDangNhap L
@@ -726,7 +713,6 @@ namespace TFitnessApp.Pages
 
             if (ListHoatDong != null) ListHoatDong.ItemsSource = displayList;
         }
-
 
         private void DashboardCard_Click(object sender, MouseButtonEventArgs e)
         {

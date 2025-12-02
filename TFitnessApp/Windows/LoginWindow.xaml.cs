@@ -4,15 +4,20 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Data.Sqlite;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
     public partial class LoginWindow : Window
     {
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         public LoginWindow()
         {
             InitializeComponent();
             try { SQLitePCL.Batteries_V2.Init(); } catch { }
+            _dbAccess = new DbAccess();
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             txtUsername.Focus();
         }
@@ -52,7 +57,7 @@ namespace TFitnessApp.Windows
  
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
-            using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
+            using (SqliteConnection connection = DbAccess.CreateConnection())
             {
                 connection.Open();
 
