@@ -6,12 +6,16 @@ using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using TFitnessApp;
 using System.Windows.Controls;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
+    // Lớp Window2 dùng để xem và chỉnh sửa chi tiết giao dịch
     public partial class Window2 : Window, INotifyPropertyChanged
     {
-        private string _chuoiKetNoi;
+        #region Trường Dữ liệu Nội bộ
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         private string _maGD;
         private string _maHV;
         private string _hoTenHocVien;
@@ -28,7 +32,9 @@ namespace TFitnessApp.Windows
 
         // Biến để kiểm tra xem có đang trong chế độ chỉnh sửa không
         private bool _isEditMode = false;
+        #endregion
 
+        #region Thuộc tính Binding (Public Properties)
         public string MaGD
         {
             get => _maGD;
@@ -80,6 +86,7 @@ namespace TFitnessApp.Windows
         public decimal DaThanhToan
         {
             get => _daThanhToan;
+            // Tính lại số tiền nợ mỗi khi DaThanhToan thay đổi
             set { _daThanhToan = value; OnPropertyChanged(nameof(DaThanhToan)); TinhSoTienNo(); }
         }
 
@@ -112,44 +119,34 @@ namespace TFitnessApp.Windows
             get => _isEditMode;
             set { _isEditMode = value; OnPropertyChanged(nameof(IsEditMode)); }
         }
+        #endregion
 
-        // Constructor nhận đối tượng MoDonDuLieuGiaoDich đầy đủ
+        #region Khởi tạo và Tải dữ liệu
+        // Constructor nhận đối tượng MoDonDuLieuGiaoDich (từ DataGrid)
         public Window2(MoDonDuLieuGiaoDich transaction)
         {
             InitializeComponent();
 
-            // Khởi tạo chuỗi kết nối
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            _chuoiKetNoi = $"Data Source={duongDanDB};";
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
 
-            // Gán dữ liệu trực tiếp từ transaction
+            // Gán dữ liệu cơ bản từ transaction (từ DataGrid)
             GanDuLieuTuTransaction(transaction);
 
-            // Tải thông tin bổ sung từ database
+            // Tải thông tin bổ sung (PhuongThuc, HoTenNhanVien) từ database
             TaiThongTinBoSung();
 
-            // Khởi tạo chế độ xem
+            // Khởi tạo chế độ xem (mặc định là chế độ chỉ đọc)
             SetEditMode(false);
         }
 
-        // Constructor nhận mã giao dịch (nếu cần)
-        public Window2(string maGD)
-        {
-            InitializeComponent();
-
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            _chuoiKetNoi = $"Data Source={duongDanDB};";
-
-            this.DataContext = this;
-            TaiThongTinGiaoDich(maGD);
-            SetEditMode(false);
-        }
-
+        // Gán các trường dữ liệu từ đối tượng MoDonDuLieuGiaoDich
         private void GanDuLieuTuTransaction(MoDonDuLieuGiaoDich transaction)
         {
-            // Gán tất cả dữ liệu có sẵn từ transaction
             MaGD = transaction.MaGD;
             MaHV = transaction.MaHV;
             HoTenHocVien = transaction.HoTen;
@@ -163,15 +160,16 @@ namespace TFitnessApp.Windows
             NgayGD = transaction.NgayGD;
         }
 
+        // Tải thông tin bổ sung (PhuongThuc, HoTenNhanVien) từ database
         private void TaiThongTinBoSung()
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
 
-                    // Chỉ lấy thông tin Phương thức và Họ tên nhân viên từ database
+                    // Query lấy Phương thức thanh toán và Họ tên nhân viên
                     string query = @"
                         SELECT 
                             gd.PhuongThuc,
@@ -180,7 +178,7 @@ namespace TFitnessApp.Windows
                         LEFT JOIN TaiKhoan tk ON gd.MaTK = tk.MaTK
                         WHERE gd.MaGD = @MaGD";
 
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaGD", MaGD);
 
@@ -188,8 +186,9 @@ namespace TFitnessApp.Windows
                         {
                             if (reader.Read())
                             {
-                                PhuongThuc = reader["PhuongThuc"].ToString();
-                                HoTenNhanVien = reader["HoTenNhanVien"].ToString();
+                                // Gán dữ liệu (xử lý DBNull)
+                                PhuongThuc = reader["PhuongThuc"] != DBNull.Value ? reader["PhuongThuc"].ToString() : "";
+                                HoTenNhanVien = reader["HoTenNhanVien"] != DBNull.Value ? reader["HoTenNhanVien"].ToString() : "";
                             }
                         }
                     }
@@ -200,61 +199,16 @@ namespace TFitnessApp.Windows
                 MessageBox.Show($"Lỗi khi tải thông tin bổ sung: {ex.Message}");
             }
         }
+        #endregion
 
-        private void TaiThongTinGiaoDich(string maGD)
-        {
-            try
-            {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
-                {
-                    connection.Open();
-
-                    // Lấy thông tin giao dịch đầy đủ
-                    string query = @"
-                        SELECT gd.*, hv.HoTen as HoTenHocVien, gt.TenGoi as TenGoiTap, tk.HoTen as HoTenNhanVien
-                        FROM GiaoDich gd
-                        LEFT JOIN HocVien hv ON gd.MaHV = hv.MaHV
-                        LEFT JOIN GoiTap gt ON gd.MaGoi = gt.MaGoi
-                        LEFT JOIN TaiKhoan tk ON gd.MaTK = tk.MaTK
-                        WHERE gd.MaGD = @MaGD";
-
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@MaGD", maGD);
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                MaGD = reader["MaGD"].ToString();
-                                MaHV = reader["MaHV"].ToString();
-                                HoTenHocVien = reader["HoTenHocVien"].ToString();
-                                MaGoi = reader["MaGoi"].ToString();
-                                TenGoiTap = reader["TenGoiTap"].ToString();
-                                MaTK = reader["MaTK"].ToString();
-                                HoTenNhanVien = reader["HoTenNhanVien"].ToString();
-                                TongTien = Convert.ToDecimal(reader["TongTien"]);
-                                DaThanhToan = Convert.ToDecimal(reader["DaThanhToan"]);
-                                SoTienNo = Convert.ToDecimal(reader["SoTienNo"]);
-                                PhuongThuc = reader["PhuongThuc"].ToString();
-                                TrangThai = reader["TrangThai"].ToString();
-                                NgayGD = Convert.ToDateTime(reader["NgayGD"]);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tải thông tin giao dịch: {ex.Message}");
-            }
-        }
-
+        #region Xử lý Logic và UI
+        // Tính toán lại số tiền nợ
         private void TinhSoTienNo()
         {
             SoTienNo = TongTien - DaThanhToan;
         }
 
+        // Thiết lập chế độ chỉnh sửa cho các control
         private void SetEditMode(bool isEdit)
         {
             IsEditMode = isEdit;
@@ -269,7 +223,7 @@ namespace TFitnessApp.Windows
             if (txtDaThanhToan != null)
                 txtDaThanhToan.IsEnabled = isEdit;
 
-            // Cập nhật nút
+            // Cập nhật nút "Sửa" thành "Lưu" hoặc ngược lại
             if (btnSua != null)
             {
                 var stackPanel = btnSua.Content as StackPanel;
@@ -282,11 +236,13 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Đóng cửa sổ
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        // Sự kiện khi nhấn nút "Sửa" / "Lưu"
         private void btnSua_Click(object sender, RoutedEventArgs e)
         {
             if (!IsEditMode)
@@ -296,7 +252,7 @@ namespace TFitnessApp.Windows
             }
             else
             {
-                // Lưu thay đổi
+                // Lưu thay đổi (Cập nhật Database)
                 try
                 {
                     // Validate dữ liệu
@@ -322,16 +278,17 @@ namespace TFitnessApp.Windows
                     // Tính toán số tiền nợ
                     TinhSoTienNo();
 
-                    using (var connection = new SqliteConnection(_chuoiKetNoi))
+                    using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
-                        connection.Open();
+                        conn.Open();
                         string query = @"
                             UPDATE GiaoDich 
                             SET NgayGD = @NgayGD, TrangThai = @TrangThai, DaThanhToan = @DaThanhToan, SoTienNo = @SoTienNo
                             WHERE MaGD = @MaGD";
 
-                        using (var command = new SqliteCommand(query, connection))
+                        using (var command = new SqliteCommand(query, conn))
                         {
+                            // Lưu ngày giao dịch với định dạng yyyy-MM-dd
                             command.Parameters.AddWithValue("@NgayGD", NgayGD.ToString("yyyy-MM-dd"));
                             command.Parameters.AddWithValue("@TrangThai", TrangThai);
                             command.Parameters.AddWithValue("@DaThanhToan", DaThanhToan);
@@ -358,21 +315,23 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Sự kiện khi nhấn nút "Xóa"
         private void btnXoa_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa giao dịch {MaGD} không?", "Xác nhận xóa",
-                                       MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
+                // Thực hiện xóa giao dịch khỏi Database
                 try
                 {
-                    using (var connection = new SqliteConnection(_chuoiKetNoi))
+                    using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
-                        connection.Open();
+                        conn.Open();
                         string query = "DELETE FROM GiaoDich WHERE MaGD = @MaGD";
 
-                        using (var command = new SqliteCommand(query, connection))
+                        using (var command = new SqliteCommand(query, conn))
                         {
                             command.Parameters.AddWithValue("@MaGD", MaGD);
                             int rowsAffected = command.ExecuteNonQuery();
@@ -396,6 +355,7 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Sự kiện khi nhấn nút "Xuất" hóa đơn
         private void btnXuat_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -424,6 +384,7 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Phương thức tạo nội dung hóa đơn (text)
         private string TaoNoiDungHoaDon()
         {
             return $@"HÓA ĐƠN THANH TOÁN TFITNESS
@@ -456,19 +417,15 @@ Cảm ơn quý khách đã sử dụng dịch vụ!
 TFitness - Nâng tầm thể chất";
         }
 
-        // Sự kiện khi giá trị đã thanh toán thay đổi
-        private void txtDaThanhToan_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (IsEditMode && decimal.TryParse(txtDaThanhToan.Text, out decimal daThanhToanMoi))
-            {
-                SoTienNo = TongTien - daThanhToanMoi;
-            }
-        }
+        #endregion
 
+        #region Triển khai INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
+        // Phương thức gọi sự kiện PropertyChanged khi giá trị thuộc tính thay đổi
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
     }
 }

@@ -14,12 +14,16 @@ using System.Windows.Data;
 using System.Diagnostics;
 using System.Windows.Controls.Primitives;
 using TFitnessApp.Windows;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
     public partial class TaiKhoanPage : Page
     {
-        private string chuoiKetNoi;
+        #region Khai báo biến
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
+
         private List<MoDonDuLieuTaiKhoan> tatCaTaiKhoan = new List<MoDonDuLieuTaiKhoan>();
         private List<MoDonDuLieuTaiKhoan> danhSachGoc = new List<MoDonDuLieuTaiKhoan>();
         private ObservableCollection<MoDonDuLieuTaiKhoan> taiKhoanHienThi = new ObservableCollection<MoDonDuLieuTaiKhoan>();
@@ -33,19 +37,17 @@ namespace TFitnessApp
         private string _tuKhoaTimKiem = "";
         private bool _isInitialLoadComplete = false;
 
+        #endregion
+
+        #region Constructor và Khởi tạo
+        // Khởi tạo trang Tài khoản
         public TaiKhoanPage()
         {
             InitializeComponent();
-
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            chuoiKetNoi = $"Data Source={duongDanDB};";
-
-            if (!File.Exists(duongDanDB))
-            {
-                MessageBox.Show($"Không tìm thấy cơ sở dữ liệu tại:\n{duongDanDB}",
-                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             if (SearchTextBox != null)
             {
@@ -58,7 +60,7 @@ namespace TFitnessApp
             TaiDanhSachTaiKhoan();
         }
 
-        #region Khởi tạo phân trang
+        // Khởi tạo combobox chọn số bản ghi hiển thị mỗi trang
         private void KhoiTaoComboBoxSoBanGhi()
         {
             if (cboSoBanGhiMoiTrang != null)
@@ -67,7 +69,10 @@ namespace TFitnessApp
                 cboSoBanGhiMoiTrang.SelectedItem = _soBanGhiMoiTrang;
             }
         }
+        #endregion
 
+        #region Quản lý Phân trang
+        // Cập nhật các thông số phân trang (tổng số bản ghi, tổng số trang)
         private void CapNhatPhanTrang()
         {
             _tongSoBanGhi = tatCaTaiKhoan.Count;
@@ -81,6 +86,7 @@ namespace TFitnessApp
             CapNhatGiaoDienPhanTrang();
         }
 
+        // Cập nhật giao diện các nút và thông tin phân trang
         private void CapNhatGiaoDienPhanTrang()
         {
             if (txtThongTinPhanTrang != null)
@@ -110,6 +116,7 @@ namespace TFitnessApp
             if (txtChuyenTrang != null) txtChuyenTrang.Text = _trangHienTai.ToString();
         }
 
+        // Hiển thị dữ liệu cho trang hiện tại sau khi tính toán phân trang
         private void HienThiDuLieuPhanTrang()
         {
             if (dgTaiKhoan == null || taiKhoanHienThi == null) return;
@@ -143,7 +150,8 @@ namespace TFitnessApp
         }
         #endregion
 
-        #region Database Functions
+        #region Xử lý database
+        // Tải danh sách tài khoản từ database SQLite
         private void TaiDanhSachTaiKhoan()
         {
             try
@@ -155,25 +163,22 @@ namespace TFitnessApp
                 taiKhoanHienThi.Clear();
                 danhSachGoc.Clear();
 
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
 
-                    // Kiểm tra và cập nhật cấu trúc bảng nếu cần
-                    KiemTraVaCapNhatCauTrucBang(conn);
-
                     string sql = @"SELECT 
-                                 MaTK,
-                                 HoTen,
-                                 PhanQuyen,
-                                 TenDangNhap,
-                                 MatKhau,
-                                 NgayTao,
-                                 TrangThai,
-                                 Email,
-                                 SoDienThoai
-                                 FROM TaiKhoan
-                                 ORDER BY NgayTao DESC";
+                                     MaTK,
+                                     HoTen,
+                                     PhanQuyen,
+                                     TenDangNhap,
+                                     MatKhau,
+                                     NgayTao,
+                                     TrangThai,
+                                     Email,
+                                     SoDienThoai
+                                     FROM TaiKhoan
+                                     ORDER BY NgayTao DESC";
 
                     Debug.WriteLine("SQL: " + sql);
 
@@ -258,57 +263,10 @@ namespace TFitnessApp
                 Debug.WriteLine("=== KẾT THÚC TẢI DỮ LIỆU TÀI KHOẢN ===");
             }
         }
-
-        private void KiemTraVaCapNhatCauTrucBang(SqliteConnection conn)
-        {
-            try
-            {
-                // Kiểm tra cột Email
-                string checkEmailQuery = "SELECT Email FROM TaiKhoan LIMIT 1";
-                try
-                {
-                    using (var cmd = new SqliteCommand(checkEmailQuery, conn))
-                    {
-                        cmd.ExecuteScalar();
-                    }
-                }
-                catch
-                {
-                    // Thêm cột Email nếu chưa có
-                    string alterEmailQuery = "ALTER TABLE TaiKhoan ADD COLUMN Email TEXT";
-                    using (var cmd = new SqliteCommand(alterEmailQuery, conn))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                // Kiểm tra cột SoDienThoai
-                string checkPhoneQuery = "SELECT SoDienThoai FROM TaiKhoan LIMIT 1";
-                try
-                {
-                    using (var cmd = new SqliteCommand(checkPhoneQuery, conn))
-                    {
-                        cmd.ExecuteScalar();
-                    }
-                }
-                catch
-                {
-                    // Thêm cột SoDienThoai nếu chưa có
-                    string alterPhoneQuery = "ALTER TABLE TaiKhoan ADD COLUMN SoDienThoai TEXT";
-                    using (var cmd = new SqliteCommand(alterPhoneQuery, conn))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Lỗi khi cập nhật cấu trúc bảng: {ex.Message}");
-            }
-        }
         #endregion
 
-        #region Search và Filter Functions
+        #region Xử lý Tìm kiếm (Search)
+        // Xử lý khi ô tìm kiếm nhận focus (xóa placeholder)
         private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             if (SearchTextBox.Text == VAN_BAN_TIM_KIEM_MAC_DINH)
@@ -319,6 +277,7 @@ namespace TFitnessApp
             SearchPlaceholder.Visibility = Visibility.Collapsed;
         }
 
+        // Xử lý khi ô tìm kiếm mất focus (hiển thị placeholder nếu rỗng)
         private void SearchTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
@@ -329,6 +288,7 @@ namespace TFitnessApp
             }
         }
 
+        // Xử lý sự kiện TextChanged để ẩn/hiện placeholder
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(SearchTextBox.Text) || SearchTextBox.Text == VAN_BAN_TIM_KIEM_MAC_DINH)
@@ -341,6 +301,7 @@ namespace TFitnessApp
             }
         }
 
+        // Kích hoạt tìm kiếm khi nhấn Enter
         private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -349,11 +310,13 @@ namespace TFitnessApp
             }
         }
 
+        // Kích hoạt tìm kiếm khi nhấn nút Search
         private void ThucHienTimKiem_Click(object sender, RoutedEventArgs e)
         {
             ThucHienTimKiem();
         }
 
+        // Lấy từ khóa và gọi hàm áp dụng tìm kiếm
         private void ThucHienTimKiem()
         {
             if (SearchTextBox == null || dgTaiKhoan == null) return;
@@ -371,6 +334,7 @@ namespace TFitnessApp
             ApDungTimKiem();
         }
 
+        // Lọc danh sách dữ liệu gốc theo từ khóa tìm kiếm
         private void ApDungTimKiem()
         {
             Debug.WriteLine("=== ÁP DỤNG TÌM KIẾM ===");
@@ -399,6 +363,7 @@ namespace TFitnessApp
             HienThiDuLieuPhanTrang();
         }
 
+        // Hàm loại bỏ dấu tiếng Việt (để hỗ trợ tìm kiếm không dấu)
         private string BoQuyenDau(string text)
         {
             if (string.IsNullOrEmpty(text)) return "";
@@ -418,7 +383,8 @@ namespace TFitnessApp
         }
         #endregion
 
-        #region Phân trang Events
+        #region Xử lý Sự kiện Phân trang
+        // Thay đổi số bản ghi tối đa trên một trang
         private void cboSoBanGhiMoiTrang_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cboSoBanGhiMoiTrang.SelectedItem != null)
@@ -429,12 +395,14 @@ namespace TFitnessApp
             }
         }
 
+        // Chuyển về trang đầu tiên
         private void btnTrangDau_Click(object sender, RoutedEventArgs e)
         {
             _trangHienTai = 1;
             HienThiDuLieuPhanTrang();
         }
 
+        // Chuyển về trang trước
         private void btnTrangTruoc_Click(object sender, RoutedEventArgs e)
         {
             if (_trangHienTai > 1)
@@ -444,6 +412,7 @@ namespace TFitnessApp
             }
         }
 
+        // Chuyển sang trang sau
         private void btnTrangSau_Click(object sender, RoutedEventArgs e)
         {
             if (_trangHienTai < _tongSoTrang)
@@ -453,12 +422,14 @@ namespace TFitnessApp
             }
         }
 
+        // Chuyển đến trang cuối cùng
         private void btnTrangCuoi_Click(object sender, RoutedEventArgs e)
         {
             _trangHienTai = _tongSoTrang;
             HienThiDuLieuPhanTrang();
         }
 
+        // Xử lý sự kiện khi nhấn Enter trong ô nhập số trang
         private void txtChuyenTrang_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && txtChuyenTrang != null)
@@ -490,7 +461,8 @@ namespace TFitnessApp
         }
         #endregion
 
-        #region Button Commands
+        #region Xử lý Nút lệnh và Menu Context
+        // Thực hiện làm mới dữ liệu
         private void RefreshCommand_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -513,6 +485,7 @@ namespace TFitnessApp
             }
         }
 
+        // Mở cửa sổ tạo tài khoản mới
         private void AddAccountCommand_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -528,10 +501,11 @@ namespace TFitnessApp
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi mở cửa sổ tạo tài khoản: {ex.Message}", "Lỗi",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                                 MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        // Xóa các tài khoản đã chọn
         private void DeleteAccountCommand_Click(object sender, RoutedEventArgs e)
         {
             var taiKhoanDaChon = taiKhoanHienThi.Where(tk => tk.IsSelected).ToList();
@@ -550,7 +524,7 @@ namespace TFitnessApp
             {
                 try
                 {
-                    using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                    using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
                         conn.Open();
 
@@ -579,6 +553,7 @@ namespace TFitnessApp
             }
         }
 
+        // Mở cửa sổ xem chi tiết tài khoản
         private void ViewAccountCommand_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -597,18 +572,31 @@ namespace TFitnessApp
                 else
                 {
                     MessageBox.Show("Vui lòng chọn một tài khoản để xem chi tiết.", "Thông báo",
-                                  MessageBoxButton.OK, MessageBoxImage.Information);
+                                     MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi mở cửa sổ xem tài khoản: {ex.Message}", "Lỗi",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                                 MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Xử lý khi chọn Refresh từ context menu
+        private void MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshCommand_Click(sender, e);
+        }
+
+        // Xử lý khi chọn Add Account từ context menu
+        private void MenuItem_AddAccount_Click(object sender, RoutedEventArgs e)
+        {
+            AddAccountCommand_Click(sender, e);
         }
         #endregion
 
-        #region Selection Management
+        #region Quản lý Lựa chọn (Selection)
+        // Cập nhật trạng thái của checkbox "Chọn tất cả" trong header DataGrid
         private void CapNhatTrangThaiSelectAll()
         {
             if (dgTaiKhoan == null) return;
@@ -635,6 +623,7 @@ namespace TFitnessApp
             }
         }
 
+        // Hàm hỗ trợ tìm kiếm phần tử con trong cây VisualTree (dùng để tìm Checkbox header)
         private T FindVisualChild<T>(DependencyObject parent, string childName = null) where T : DependencyObject
         {
             if (parent == null) return null;
@@ -659,6 +648,7 @@ namespace TFitnessApp
             return null;
         }
 
+        // Xử lý khi checkbox của một hàng được chọn
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
@@ -674,6 +664,7 @@ namespace TFitnessApp
             CapNhatThongTinSoLuong();
         }
 
+        // Xử lý khi checkbox của một hàng bị bỏ chọn
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
@@ -689,6 +680,7 @@ namespace TFitnessApp
             CapNhatThongTinSoLuong();
         }
 
+        // Xử lý sự kiện khi checkbox "Chọn tất cả" thay đổi trạng thái
         private void SelectAllCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
@@ -703,6 +695,7 @@ namespace TFitnessApp
             CapNhatThongTinSoLuong();
         }
 
+        // Cập nhật thông tin số lượng tài khoản đang hiển thị và đã chọn
         private void CapNhatThongTinSoLuong()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -719,25 +712,10 @@ namespace TFitnessApp
             });
         }
         #endregion
-
-        #region Context Menu
-        private void MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshCommand_Click(sender, e);
-        }
-
-        private void MenuItem_AddAccount_Click(object sender, RoutedEventArgs e)
-        {
-            AddAccountCommand_Click(sender, e);
-        }
-        #endregion
-
-        private void LoadData()
-        {
-            TaiDanhSachTaiKhoan();
-        }
     }
 
+    #region Model class
+    // Model đại diện cho một tài khoản
     public class MoDonDuLieuTaiKhoan
     {
         public string MaTK { get; set; }
@@ -751,6 +729,7 @@ namespace TFitnessApp
         public string SoDienThoai { get; set; }
         public bool IsSelected { get; set; }
 
+        // Thuộc tính định dạng ngày tạo cho hiển thị trên DataGrid
         public string NgayTaoFormatted
         {
             get
@@ -761,4 +740,5 @@ namespace TFitnessApp
             }
         }
     }
+    #endregion
 }

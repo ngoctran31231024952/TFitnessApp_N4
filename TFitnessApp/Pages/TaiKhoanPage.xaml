@@ -11,12 +11,7 @@
       Background="White">
 
     <Page.Resources>
-        <!-- CÁC RESOURCES ĐƯỢC GIỮ LẠI TỪ GiaoDichPage -->
-        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <local:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <local:StatusToBorderBrushConverter x:Key="StatusToBorderBrushConverter"/>
-
+        <!-- Style cho các nút bo tròn màu đỏ đặc trưng -->
         <Style x:Key="RoundButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -39,6 +34,7 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Style cho tiêu đề cột DataGrid căn giữa -->
         <Style x:Key="CenteredHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -50,6 +46,7 @@
             <Setter Property="Foreground" Value="#333"/>
         </Style>
 
+        <!-- Style cho hàng DataGrid tùy chỉnh (hover và selected) -->
         <Style x:Key="CustomRowStyle" TargetType="{x:Type DataGridRow}">
             <Setter Property="Background" Value="White"/>
             <Style.Triggers>
@@ -65,6 +62,7 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Style cho nội dung TextBlock trong DataGrid căn giữa -->
         <Style x:Key="CenteredContentStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -72,6 +70,7 @@
             <Setter Property="Padding" Value="5,2"/>
         </Style>
 
+        <!-- Style tổng thể cho DataGrid -->
         <Style x:Key="CustomDataGridStyle" TargetType="{x:Type DataGrid}">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E1E0E7"/>
@@ -94,6 +93,7 @@
             <Setter Property="SelectionUnit" Value="FullRow"/>
         </Style>
 
+        <!-- Style cho các nút phân trang -->
         <Style x:Key="PaginationButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
@@ -126,7 +126,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- HÀNG 0: TIÊU ĐỀ, TÌM KIẾM, NÚT THÊM, LÀM MỚI -->
+        <!-- Khu vực tiêu đề, tìm kiếm, nút thêm mới và làm mới -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -135,7 +135,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- TIÊU ĐỀ -->
+            <!-- Khối TIÊU ĐỀ trang -->
             <Border Grid.Column="0" CornerRadius="0,20,20,0" Margin="0,0,15,0" Background="#C71A1B">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -156,7 +156,7 @@
                 </Grid>
             </Border>
 
-            <!-- THANH TÌM KIẾM -->
+            <!-- Thanh TÌM KIẾM -->
             <Border Grid.Column="1" CornerRadius="8" Background="#ECECEC" Height="40" VerticalAlignment="Center" Margin="0,0,15,0"
                     BorderBrush="#CCCCCC" BorderThickness="1">
                 <Border.Effect>
@@ -199,7 +199,7 @@
                 </Grid>
             </Border>
 
-            <!-- NÚT THÊM MỚI -->
+            <!-- NÚT THÊM MỚI Tài khoản -->
             <Border Grid.Column="2" CornerRadius="5" Margin="0,0,10,0">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -214,12 +214,12 @@
                         Click="AddAccountCommand_Click">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Tạo TK" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
+                        <TextBlock Text="Tạo" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
 
-            <!-- NÚT LÀM MỚI -->
+            <!-- NÚT LÀM MỚI dữ liệu -->
             <Border Grid.Column="3" CornerRadius="5">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -240,9 +240,7 @@
             </Border>
         </Grid>
 
-        <!-- HÀNG 1: ĐÃ XÓA HOÀN TOÀN THANH NGANG CHỌN TRẠNG THÁI THANH TOÁN (KHÔNG CÒN TRONG TÀI KHOẢN) -->
-
-        <!-- HÀNG 2: DATAGRID -->
+        <!-- Khu vực hiển thị danh sách Tài khoản bằng DataGrid -->
         <Border Grid.Row="2" 
                 CornerRadius="10" 
                 BorderBrush="#E1E0E7" 
@@ -264,7 +262,7 @@
                       ColumnHeaderStyle="{StaticResource CenteredHeaderStyle}">
 
                 <DataGrid.Columns>
-                    <!-- CỘT CHỌN VÀ XEM CHI TIẾT -->
+                    <!-- CỘT CHỌN VÀ XEM CHI TIẾT tài khoản -->
                     <DataGridTemplateColumn Width="70" Header="Chọn">
                         <DataGridTemplateColumn.HeaderTemplate>
                             <DataTemplate>
@@ -326,52 +324,7 @@
                                         Binding="{Binding NgayTaoFormatted}" 
                                         Width="160" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
-
-                    <!-- CỘT TRẠNG THÁI -->
-                    <!--<DataGridTemplateColumn Header="Trạng thái" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="12" 
-                                        Padding="8,4" 
-                                        HorizontalAlignment="Center" 
-                                        VerticalAlignment="Center"
-                                        BorderThickness="1">
-                                    <TextBlock Text="{Binding TrangThai}" 
-                                               FontWeight="SemiBold" 
-                                               FontSize="11"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt động">
-                                                        <Setter Property="Foreground" Value="#059669"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Khóa">
-                                                        <Setter Property="Foreground" Value="#DC2626"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt động">
-                                                    <Setter Property="Background" Value="#D1FAE5"/>
-                                                    <Setter Property="BorderBrush" Value="#10B981"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Khóa">
-                                                    <Setter Property="Background" Value="#FEE2E2"/>
-                                                    <Setter Property="BorderBrush" Value="#EF4444"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>-->
+                    <!-- Cột hiển thị Trạng Thái tài khoản (có màu sắc) -->
                     <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -388,9 +341,11 @@
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
+                                                    <!-- Đặt màu cho Text khi Bị Khóa -->
                                                     <DataTrigger Binding="{Binding TrangThai}" Value="Bị Khóa">
                                                         <Setter Property="Foreground" Value="#DC2626"/>
                                                     </DataTrigger>
+                                                    <!-- Đặt màu cho Text khi Hoạt Động -->
                                                     <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt Động">
                                                         <Setter Property="Foreground" Value="#059669"/>
                                                     </DataTrigger>
@@ -401,10 +356,12 @@
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Style.Triggers>
+                                                <!-- Đặt màu nền và border khi Bị Khóa -->
                                                 <DataTrigger Binding="{Binding TrangThai}" Value="Bị Khóa">
                                                     <Setter Property="Background" Value="#FEE2E2"/>
                                                     <Setter Property="BorderBrush" Value="#EF4444"/>
                                                 </DataTrigger>
+                                                <!-- Đặt màu nền và border khi Hoạt Động -->
                                                 <DataTrigger Binding="{Binding TrangThai}" Value="Hoạt Động">
                                                     <Setter Property="Background" Value="#D1FAE5"/>
                                                     <Setter Property="BorderBrush" Value="#10B981"/>
@@ -419,6 +376,7 @@
 
                 </DataGrid.Columns>
 
+                <!-- Context Menu cho DataGrid (click chuột phải) -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Làm mới" Click="MenuItem_Refresh_Click"/>
@@ -429,7 +387,7 @@
             </DataGrid>
         </Border>
 
-        <!-- HÀNG 3: PHÂN TRANG -->
+        <!-- Khu vực PHÂN TRANG -->
         <Border Grid.Row="3" 
                 Background="#F5F5F5" 
                 BorderBrush="#E0E0E0" 
@@ -438,23 +396,27 @@
                 Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="Hiển thị:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
+                <!-- ComboBox chọn số bản ghi mỗi trang -->
                 <ComboBox x:Name="cboSoBanGhiMoiTrang" 
                           Width="60" 
                           SelectionChanged="cboSoBanGhiMoiTrang_SelectionChanged"
                           VerticalAlignment="Center"
                           FontSize="12"/>
 
+                <!-- Text hiển thị thông tin phân trang -->
                 <TextBlock x:Name="txtThongTinPhanTrang" 
                            VerticalAlignment="Center" 
                            Margin="20,0,0,0"
                            FontSize="12"/>
 
                 <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                    <!-- Nút Trang Đầu -->
                     <Button x:Name="btnTrangDau" 
                             Content="&lt;&lt;" 
                             Style="{StaticResource PaginationButtonStyle}"
                             Click="btnTrangDau_Click" 
                             ToolTip="Trang đầu"/>
+                    <!-- Nút Trang Trước -->
                     <Button x:Name="btnTrangTruoc" 
                             Content="&lt;" 
                             Style="{StaticResource PaginationButtonStyle}"
@@ -462,6 +424,7 @@
                             ToolTip="Trang trước" 
                             Margin="5,0,0,0"/>
 
+                    <!-- TextBox để chuyển trang nhanh -->
                     <TextBox x:Name="txtChuyenTrang" 
                             Width="40" 
                             TextAlignment="Center" 
@@ -470,16 +433,19 @@
                             ToolTip="Nhập số trang và Enter" 
                             KeyDown="txtChuyenTrang_KeyDown"
                             FontSize="12"/>
+                    <!-- Text hiển thị trang hiện tại và tổng số trang -->
                     <TextBlock x:Name="txtTrangHienTai" 
                                VerticalAlignment="Center" 
                                Margin="0,0,10,0"
                                FontSize="12"/>
 
+                    <!-- Nút Trang Sau -->
                     <Button x:Name="btnTrangSau" 
                             Content="&gt;" 
                             Style="{StaticResource PaginationButtonStyle}"
                             Click="btnTrangSau_Click" 
                             ToolTip="Trang sau"/>
+                    <!-- Nút Trang Cuối -->
                     <Button x:Name="btnTrangCuoi" 
                             Content="&gt;&gt;" 
                             Style="{StaticResource PaginationButtonStyle}"
@@ -490,14 +456,14 @@
             </StackPanel>
         </Border>
 
-        <!-- HÀNG 4: THAO TÁC (XÓA) -->
+        <!-- Khu vực THAO TÁC (Chủ yếu là XÓA) -->
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- TEXT THÔNG TIN HIỂN THỊ/ĐÃ CHỌN -->
+            <!-- Text THÔNG TIN HIỂN THỊ/ĐÃ CHỌN -->
             <StackPanel x:Name="InfoStackPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock x:Name="txtSoTaiKhoanHienThi"
                            Foreground="#666" 
@@ -511,9 +477,8 @@
                            Visibility="Collapsed"/>
             </StackPanel>
 
-            <!-- NÚT THAO TÁC - CHỈ CÒN NÚT XÓA -->
+            <!-- NÚT THAO TÁC (NÚT XÓA) -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <!-- NÚT XÓA -->
                 <Button x:Name="btnDelete"
                         Style="{StaticResource RoundButtonStyle}" 
                         Height="36" 
@@ -531,7 +496,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- Loading Indicator -->
+        <!-- Chỉ báo Đang tải dữ liệu (Loading Indicator) -->
         <Border Grid.Row="0" Grid.RowSpan="5" 
                 Background="#80000000" 
                 x:Name="LoadingIndicator"
@@ -548,6 +513,7 @@
                             <fa:IconImage.Triggers>
                                 <EventTrigger RoutedEvent="Loaded">
                                     <BeginStoryboard>
+                                        <!-- Animation xoay loading -->
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Angle"
                                                              From="0" To="360" Duration="0:0:1" 

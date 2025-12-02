@@ -10,12 +10,9 @@
       Title="GiaoDichPage"
       Background="White">
 
+    <!-- KHỐI ĐỊNH NGHĨA TÀI NGUYÊN (RESOURCES) -->
     <Page.Resources>
-        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <local:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <local:StatusToBorderBrushConverter x:Key="StatusToBorderBrushConverter"/>
-
+        <!-- Style chung cho các nút tròn (RoundButtonStyle) -->
         <Style x:Key="RoundButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -31,6 +28,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <!-- Trigger hiệu ứng khi di chuột qua -->
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#A51617"/>
@@ -38,6 +36,7 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Style cho Header của DataGrid (CenteredHeaderStyle) -->
         <Style x:Key="CenteredHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -49,6 +48,7 @@
             <Setter Property="Foreground" Value="#333"/>
         </Style>
 
+        <!-- Style tùy chỉnh cho các dòng của DataGrid (CustomRowStyle) -->
         <Style x:Key="CustomRowStyle" TargetType="{x:Type DataGridRow}">
             <Setter Property="Background" Value="White"/>
             <Style.Triggers>
@@ -64,6 +64,7 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Style cho các nút RadioButton (PaymentTabStyle) để chuyển Tab trạng thái thanh toán -->
         <Style x:Key="PaymentTabStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -102,6 +103,7 @@
             </Setter>
         </Style>
 
+        <!-- Style cho nội dung TextBlock căn giữa trong DataGrid (CenteredContentStyle) -->
         <Style x:Key="CenteredContentStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -109,6 +111,7 @@
             <Setter Property="Padding" Value="5,2"/>
         </Style>
 
+        <!-- Style tùy chỉnh cho DataGrid (CustomDataGridStyle) -->
         <Style x:Key="CustomDataGridStyle" TargetType="{x:Type DataGrid}">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E1E0E7"/>
@@ -131,6 +134,7 @@
             <Setter Property="SelectionUnit" Value="FullRow"/>
         </Style>
 
+        <!-- Style cho các nút phân trang (PaginationButtonStyle) -->
         <Style x:Key="PaginationButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
@@ -154,7 +158,9 @@
 
     </Page.Resources>
 
+    <!-- KHỐI CHÍNH (MAIN GRID) -->
     <Grid Margin="20" Background="White">
+        <!-- Định nghĩa 5 dòng: Tiêu đề/Tìm kiếm, Tab trạng thái, DataGrid, Phân trang, Nút hành động -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -163,6 +169,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- DÒNG 0: TIÊU ĐỀ, TÌM KIẾM, NÚT TẠO/LÀM MỚI -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -171,6 +178,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Khối Tiêu đề (Danh sách Giao dịch) -->
             <Border Grid.Column="0" CornerRadius="0,20,20,0" Margin="0,0,15,0" Background="#C71A1B">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -191,6 +199,7 @@
                 </Grid>
             </Border>
 
+            <!-- Khối Tìm kiếm (Search Bar) -->
             <Border Grid.Column="1" CornerRadius="8" Background="#ECECEC" Height="40" VerticalAlignment="Center" Margin="0,0,15,0"
                     BorderBrush="#CCCCCC" BorderThickness="1">
                 <Border.Effect>
@@ -202,8 +211,8 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- SỬA: Sử dụng Grid với ZIndex để kiểm soát thứ tự hiển thị -->
                     <Grid Grid.Column="0" Margin="15,0,0,0">
+                        <!-- TextBox nhập liệu tìm kiếm -->
                         <TextBox x:Name="SearchTextBox" 
                                  BorderThickness="0" 
                                  Background="Transparent" 
@@ -216,8 +225,7 @@
                                  KeyDown="SearchTextBox_KeyDown"
                                  TextChanged="SearchTextBox_TextChanged"
                                  Panel.ZIndex="2"/>
-                        <!-- TextBox trên cùng -->
-
+                        <!-- TextBlock Placeholder (Hướng dẫn) -->
                         <TextBlock x:Name="SearchPlaceholder"
                                    IsHitTestVisible="False" 
                                    VerticalAlignment="Center" 
@@ -225,9 +233,9 @@
                                    FontStyle="Italic"
                                    FontSize="13"
                                    Panel.ZIndex="1"/>
-                        <!-- Placeholder ở dưới -->
                     </Grid>
 
+                    <!-- Nút tìm kiếm (Icon Search) -->
                     <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="0" Width="40" Height="40"
                             ToolTip="Tìm kiếm" Click="ThucHienTimKiem_Click">
                         <Viewbox Width="16" Height="16" Margin="0,0,15,0">
@@ -237,6 +245,7 @@
                 </Grid>
             </Border>
 
+            <!-- Nút Tạo giao dịch mới -->
             <Border Grid.Column="2" CornerRadius="5" Margin="0,0,10,0">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -251,11 +260,12 @@
                         Click="AddTransactionCommand_Click">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="CirclePlus" Width="15" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Tạo GD" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
+                        <TextBlock Text="Tạo" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
                     </StackPanel>
                 </Button>
             </Border>
 
+            <!-- Nút Làm mới dữ liệu -->
             <Border Grid.Column="3" CornerRadius="5">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
@@ -276,6 +286,7 @@
             </Border>
         </Grid>
 
+        <!-- DÒNG 1: KHỐI CHỌN TRẠNG THÁI THANH TOÁN (TAB) -->
         <Border Grid.Row="1" 
                 CornerRadius="8" 
                 Background="White" 
@@ -292,20 +303,20 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
+                <!-- Tab: Chưa thanh toán -->
                 <RadioButton x:Name="rbChuaThanhToan"
                              Grid.Column="0" 
                              Content="Chưa thanh toán" 
                              Style="{StaticResource PaymentTabStyle}"
                              IsChecked="True" 
                              Checked="RadioButton_Checked"/>
-
+                <!-- Tab: Thanh toán một phần -->
                 <RadioButton x:Name="rbThanhToanMotPhan"
                              Grid.Column="1" 
                              Content="Thanh toán một phần" 
                              Style="{StaticResource PaymentTabStyle}"
                              Checked="RadioButton_Checked"/>
-
+                <!-- Tab: Đã thanh toán -->
                 <RadioButton x:Name="rbDaThanhToan"
                              Grid.Column="2" 
                              Content="Đã thanh toán" 
@@ -314,6 +325,7 @@
             </Grid>
         </Border>
 
+        <!-- DÒNG 2: DATA GRID HIỂN THỊ DANH SÁCH GIAO DỊCH -->
         <Border Grid.Row="2" 
                 CornerRadius="10" 
                 BorderBrush="#E1E0E7" 
@@ -335,6 +347,7 @@
                       ColumnHeaderStyle="{StaticResource CenteredHeaderStyle}">
 
                 <DataGrid.Columns>
+                    <!-- Cột Chọn và Xem chi tiết -->
                     <DataGridTemplateColumn Width="70" Header="Chọn">
                         <DataGridTemplateColumn.HeaderTemplate>
                             <DataTemplate>
@@ -353,6 +366,7 @@
                                               Checked="CheckBox_Checked"
                                               Unchecked="CheckBox_Unchecked"
                                               ToolTip="Chọn giao dịch này"/>
+                                    <!-- Nút Xem chi tiết -->
                                     <Button Background="Transparent" 
                                             BorderThickness="0" 
                                             Padding="4" 
@@ -367,46 +381,55 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
+                    <!-- Cột Mã GD (Giao dịch) -->
                     <DataGridTextColumn Header="Mã GD" 
                                         Binding="{Binding MaGD}" 
                                         Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Mã HV (Học viên) -->
                     <DataGridTextColumn Header="Mã HV" 
                                         Binding="{Binding MaHV}" 
                                         Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Mã Gói -->
                     <DataGridTextColumn Header="Mã Gói" 
                                         Binding="{Binding MaGoi}" 
                                         Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Mã TK (Tài khoản) -->
                     <DataGridTextColumn Header="Mã TK" 
                                         Binding="{Binding MaTK}" 
                                         Width="95" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Tổng Tiền (Đã format tiền tệ) -->
                     <DataGridTextColumn Header="Tổng Tiền" 
                                         Binding="{Binding TongTienFormatted}" 
                                         Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Đã Thanh Toán (Đã format tiền tệ) -->
                     <DataGridTextColumn Header="Đã Thanh Toán" 
                                         Binding="{Binding DaThanhToanFormatted}" 
                                         Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Số Tiền Nợ (Đã format tiền tệ) -->
                     <DataGridTextColumn Header="Số Tiền Nợ" 
                                         Binding="{Binding SoTienNoFormatted}" 
                                         Width="150" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Ngày GD (Đã format ngày) -->
                     <DataGridTextColumn Header="Ngày GD" 
                                         Binding="{Binding NgayGDFormatted}" 
                                         Width="130" 
                                         ElementStyle="{StaticResource CenteredContentStyle}"/>
 
+                    <!-- Cột Trạng Thái (Với style màu sắc theo DataTrigger) -->
                     <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -460,6 +483,7 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
 
+                <!-- Context Menu khi chuột phải vào DataGrid -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Làm mới" Click="MenuItem_Refresh_Click"/>
@@ -470,6 +494,7 @@
             </DataGrid>
         </Border>
 
+        <!-- DÒNG 3: THANH PHÂN TRANG (PAGINATION) -->
         <Border Grid.Row="3" 
                 Background="#F5F5F5" 
                 BorderBrush="#E0E0E0" 
@@ -477,6 +502,7 @@
                 Padding="10"
                 Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- ComboBox chọn số bản ghi mỗi trang -->
                 <TextBlock Text="Hiển thị:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
                 <ComboBox x:Name="cboSoBanGhiMoiTrang" 
                           Width="60" 
@@ -484,11 +510,13 @@
                           SelectionChanged="cboSoBanGhiMoiTrang_SelectionChanged"
                           FontSize="12"/>
 
+                <!-- TextBlock hiển thị thông tin phân trang -->
                 <TextBlock x:Name="txtThongTinPhanTrang" 
                            VerticalAlignment="Center" 
                            Margin="20,0,0,0"
                            FontSize="12"/>
 
+                <!-- Khối các nút chuyển trang -->
                 <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
                     <Button x:Name="btnTrangDau" 
                             Content="&lt;&lt;" 
@@ -502,6 +530,7 @@
                             ToolTip="Trang trước" 
                             Margin="5,0,0,0"/>
 
+                    <!-- TextBox chuyển nhanh đến trang cụ thể -->
                     <TextBox x:Name="txtChuyenTrang" 
                             Width="40" 
                             TextAlignment="Center" 
@@ -510,6 +539,7 @@
                             ToolTip="Nhập số trang và Enter" 
                             KeyDown="txtChuyenTrang_KeyDown"
                             FontSize="12"/>
+                    <!-- TextBlock hiển thị trang hiện tại / tổng số trang -->
                     <TextBlock x:Name="txtTrangHienTai" 
                                VerticalAlignment="Center" 
                                Margin="0,0,10,0"
@@ -530,12 +560,14 @@
             </StackPanel>
         </Border>
 
+        <!-- DÒNG 4: THÔNG TIN TỔNG QUAN VÀ CÁC NÚT HÀNH ĐỘNG (XÓA/XUẤT FILE) -->
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
+            <!-- StackPanel hiển thị thông tin số lượng giao dịch -->
             <StackPanel x:Name="InfoStackPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock x:Name="txtSoGiaoDichHienThi"
                            Foreground="#666" 
@@ -549,7 +581,9 @@
                            Visibility="Collapsed"/>
             </StackPanel>
 
+            <!-- StackPanel chứa các nút hành động (Xóa, Xuất) -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <!-- Nút Xóa giao dịch đã chọn -->
                 <Button x:Name="btnDelete"
                         Style="{StaticResource RoundButtonStyle}" 
                         Height="36" 
@@ -565,6 +599,7 @@
                     </StackPanel>
                 </Button>
 
+                <!-- Nút Xuất danh sách giao dịch -->
                 <Button x:Name="btnExport"
                         Style="{StaticResource RoundButtonStyle}" 
                         Width="90" 
@@ -581,6 +616,7 @@
             </StackPanel>
         </Grid>
 
+        <!-- KHỐI CHẶN (LOADING INDICATOR) - Hiển thị khi đang tải dữ liệu -->
         <Border Grid.Row="0" Grid.RowSpan="5" 
                 Background="#80000000" 
                 x:Name="LoadingIndicator"
@@ -589,6 +625,7 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border Background="White" CornerRadius="8" Padding="20" Width="200" Height="100">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <!-- Icon quay loading -->
                         <fa:IconImage Icon="Refresh" Width="24" Height="24" Foreground="#C71A1B" 
                                       HorizontalAlignment="Center" Margin="0,0,0,10">
                             <fa:IconImage.RenderTransform>
