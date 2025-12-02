@@ -1,0 +1,115 @@
+﻿<UserControl x:Class="TFitnessApp.DateRangeFilter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TFitnessApp"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             Width="125" Height="35">
+
+    <Grid>
+        <!-- Border với hiệu ứng giống ComboBox -->
+        <Border Background="White"  BorderThickness="1" CornerRadius="4">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
+
+            <!-- ToggleButton với background trong suốt để hiển thị border của parent -->
+            <ToggleButton x:Name="btnChuyen" 
+                          Style="{StaticResource DropdownToggleStyle}" 
+                          Content="{Binding NhanHienTai, ElementName=Root}"
+                          IsChecked="{Binding IsPopupOpen, ElementName=Root}"
+                          Width="125" Height="35"
+                          Foreground="{StaticResource MauDoChinh}"
+                          Background="Transparent"
+                          BorderThickness="0"/>
+        </Border>
+
+        <!-- Popup cho dropdown -->
+        <Popup x:Name="popupLoc" 
+               Placement="Bottom" 
+               IsOpen="{Binding IsPopupOpen, ElementName=Root}"
+               StaysOpen="False"
+               PopupAnimation="Slide"
+               AllowsTransparency="True">
+
+            <Border Background="White" 
+                  
+                    BorderThickness="1" 
+                    CornerRadius="4"
+                    Padding="10"
+                    MinWidth="280">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+
+                <StackPanel>
+                    <!-- Các lựa chọn nhanh -->
+                    <TextBlock Text="Chọn nhanh" FontWeight="SemiBold" Margin="0,0,0,5"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Hôm nay" Tag="today" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                        <Button Content="Hôm qua" Tag="yesterday" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Tuần này" Tag="this_week" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                        <Button Content="Tuần trước" Tag="last_week" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Tháng này" Tag="this_month" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                        <Button Content="Tháng trước" Tag="last_month" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Quý này" Tag="this_quarter" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                        <Button Content="Quý trước" Tag="last_quarter" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Năm nay" Tag="this_year" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                        <Button Content="Năm trước" Tag="last_year" Style="{StaticResource MenuItemBtnStyle}" Click="ChonNhanh_Click"/>
+                    </StackPanel>
+
+                    <Separator Margin="0,5"/>
+
+                    <!-- Chọn ngày tùy chỉnh -->
+                    <TextBlock Text="Tùy chọn ngày" FontWeight="SemiBold" Margin="0,5,0,5"/>
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <DatePicker x:Name="dpTuNgay" 
+                                    Width="120" 
+                                    Margin="0,0,5,0" 
+                                    SelectedDateChanged="NgayTuChon_ThayDoi"
+                                    Style="{StaticResource DatePickerStyle}"/>
+                        <TextBlock Text="đến" 
+                                   VerticalAlignment="Center" 
+                                   Margin="5,0,5,0" 
+                                   Foreground="#666"/>
+                        <DatePicker x:Name="dpDenNgay" 
+                                    Width="120" 
+                                    SelectedDateChanged="NgayTuChon_ThayDoi"
+                                    Style="{StaticResource DatePickerStyle}"/>
+                    </StackPanel>
+
+                    <!-- Nút áp dụng -->
+                    <Button Content="Áp dụng" 
+                            Margin="0,10,0,0" 
+                            Height="30" 
+                            Background="{StaticResource MauDoChinh}"
+                            Foreground="White" 
+                            BorderThickness="0"
+                            Click="ApDungNgayTuChon_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
