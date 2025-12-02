@@ -5,19 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TFitnessApp"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-        mc:Ignorable="d"
-        Title="TFitness - Khỏe hơn mỗi ngày" Height="450" Width="800"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        mc:Ignorable="d"
+        Title="TFitness" Height="450" Width="800"
         WindowState="Maximized"
         WindowStyle="SingleBorderWindow"
         MinHeight="600"
-        MinWidth="900">
+        MinWidth="900"
+        Icon="/Images/Logo.ico">
+
     <Window.Resources>
         <Color x:Key="ColorRedMain">#C71A1B</Color>
         <Color x:Key="ColorRedDark">#ED1A1B</Color>
         <SolidColorBrush x:Key="BrushRedMain" Color="{StaticResource ColorRedMain}"/>
         <SolidColorBrush x:Key="BrushTextDark" Color="#212121"/>
         <SolidColorBrush x:Key="BrushError" Color="#D32F2F"/>
+
         <Style x:Key="NoHoverButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -54,33 +57,19 @@
             <Setter Property="HasDropShadow" Value="False"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-
             <Setter Property="Foreground" Value="#333333"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Normal"/>
-
             <Setter Property="Padding" Value="12,8"/>
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToolTip">
-                        <Border Background="White"
-                        BorderBrush="#EEEEEE"
-                        BorderThickness="1"
-                        CornerRadius="5" 
-                        Padding="{TemplateBinding Padding}"
-                        Margin="20">
-
+                        <Border Background="White" BorderBrush="#EEEEEE" BorderThickness="1"
+                                CornerRadius="5" Padding="{TemplateBinding Padding}" Margin="20">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="15" 
-                                          ShadowDepth="3" 
-                                          Opacity="0.2" 
-                                          Color="Black" 
-                                          Direction="270"/>
+                                <DropShadowEffect BlurRadius="15" ShadowDepth="3" Opacity="0.2" Color="Black" Direction="270"/>
                             </Border.Effect>
-
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -99,16 +88,13 @@
             <Setter Property="ToolTipService.InitialShowDelay" Value="10"/>
             <Setter Property="ToolTipService.ShowDuration" Value="5000"/>
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
-
             <Setter Property="ToolTip" Value="{x:Null}"/>
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border x:Name="Border" CornerRadius="7" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
                             <ContentPresenter x:Name="ItemContentPresenter" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
-
                         <ControlTemplate.Triggers>
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
@@ -117,11 +103,9 @@
                                 </MultiTrigger.Conditions>
                                 <Setter TargetName="Border" Property="Background" Value="#33FFFFFF"/>
                             </MultiTrigger>
-
                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ContextMenu.IsOpen}" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="#33FFFFFF"/>
                             </DataTrigger>
-
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="{StaticResource TFitness.White}"/>
                                 <Setter Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
@@ -131,7 +115,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ElementName=HamburgerButton, Path=IsChecked}" Value="True">
                     <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Tag}"/>
@@ -190,10 +173,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ContextMenu">
-                        <Border Background="{TemplateBinding Background}" 
-            CornerRadius="6" 
-            BorderThickness="0"
-            Margin="10">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" BorderThickness="0" Margin="10">
                             <Border.Effect>
                                 <DropShadowEffect ShadowDepth="2" BlurRadius="12" Color="#AAA" Opacity="0.3"/>
                             </Border.Effect>
@@ -211,10 +191,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
-                        <Border x:Name="Border" 
-                                Background="{TemplateBinding Background}" 
-                                Padding="{TemplateBinding Padding}"
-                                CornerRadius="4">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="25"/>
@@ -233,19 +210,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
 
     <Grid>
-
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SidebarColumn" Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border x:Name="SidebarBorder" Width="230" Grid.Column="0" 
-                Background="{StaticResource TFitness.HeaderGradient}">
+        <Border x:Name="SidebarBorder" Width="230" Grid.Column="0" Background="{StaticResource TFitness.HeaderGradient}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="70"/>
@@ -257,19 +230,14 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ToggleButton x:Name="HamburgerButton" 
-              Grid.Column="1" 
-              Width="40" Height="40" 
-              VerticalAlignment="Center" 
-              Foreground="White" FontSize="18"
-              Checked="HamburgerButton_Checked"     
-              Unchecked="HamburgerButton_Unchecked">
 
+                    <ToggleButton x:Name="HamburgerButton" Grid.Column="1" Width="40" Height="40" 
+                                  VerticalAlignment="Center" Foreground="White" FontSize="18"
+                                  Checked="HamburgerButton_Checked" Unchecked="HamburgerButton_Unchecked">
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource NoHoverToggleButton}">
                                 <Setter Property="HorizontalAlignment" Value="Right"/>
                                 <Setter Property="Margin" Value="0,-8,4,0"/>
-
                                 <Style.Triggers>
                                     <Trigger Property="IsChecked" Value="True">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -285,29 +253,24 @@
                             <EventTrigger RoutedEvent="ToggleButton.Checked">
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SidebarBorder" 
-                                     Storyboard.TargetProperty="Width"
-                                     To="70" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="SidebarBorder" Storyboard.TargetProperty="Width"
+                                                         To="70" Duration="0:0:0.2"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                             <EventTrigger RoutedEvent="ToggleButton.Unchecked">
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SidebarBorder" 
-                                     Storyboard.TargetProperty="Width"
-                                     To="230" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="SidebarBorder" Storyboard.TargetProperty="Width"
+                                                         To="230" Duration="0:0:0.2"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                         </ToggleButton.Triggers>
-
                     </ToggleButton>
-                    <Button x:Name="LogoButton" 
-                            Click="LogoButton_Click"
-                            HorizontalAlignment="Left" 
-                            VerticalAlignment="Center" 
-                            Margin="15,0,0,0">
+
+                    <Button x:Name="LogoButton" Click="LogoButton_Click" HorizontalAlignment="Left" 
+                            VerticalAlignment="Center" Margin="15,0,0,0">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NoHoverButton}">
                                 <Style.Triggers>
@@ -322,10 +285,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <fa:IconImage Icon="Dumbbell" 
-                                          Foreground="White" 
-                                          Width="45" Height="45" Margin="-4,0,8,0"
-                                          VerticalAlignment="Center">
+                            <fa:IconImage Icon="Dumbbell" Foreground="White" Width="45" Height="45" 
+                                          Margin="-4,0,8,0" VerticalAlignment="Center">
                                 <fa:IconImage.Style>
                                     <Style TargetType="fa:IconImage">
                                         <Setter Property="Visibility" Value="Visible"/>
@@ -337,24 +298,15 @@
                                     </Style>
                                 </fa:IconImage.Style>
                             </fa:IconImage>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center"
-                                        Style="{StaticResource LogoTextStackPanel}">
-                                <TextBlock Text="TFitness" 
-                                           Foreground="White" 
-                                           FontSize="25" FontWeight="Bold"/>
-                                <TextBlock Text="Khỏe hơn mỗi ngày" Foreground="#FFFFFF" 
-                                           Opacity="1" 
-                                           FontSize="13" Margin="0,-4,0,0"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LogoTextStackPanel}">
+                                <TextBlock Text="TFitness" Foreground="White" FontSize="25" FontWeight="Bold"/>
+                                <TextBlock Text="Khỏe hơn mỗi ngày" Foreground="#FFFFFF" Opacity="1" FontSize="13" Margin="0,-4,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Button>
-
                 </Grid>
-                <Border Height="1" 
-        Background="White" 
-        Opacity="0.5" 
-        VerticalAlignment="Bottom" 
-        Margin="0,69,0,0"/>
+
+                <Border Height="1" Background="White" Opacity="0.5" VerticalAlignment="Bottom" Margin="0,69,0,0"/>
 
                 <ListBox x:Name="MenuListBox" Grid.Row="1" Margin="0,4,0,0"
                          Background="Transparent" BorderThickness="0" 
@@ -379,12 +331,9 @@
                     </ListBoxItem>
 
                     <ListBoxItem x:Name="ItemLichTap" Tag="Lịch tập" Height="48" Padding="18,0">
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-
                             <fa:IconImage Icon="Calendar" Style="{StaticResource MenuIcon}" Height="22" Width="23"/>
                             <TextBlock Text="Lịch tập" Style="{StaticResource MenuText}" Height="19"/>
-
                         </StackPanel>
                     </ListBoxItem>
 
@@ -396,13 +345,9 @@
                     </ListBoxItem>
 
                     <ListBoxItem x:Name="ItemPT" Tag="PT" Style="{StaticResource MenuListBoxItemStyle}" Height="48">
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-
                             <fa:IconImage Icon="UserNinja" Style="{StaticResource MenuIcon}"/>
-
                             <TextBlock Text="PT" Style="{StaticResource MenuText}" VerticalAlignment="Center"/>
-
                         </StackPanel>
                     </ListBoxItem>
 
@@ -421,13 +366,8 @@
                     </ListBoxItem>
 
                     <ListBoxItem x:Name="ItemHopDong" Tag="Hợp đồng" Height="48" Padding="18,0">
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-
-                            <fa:IconImage Icon="FileAlt" 
-                      Style="{StaticResource MenuIcon}" 
-                      Height="22" Width="23"/>
-
+                            <fa:IconImage Icon="FileAlt" Style="{StaticResource MenuIcon}" Height="22" Width="23"/>
                             <TextBlock Text="Hợp đồng" Style="{StaticResource MenuText}" Height="20"/>
                         </StackPanel>
                     </ListBoxItem>
@@ -446,10 +386,8 @@
                         </StackPanel>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemBaoCao"
-             MouseEnter="ItemBaoCao_MouseEnter"
-             PreviewMouseLeftButtonDown="ItemBaoCao_PreviewMouseLeftButtonDown">
-
+                    <ListBoxItem x:Name="ItemBaoCao" MouseEnter="ItemBaoCao_MouseEnter"
+                                 PreviewMouseLeftButtonDown="ItemBaoCao_PreviewMouseLeftButtonDown">
                         <ListBoxItem.Style>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource MenuListBoxItemStyle}">
                                 <Style.Triggers>
@@ -457,7 +395,6 @@
                                         <Setter Property="Background" Value="#33FFFFFF"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
-
                                     <DataTrigger Binding="{Binding ElementName=ItemBaoCaoHocVien, Path=IsSelected}" Value="True">
                                         <Setter Property="Background" Value="#33FFFFFF"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
@@ -467,28 +404,14 @@
                         </ListBoxItem.Style>
 
                         <ListBoxItem.ContextMenu>
-                            <ContextMenu x:Name="MenuBaoCaoFlyout"
-                                         Padding="0"
-                                         Background="Transparent">
-
+                            <ContextMenu x:Name="MenuBaoCaoFlyout" Padding="0" Background="Transparent">
                                 <ContextMenu.Template>
                                     <ControlTemplate TargetType="ContextMenu">
-                                        <Border Background="White" 
-                                                CornerRadius="6" 
-                                                BorderThickness="0" 
-                                                Margin="10"
-                                                Width="180">
-
+                                        <Border Background="White" CornerRadius="6" BorderThickness="0" Margin="10" Width="180">
                                             <Border.Effect>
-                                                <DropShadowEffect ShadowDepth="2" 
-                                      BlurRadius="12" 
-                                      Color="#AAA" 
-                                      Opacity="0.3"/>
+                                                <DropShadowEffect ShadowDepth="2" BlurRadius="12" Color="#AAA" Opacity="0.3"/>
                                             </Border.Effect>
-
-                                            <StackPanel IsItemsHost="True" 
-                            KeyboardNavigation.DirectionalNavigation="Cycle" 
-                            Background="Transparent"/>
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" Background="Transparent"/>
                                         </Border>
                                     </ControlTemplate>
                                 </ContextMenu.Template>
@@ -576,7 +499,8 @@
                                 <fa:IconImage Icon="ChartLine" Style="{StaticResource MenuIcon}"/>
                                 <TextBlock Text="Báo cáo" Style="{StaticResource MenuText}"/>
                             </StackPanel>
-                            <fa:IconImage x:Name="IconChevronBaoCao" Icon="ChevronRight" Grid.Column="1" Width="15" Height="15" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <fa:IconImage x:Name="IconChevronBaoCao" Icon="ChevronRight" Grid.Column="1" Width="15" Height="15" 
+                                          VerticalAlignment="Center" Margin="0,0,12,0">
                                 <fa:IconImage.Style>
                                     <Style TargetType="fa:IconImage">
                                         <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"/>
@@ -592,40 +516,36 @@
                         </Grid>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemBaoCaoDoanhThu" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" Padding="30,10,15,10" Margin="30,6,20,3">
+                    <ListBoxItem x:Name="ItemBaoCaoDoanhThu" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" 
+                                 Padding="30,10,15,10" Margin="30,6,20,3">
                         <TextBlock Text="Báo cáo doanh thu" Style="{StaticResource MenuText}" FontSize="15"/>
                     </ListBoxItem>
 
-                    <ListBoxItem x:Name="ItemBaoCaoHocVien" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" Padding="30,10,15,10" Margin="30,3,20,3">
+                    <ListBoxItem x:Name="ItemBaoCaoHocVien" Visibility="Collapsed" Style="{StaticResource MenuListBoxItemStyle}" 
+                                 Padding="30,10,15,10" Margin="30,3,20,3">
                         <TextBlock Text="Báo cáo học viên" Style="{StaticResource MenuText}" FontSize="15"/>
                     </ListBoxItem>
                 </ListBox>
             </Grid>
         </Border>
 
-        <Grid Grid.Column="1" 
-              Background="{StaticResource TFitness.SecondaryBackground}">
+        <Grid Grid.Column="1" Background="{StaticResource TFitness.SecondaryBackground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="70"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" 
-        Background="White" 
-        BorderBrush="#EEEEEE" 
-        BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Background="White" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="PageTitle" Text="Tổng quan" 
-                   FontSize="20" FontWeight="Bold" 
-                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                   Margin="25,0"/>
+
+                    <TextBlock x:Name="PageTitle" Text="Tổng quan" FontSize="20" FontWeight="Bold" 
+                               VerticalAlignment="Center" HorizontalAlignment="Left" Margin="25,0"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0">
-
                         <Button x:Name="BtnHelp" Style="{StaticResource TopBarButton}" Click="BtnHelp_Click">
                             <StackPanel Orientation="Horizontal">
                                 <fa:IconImage Icon="QuestionCircle" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
@@ -640,79 +560,13 @@
                             </StackPanel>
                         </Button>
 
-                        <Popup x:Name="VideoHelpPopup"
-       PlacementTarget="{Binding ElementName=BtnVideoHelp}"
-       Placement="Bottom"
-       VerticalOffset="10"
-       HorizontalOffset="-300"
-       AllowsTransparency="True"
-       StaysOpen="False"
-       PopupAnimation="Fade"
-       Closed="VideoHelpPopup_Closed">
-
-                            <Border Background="Black" 
-            CornerRadius="8" 
-            Width="560" Height="315"  
-            BorderBrush="#333"
-            BorderThickness="1">
-
-                                <Grid>
-                                    <!-- Nút đóng -->
-                                    <Button Click="CloseVideoPopup_Click" 
-                    HorizontalAlignment="Right" 
-                    VerticalAlignment="Top"
-                    Width="30" Height="30"
-                    Panel.ZIndex="100" 
-                    Background="Transparent" 
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    Margin="0,-10,-10,0">
-                                        <fa:IconImage Icon="Times" 
-                             Foreground="White" 
-                             Width="15" 
-                             Opacity="0.7"/>
-                                    </Button>
-
-                                    <!-- Loading -->
-                                    <StackPanel x:Name="VideoLoadingText" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center" 
-                       Visibility="Visible">
-                                        <fa:IconImage Icon="Spinner" 
-                             Foreground="White" 
-                             Width="30" Height="30" 
-                             Margin="0,0,0,10"/>
-                                        <TextBlock Text="Đang tải..." 
-                          Foreground="White" 
-                          HorizontalAlignment="Center"/>
-                                    </StackPanel>
-
-                                    <!-- WebView2 -->
-                                    <wv2:WebView2 x:Name="VideoWebView2" 
-                          Margin="0"
-                          Visibility="Collapsed"
-                          NavigationCompleted="VideoWebView2_NavigationCompleted"/>
-                                </Grid>
-                            </Border>
-                        </Popup>
-
-                        <Popup x:Name="HelpPopup" 
-                               PlacementTarget="{Binding ElementName=BtnHelp}" 
-                               Placement="Bottom"
-                               VerticalOffset="5" 
-                               HorizontalOffset="-200"
-                               AllowsTransparency="True" 
-                               StaysOpen="False" 
-                               PopupAnimation="Fade">
-
+                        <Popup x:Name="HelpPopup" PlacementTarget="{Binding ElementName=BtnHelp}" Placement="Bottom"
+                               VerticalOffset="5" HorizontalOffset="-200" AllowsTransparency="True" StaysOpen="False" PopupAnimation="Fade">
                             <Grid Margin="0,0,10,10">
-                                <Border Background="White" CornerRadius="8" Width="270" Padding="0" Margin="10"
-                                        Focusable="False">
-
+                                <Border Background="White" CornerRadius="8" Width="270" Padding="0" Margin="10" Focusable="False">
                                     <Border.Effect>
                                         <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.2" RenderingBias="Quality"/>
                                     </Border.Effect>
-
                                     <StackPanel>
                                         <Grid Margin="15,15,15,10">
                                             <StackPanel Orientation="Horizontal">
@@ -720,9 +574,7 @@
                                                 <TextBlock Text="Trung tâm hỗ trợ" FontWeight="Bold" FontSize="16" Foreground="{StaticResource BrushRedMain}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <Separator Background="#EEE" Margin="0"/>
-
                                         <StackPanel Margin="20,15,20,20">
                                             <TextBlock Text="Bạn đang gặp sự cố kỹ thuật?" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10"/>
                                             <TextBlock Text="Vui lòng liên hệ bộ phận IT để được hỗ trợ:" Foreground="Black" TextWrapping="Wrap" Margin="0,0,0,15"/>
@@ -749,31 +601,22 @@
                             </Grid>
                         </Popup>
 
-                        <Button x:Name="AvatarButton" 
-                                Style="{StaticResource TopBarButton}"
-                                Click="AvatarButton_Click">
-
+                        <Button x:Name="AvatarButton" Style="{StaticResource TopBarButton}" Click="AvatarButton_Click">
                             <StackPanel Orientation="Horizontal">
                                 <Grid Width="32" Height="32" VerticalAlignment="Center">
                                     <Ellipse Fill="#007ACC"/>
                                     <TextBlock x:Name="txtAvatarInitial" Text="O" Foreground="White" FontSize="16" FontWeight="SemiBold"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Grid>
-
                                 <StackPanel VerticalAlignment="Center" Margin="7,0,0,0">
-                                    <TextBlock x:Name="txtUserName" Text="Admin"  FontWeight="Bold" Foreground="Black"/>
-                                    <TextBlock x:Name="txtUserRole" Text="Quản trị viên"  Foreground="Gray" FontSize="11" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="txtUserName" Text="Admin" FontWeight="Bold" Foreground="Black"/>
+                                    <TextBlock x:Name="txtUserRole" Text="Quản trị viên" Foreground="Gray" FontSize="11" Margin="0,2,0,0"/>
                                 </StackPanel>
-
                                 <fa:IconImage Icon="ChevronDown" Foreground="Gray" Width="10" Height="10" VerticalAlignment="Center" Margin="8,5,0,0"/>
                             </StackPanel>
-
                             <Button.ContextMenu>
                                 <ContextMenu MinWidth="170">
-                                    <MenuItem Header="Đăng xuất" 
-                                              Padding="15,10" 
-                                              FontSize="14" 
-                                              Click="Logout_Click">
+                                    <MenuItem Header="Đăng xuất" Padding="15,10" FontSize="14" Click="Logout_Click">
                                         <MenuItem.Template>
                                             <ControlTemplate TargetType="MenuItem">
                                                 <Border x:Name="Border" Background="Transparent" Padding="{TemplateBinding Padding}">
@@ -782,28 +625,15 @@
                                                             <ColumnDefinition Width="30"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-
-                                                        <fa:IconImage x:Name="IconLogout" 
-                                  Icon="SignOutAlt" 
-                                  Width="16" Height="16" 
-                                  Foreground="#555555"
-                                  VerticalAlignment="Center" 
-                                  HorizontalAlignment="Center"/>
-
-                                                        <TextBlock Text="{TemplateBinding Header}" 
-                               Grid.Column="1"
-                               Foreground="#555555" 
-                               VerticalAlignment="Center"/>
+                                                        <fa:IconImage x:Name="IconLogout" Icon="SignOutAlt" Width="16" Height="16" 
+                                                                      Foreground="#555555" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="{TemplateBinding Header}" Grid.Column="1" Foreground="#555555" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
-
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsHighlighted" Value="True">
-
                                                         <Setter TargetName="Border" Property="Background" Value="#F5F5F5"/>
-
                                                         <Setter TargetName="IconLogout" Property="Foreground" Value="{StaticResource TFitness.PrimaryRed}"/>
-
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -811,28 +641,60 @@
                                     </MenuItem>
                                 </ContextMenu>
                             </Button.ContextMenu>
-
                         </Button>
 
                         <Button Style="{StaticResource TopBarButton}">
                             <Grid>
                                 <fa:IconImage Icon="Bell" Foreground="Gray" Width="18" Height="18" VerticalAlignment="Center"/>
                                 <Border CornerRadius="7" Background="#D93025" Padding="4,1" MinWidth="14" 
-                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-8,0">
+                                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-8,0">
                                     <TextBlock Text="37" Foreground="White" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </Button>
-
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Frame Grid.Row="1" 
-                   x:Name="MainFrame" 
-                   NavigationUIVisibility="Hidden" 
-                   Margin="10,10,10,10"/>
+            <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" Margin="10,10,10,10"/>
         </Grid>
+
+        <Border x:Name="SmallVideoContainer" Grid.ColumnSpan="2" 
+                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Width="480" Height="305" Margin="0,0,20,20"
+                Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1"
+                Visibility="Collapsed" Panel.ZIndex="999">
+            <Border.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Border.Resources>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.5" Color="Black" Direction="270"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="35"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="{StaticResource BrushRedMain}" CornerRadius="4,4,0,0">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                            <fa:IconImage Icon="Youtube" Foreground="White" Width="16" Height="16" Margin="0,0,8,0"/>
+                            <TextBlock Text="Hướng dẫn sử dụng" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Click="CloseSmallVideo_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Width="35" Height="35" Style="{StaticResource NoHoverButton}" Cursor="Hand">
+                            <fa:IconImage Icon="Times" Foreground="White" Width="12"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" Background="Black" CornerRadius="0,0,4,4" ClipToBounds="True">
+                    <wv2:WebView2 x:Name="VideoWebView2" Visibility="Visible"/>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
-
