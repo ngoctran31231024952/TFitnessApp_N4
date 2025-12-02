@@ -23,7 +23,6 @@ namespace TFitnessApp
         // --- 2. CÁC BIẾN BỘ LỌC ---
         private string _filterChiNhanh = "Tất cả";
         private int _filterLoaiBieuDo = 1; // 1: Đường (Line), 0: Cột (Column)
-        // Mở rộng mặc định 60 ngày để chắc chắn có dữ liệu test
         private DateTime _filterTuNgay = DateTime.Today.AddDays(-60);
         private DateTime _filterDenNgay = DateTime.Today;
 
@@ -51,7 +50,51 @@ namespace TFitnessApp
             set { _filterDenNgay = value; OnPropertyChanged(nameof(FilterDenNgay)); ReloadData(); }
         }
 
-        // --- 3. DỮ LIỆU BIỂU ĐỒ ---
+        // --- 3. DỮ LIỆU THỐNG KÊ KINH DOANH (DOANH SỐ) ---
+        private string _tongDoanhThuFormatted;
+        private string _doanhSoGiaHanCuFormatted;
+        private string _doanhSoMoiFormatted;
+        private double _tongDoanhThuValue;
+        private double _doanhSoGiaHanCuValue;
+        private double _doanhSoMoiValue;
+
+        public string TongDoanhThuFormatted
+        {
+            get => _tongDoanhThuFormatted;
+            set { _tongDoanhThuFormatted = value; OnPropertyChanged(nameof(TongDoanhThuFormatted)); }
+        }
+
+        public string DoanhSoGiaHanCuFormatted
+        {
+            get => _doanhSoGiaHanCuFormatted;
+            set { _doanhSoGiaHanCuFormatted = value; OnPropertyChanged(nameof(DoanhSoGiaHanCuFormatted)); }
+        }
+
+        public string DoanhSoMoiFormatted
+        {
+            get => _doanhSoMoiFormatted;
+            set { _doanhSoMoiFormatted = value; OnPropertyChanged(nameof(DoanhSoMoiFormatted)); }
+        }
+
+        public double TongDoanhThuValue
+        {
+            get => _tongDoanhThuValue;
+            set { _tongDoanhThuValue = value; OnPropertyChanged(nameof(TongDoanhThuValue)); }
+        }
+
+        public double DoanhSoGiaHanCuValue
+        {
+            get => _doanhSoGiaHanCuValue;
+            set { _doanhSoGiaHanCuValue = value; OnPropertyChanged(nameof(DoanhSoGiaHanCuValue)); }
+        }
+
+        public double DoanhSoMoiValue
+        {
+            get => _doanhSoMoiValue;
+            set { _doanhSoMoiValue = value; OnPropertyChanged(nameof(DoanhSoMoiValue)); }
+        }
+
+        // --- 4. DỮ LIỆU BIỂU ĐỒ ---
         public SeriesCollection DSDuongTangTruong { get; set; }
         public string[] NhanNgayThang { get; set; }
 
@@ -70,7 +113,20 @@ namespace TFitnessApp
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        private double _doanhSoGiaHanCuPercent;
+        private double _doanhSoMoiPercent;
 
+        public double DoanhSoGiaHanCuPercent
+        {
+            get => _doanhSoGiaHanCuPercent;
+            set { _doanhSoGiaHanCuPercent = value; OnPropertyChanged(nameof(DoanhSoGiaHanCuPercent)); }
+        }
+
+        public double DoanhSoMoiPercent
+        {
+            get => _doanhSoMoiPercent;
+            set { _doanhSoMoiPercent = value; OnPropertyChanged(nameof(DoanhSoMoiPercent)); }
+        }
         public DashboardViewModel()
         {
             string folder = AppDomain.CurrentDomain.BaseDirectory;
@@ -121,6 +177,7 @@ namespace TFitnessApp
 
                 try
                 {
+                    LoadThongTinKinhDoanh(tu, den, cn);
                     LoadDoanhThuTangTruong(tu, den, cn, loaiBD);
                     LoadTyLeGoiTap(tu, den, cn);
                     LoadTyTrongChiNhanh(tu, den);
@@ -134,11 +191,121 @@ namespace TFitnessApp
             });
         }
 
-        // --- 1. BIỂU ĐỒ TĂNG TRƯỞNG (FIX LỖI RỖNG) ---
+        // --- THÊM: LOAD THÔNG TIN KINH DOANH (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
+        private void LoadThongTinKinhDoanh(DateTime tu, DateTime den, string cn)
+        {
+            double tongDoanhThu = 0;
+            double doanhSoGiaHanCu = 0;
+            double doanhSoMoi = 0;
+
+            using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
+            {
+                conn.Open();
+
+                // Query cho tổng doanh thu 
+                string sqlTongDoanhThu = @"
+    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as TongTien
+    FROM GiaoDich GD
+    LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay
+    AND (GD.TrangThai = 'Đã thanh toán' OR GD.TrangThai = 'Trả một phần')";
+
+
+                if (cn != "Tất cả") sqlTongDoanhThu += " AND CN.TenCN = @tenCN";
+
+                // Query cho doanh số từ học viên gia hạn gói cũ - XÓA ĐIỀU KIỆN TrangThai
+                string sqlGiaHanCu = @"
+                    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as DoanhSo
+                    FROM GiaoDich GD
+                    INNER JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+                    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay 
+                    AND HD.LoaiHopDong = 'Gia hạn'";
+
+                if (cn != "Tất cả") sqlGiaHanCu += " AND CN.TenCN = @tenCN";
+
+                // Query cho doanh số từ học viên mua gói mới - XÓA ĐIỀU KIỆN TrangThai
+                string sqlMoi = @"
+                    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as DoanhSo
+                    FROM GiaoDich GD
+                    INNER JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+                    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay 
+                    AND HD.LoaiHopDong = 'Mới'";
+
+                if (cn != "Tất cả") sqlMoi += " AND CN.TenCN = @tenCN";
+
+                using (var cmd = new SqliteCommand(sqlTongDoanhThu, conn))
+                {
+                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
+                    if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
+
+                    var result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value && result != null)
+                    {
+                        tongDoanhThu = Convert.ToDouble(result);
+                    }
+                }
+
+                using (var cmd = new SqliteCommand(sqlGiaHanCu, conn))
+                {
+                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
+                    if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
+
+                    var result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value && result != null)
+                    {
+                        doanhSoGiaHanCu = Convert.ToDouble(result);
+                    }
+                }
+
+                using (var cmd = new SqliteCommand(sqlMoi, conn))
+                {
+                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
+                    if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
+
+                    var result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value && result != null)
+                    {
+                        doanhSoMoi = Convert.ToDouble(result);
+                    }
+                }
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                TongDoanhThuValue = tongDoanhThu;
+                DoanhSoGiaHanCuValue = doanhSoGiaHanCu;
+                DoanhSoMoiValue = doanhSoMoi;
+
+                TongDoanhThuFormatted = tongDoanhThu >= 1000000 ?
+                    $"{tongDoanhThu / 1000000:N1}M VNĐ" :
+                    $"{tongDoanhThu:N0} VNĐ";
+
+                DoanhSoGiaHanCuFormatted = doanhSoGiaHanCu >= 1000000 ?
+                    $"{doanhSoGiaHanCu / 1000000:N1}M VNĐ" :
+                    $"{doanhSoGiaHanCu:N0} VNĐ";
+
+                DoanhSoMoiFormatted = doanhSoMoi >= 1000000 ?
+                    $"{doanhSoMoi / 1000000:N1}M VNĐ" :
+                    $"{doanhSoMoi:N0} VNĐ";
+
+                OnPropertyChanged(nameof(TongDoanhThuValue));
+                OnPropertyChanged(nameof(DoanhSoGiaHanCuValue));
+                OnPropertyChanged(nameof(DoanhSoMoiValue));
+                OnPropertyChanged(nameof(TongDoanhThuFormatted));
+                OnPropertyChanged(nameof(DoanhSoGiaHanCuFormatted));
+                OnPropertyChanged(nameof(DoanhSoMoiFormatted));
+            });
+        }
+
+        // --- 1. BIỂU ĐỒ TĂNG TRƯỞNG ---
         private void LoadDoanhThuTangTruong(DateTime tu, DateTime den, string cn, int loaiBD)
         {
-            // Tạo map chứa tất cả các ngày trong khoảng, mặc định giá trị 0
-            // Điều này đảm bảo biểu đồ luôn có điểm dữ liệu liên tục, không bị gãy
             var dataMap = new Dictionary<DateTime, double>();
             for (var d = tu.Date; d <= den.Date; d = d.AddDays(1))
             {
@@ -148,7 +315,7 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
-                // Sử dụng LEFT JOIN để không mất dữ liệu nếu thiếu thông tin phụ
+                // KHÔNG CÓ ĐIỀU KIỆN TrangThai
                 string sql = @"
                     SELECT GD.NgayGD, CAST(GD.DaThanhToan AS REAL) as TongTien 
                     FROM GiaoDich GD
@@ -169,7 +336,6 @@ namespace TFitnessApp
                             {
                                 if (date.Date >= tu.Date && date.Date <= den.Date)
                                 {
-                                    // Cộng dồn vào ngày tương ứng
                                     if (dataMap.ContainsKey(date.Date))
                                         dataMap[date.Date] += Convert.ToDouble(reader["TongTien"]);
                                 }
@@ -187,8 +353,6 @@ namespace TFitnessApp
             {
                 DSDuongTangTruong.Clear();
 
-                // Logic chọn loại biểu đồ: 0 là Cột, 1 là Đường (Theo ComboBox)
-                // Lưu ý: ComboBox index 0 là Cột, 1 là Đường
                 if (loaiBD == 0) // Cột
                 {
                     DSDuongTangTruong.Add(new ColumnSeries
@@ -196,8 +360,7 @@ namespace TFitnessApp
                         Title = "Doanh thu",
                         Values = values,
                         Fill = Brushes.IndianRed,
-                        DataLabels = false,
-                        LabelPoint = p => p.Y > 0 ? p.Y.ToString("N0") : ""
+                        DataLabels = false
                     });
                 }
                 else // Đường
@@ -207,7 +370,7 @@ namespace TFitnessApp
                         Title = "Doanh thu",
                         Values = values,
                         Stroke = Brushes.IndianRed,
-                        Fill = Brushes.Transparent, // Không tô màu nền dưới đường
+                        Fill = Brushes.Transparent,
                         PointGeometrySize = 10,
                         DataLabels = false
                     });
@@ -218,7 +381,7 @@ namespace TFitnessApp
             });
         }
 
-        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP (FIX HIỆN DỮ LIỆU) ---
+        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
         private void LoadTyLeGoiTap(DateTime tu, DateTime den, string cn)
         {
             var goiTapMap = new Dictionary<string, double>();
@@ -226,14 +389,14 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
-                // Dùng LEFT JOIN
+                // XÓA ĐIỀU KIỆN TrangThai
                 string sql = @"
                     SELECT GT.TenGoi, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
                     FROM GiaoDich GD
                     LEFT JOIN GoiTap GT ON GD.MaGoi = GT.MaGoi
                     LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
                     LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-                    WHERE 1=1 ";
+                    WHERE 1=1";
 
                 if (cn != "Tất cả") sql += " AND CN.TenCN = @tenCN";
 
@@ -246,9 +409,10 @@ namespace TFitnessApp
                         {
                             if (TryGetDate(reader["NgayGD"].ToString(), out DateTime date) && date >= tu && date <= den)
                             {
-                                // Xử lý nếu tên gói null (dữ liệu lỗi)
                                 string tenGoi = reader["TenGoi"]?.ToString();
                                 if (string.IsNullOrEmpty(tenGoi)) tenGoi = "Khác";
+
+                                tenGoi = FormatLabel(tenGoi);
 
                                 double tien = Convert.ToDouble(reader["TongTien"]);
                                 if (goiTapMap.ContainsKey(tenGoi)) goiTapMap[tenGoi] += tien;
@@ -264,7 +428,6 @@ namespace TFitnessApp
                 DSTronDoanhThu.Clear();
                 var colors = new[] { "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#9b59b6", "#e74c3c" };
                 int i = 0;
-                // Chỉ lấy những gói có doanh thu > 0
                 foreach (var item in goiTapMap.Where(x => x.Value > 0).OrderByDescending(x => x.Value))
                 {
                     DSTronDoanhThu.Add(new PieSeries
@@ -272,15 +435,14 @@ namespace TFitnessApp
                         Title = item.Key,
                         Values = new ChartValues<double> { item.Value },
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[i % colors.Length]),
-                        DataLabels = true,
-                        LabelPoint = p => p.Y.ToString("N0")
+                        DataLabels = false
                     });
                     i++;
                 }
             });
         }
 
-        // --- 3. BIỂU ĐỒ TRÒN CHI NHÁNH ---
+        // --- 3. BIỂU ĐỒ TRÒN CHI NHÁNH (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
         private void LoadTyTrongChiNhanh(DateTime tu, DateTime den)
         {
             var cnMap = new Dictionary<string, double>();
@@ -289,6 +451,7 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
+                // XÓA ĐIỀU KIỆN TrangThai
                 string sql = @"
                     SELECT CN.TenCN, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
                     FROM GiaoDich GD
@@ -326,7 +489,7 @@ namespace TFitnessApp
                         Title = item.Key,
                         Values = new ChartValues<double> { item.Value },
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[i % colors.Length]),
-                        DataLabels = true
+                        DataLabels = false
                     });
                     i++;
                 }
@@ -335,7 +498,7 @@ namespace TFitnessApp
             });
         }
 
-        // --- 4. TOP 10 (FIX SẮP XẾP GIẢM DẦN) ---
+        // --- 4. TOP 10 (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
         private void LoadTopXepHang(DateTime tu, DateTime den, string cn)
         {
             var topCN = new Dictionary<string, double>();
@@ -344,13 +507,14 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
+                // XÓA ĐIỀU KIỆN TrangThai
                 string sql = @"
                     SELECT CN.TenCN, HV.HoTen, CAST(GD.DaThanhToan AS REAL) as Tien, GD.NgayGD
                     FROM GiaoDich GD
                     LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
                     LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
                     LEFT JOIN HocVien HV ON GD.MaHV = HV.MaHV
-                    WHERE 1=1 ";
+                    WHERE 1=1";
 
                 if (cn != "Tất cả") sql += " AND CN.TenCN = @tenCN";
 
@@ -375,43 +539,34 @@ namespace TFitnessApp
                 }
             }
 
-            // [FIX SẮP XẾP]: 
-            // 1. OrderByDescending: Lấy Top cao nhất (VD: 100, 90, 80...)
-            // 2. Take(10): Chỉ lấy 10 ông đầu
-            // 3. OrderBy (Tăng dần): Để khi vẽ lên RowSeries (vẽ từ dưới lên), giá trị to nhất sẽ nằm trên cùng.
-
             var listTopCN = topCN.OrderByDescending(x => x.Value).Take(10)
-                                 .OrderBy(x => x.Value) // Đảo lại để vẽ đúng thứ tự trên biểu đồ
+                                 .OrderBy(x => x.Value)
                                  .ToList();
 
             var listTopKH = topKH.OrderByDescending(x => x.Value).Take(10)
-                                 .OrderBy(x => x.Value) // Đảo lại
+                                 .OrderBy(x => x.Value)
                                  .ToList();
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // Top CN
                 DSHangCN.Clear();
                 DSHangCN.Add(new RowSeries
                 {
                     Title = "Doanh thu",
                     Values = new ChartValues<double>(listTopCN.Select(x => x.Value)),
                     Fill = Brushes.DodgerBlue,
-                    DataLabels = false,
-                    LabelPoint = p => p.X.ToString("N0")
+                    DataLabels = false
                 });
                 NhanTenCN = listTopCN.Select(x => x.Key).ToArray();
                 OnPropertyChanged(nameof(NhanTenCN));
 
-                // Top KH
                 DSHangKH.Clear();
                 DSHangKH.Add(new RowSeries
                 {
                     Title = "Doanh thu",
                     Values = new ChartValues<double>(listTopKH.Select(x => x.Value)),
                     Fill = Brushes.Orange,
-                    DataLabels = false,
-                    LabelPoint = p => p.X.ToString("N0")
+                    DataLabels = false
                 });
                 NhanTenKH = listTopKH.Select(x => x.Key).ToArray();
                 OnPropertyChanged(nameof(NhanTenKH));
@@ -422,6 +577,16 @@ namespace TFitnessApp
         {
             string[] formats = { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "MM/dd/yyyy", "M/d/yyyy" };
             return DateTime.TryParseExact(dateStr, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date);
+        }
+
+        private string FormatLabel(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return "Khác";
+
+            string lower = input.ToLowerInvariant();
+            System.Globalization.TextInfo textInfo = System.Globalization.CultureInfo.CurrentCulture.TextInfo;
+            return textInfo.ToTitleCase(lower);
         }
     }
 }
