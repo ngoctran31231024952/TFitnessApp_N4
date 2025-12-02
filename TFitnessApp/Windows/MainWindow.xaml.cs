@@ -9,23 +9,49 @@ using TFitnessApp.Windows;
 using TFitnessApp.Pages;
 using System.IO;
 using Microsoft.Web.WebView2.Core;
-using System.Collections.Generic;
 
 namespace TFitnessApp
 {
     public partial class MainWindow : Window
     {
         private bool isMenuProcessing = false;
-        private System.Threading.CancellationTokenSource videoLoadCancellation;
-        private bool isVideoWebViewReady = false;
+
         public MainWindow(string hoTen = "Admin", string quyen = "Quản trị viên")
         {
             InitializeComponent();
             DisplayUserInfo(hoTen, quyen);
+
             MainFrame.Navigate(new TongQuanPage());
             MenuListBox.SelectedItem = ItemTongQuan;
             PageTitle.Text = "Tổng quan";
             this.Title = "TFitness - Tổng quan";
+        }
+
+        public void NavigateToTab(string tabTag)
+        {
+            ListBoxItem itemToSelect = null;
+
+            switch (tabTag)
+            {
+                case "DoanhThu":
+                    itemToSelect = ItemGiaoDich;
+                    break;
+                case "HocVien":
+                    itemToSelect = ItemHocVien;
+                    break;
+                case "CheckIn":
+                    itemToSelect = ItemDiemDanh;
+                    break;
+                case "HetHan":
+                    itemToSelect = ItemHopDong;
+                    break;
+            }
+
+            if (itemToSelect != null)
+            {
+                MenuListBox.SelectedItem = itemToSelect;
+                MenuListBox.UpdateLayout();
+            }
         }
 
         private void DisplayUserInfo(string hoTen, string quyen)
@@ -142,8 +168,7 @@ namespace TFitnessApp
                     MainFrame.Navigate(new HocVienPage());
                     break;
                 case "ItemPT":
-                    pageTitle = "Quản lý PT";
-                    windowTitle = "PT";
+                    pageTitle = "Quản lý PT"; windowTitle = "PT";
                     MainFrame.Navigate(new PTPage());
                     break;
                 case "ItemHopDong":
@@ -166,7 +191,6 @@ namespace TFitnessApp
                     pageTitle = "Quản lý Chỉ số sức khỏe"; windowTitle = "Chỉ số sức khỏe";
                     MainFrame.Navigate(new CSSKPage());
                     break;
-
                 case "ItemBaoCaoDoanhThu":
                     pageTitle = "Báo cáo Doanh thu"; windowTitle = "Báo cáo doanh thu";
                     MainFrame.Navigate(new BaoCaoDoanhThuPage());
@@ -175,7 +199,6 @@ namespace TFitnessApp
                     pageTitle = "Báo cáo Học viên"; windowTitle = "Báo cáo học viên";
                     MainFrame.Navigate(new BaoCaoHocVienPage());
                     break;
-
                 case "ItemBaoCao":
                     return;
             }
@@ -262,7 +285,6 @@ namespace TFitnessApp
             return (p.X >= 0 && p.X <= element.ActualWidth && p.Y >= 0 && p.Y <= element.ActualHeight);
         }
 
-
         private void ItemBaoCao_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (HamburgerButton.IsChecked == true)
@@ -292,6 +314,7 @@ namespace TFitnessApp
             var clickedItem = sender as MenuItem;
             if (clickedItem == null) return;
             e.Handled = true;
+
             var parentMenu = ItemsControl.ItemsControlFromItemContainer(clickedItem) as ContextMenu;
             if (parentMenu != null)
             {
@@ -304,6 +327,7 @@ namespace TFitnessApp
                 }
                 parentMenu.IsOpen = false;
             }
+
             string header = clickedItem.Header.ToString();
             string newTitle = "";
 
@@ -339,6 +363,7 @@ namespace TFitnessApp
                 }
             }
         }
+
         private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var item = sender as ListBoxItem;
@@ -359,69 +384,76 @@ namespace TFitnessApp
 
         private async void BtnVideoHelp_Click(object sender, RoutedEventArgs e)
         {
-            // Mở Popup
-            VideoHelpPopup.IsOpen = true;
+            if (SmallVideoContainer.Visibility == Visibility.Visible)
+            {
+                CloseSmallVideo_Click(null, null);
+                return;
+            }
 
-            // Hiện Loading, Ẩn WebView
-            VideoLoadingText.Visibility = Visibility.Visible;
-            VideoWebView2.Visibility = Visibility.Collapsed;
+            SmallVideoContainer.Visibility = Visibility.Visible;
 
             try
             {
-                // Khởi tạo môi trường (Vẫn cần UserData để lưu cache giúp load nhanh hơn)
                 if (VideoWebView2.CoreWebView2 == null)
                 {
-                    string userDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TFitness_WebView2_Data");
-                    var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                    string userDataFolder = Path.Combine(Path.GetTempPath(), "TFitness_WebView2_Cache");
+                    var options = new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required");
+                    var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
                     await VideoWebView2.EnsureCoreWebView2Async(env);
                 }
 
-                // URL Google Drive Preview
-                string driveFileId = "16xnsbuYDB0X3muSMok-qfx1jM5OXxQU3";
-                string url = $"https://drive.google.com/file/d/{driveFileId}/preview";
+                string videoFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Video");
+                string videoFilePath = Path.Combine(videoFolderPath, "huongdan.mp4");
 
-                // Điều hướng
-                VideoWebView2.CoreWebView2.Navigate(url);
+                if (!File.Exists(videoFilePath))
+                {
+                    MessageBox.Show($"Không tìm thấy file video!\nVui lòng kiểm tra đường dẫn: {videoFilePath}");
+                    return;
+                }
+
+                VideoWebView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "tfitness.local",
+                    videoFolderPath,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
+
+                string htmlContent = @"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>
+                            body, html { margin: 0; padding: 0; height: 100%; background-color: black; overflow: hidden; }
+                            video { 
+                                width: 100%; 
+                                height: 100%; 
+                                object-fit: contain;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <video autoplay controls>
+                            <source src='https://tfitness.local/huongdan.mp4' type='video/mp4'>
+                            Trình duyệt của bạn không hỗ trợ thẻ video.
+                        </video>
+                    </body>
+                    </html>";
+
+                VideoWebView2.NavigateToString(htmlContent);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi: {ex.Message}");
-                VideoHelpPopup.IsOpen = false;
+                MessageBox.Show($"Lỗi phát video: {ex.Message}");
+                SmallVideoContainer.Visibility = Visibility.Collapsed;
             }
         }
 
-        // 2. Sự kiện tải xong - ĐƠN GIẢN HÓA TỐI ĐA
-        private void VideoWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        private void CloseSmallVideo_Click(object sender, RoutedEventArgs e)
         {
-            if (e.IsSuccess)
-            {
-                // Chỉ cần hiện WebView lên thôi.
-                // KHÔNG chèn CSS, KHÔNG chèn Script click ảo nữa.
-                // Hãy để Google Drive tự lo phần hiển thị.
-                VideoLoadingText.Visibility = Visibility.Collapsed;
-                VideoWebView2.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                // Nếu tải thất bại (mất mạng, link lỗi)
-                MessageBox.Show("Không thể tải video. Vui lòng kiểm tra kết nối mạng.");
-            }
-        }
-
-        // 3. Đóng Popup (Giữ nguyên)
-        private void CloseVideoPopup_Click(object sender, RoutedEventArgs e)
-        {
-            VideoHelpPopup.IsOpen = false;
-            StopVideo();
-        }
-
-        private void VideoHelpPopup_Closed(object sender, EventArgs e) => StopVideo();
-
-        private void StopVideo()
-        {
+            SmallVideoContainer.Visibility = Visibility.Collapsed;
             if (VideoWebView2?.CoreWebView2 != null)
+            {
                 VideoWebView2.CoreWebView2.Navigate("about:blank");
+            }
         }
     }
 }
-
