@@ -1,0 +1,227 @@
+﻿<Window x:Class="TFitnessApp.Windows.XemLichTapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TFitnessApp.Windows"
+        xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Height="550" Width="900"
+        Title="CHI TIẾT LỊCH TẬP">
+
+    <Window.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,10,10,0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#555"/>
+        </Style>
+
+        <Style x:Key="InputStyle" TargetType="{x:Type Control}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="BorderBrush" Value="#CCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,5,0,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsEnabled" Value="False"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Setter Property="Background" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#F0F0F0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource InputStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="DisplayOnlyStyle" TargetType="TextBox" BasedOn="{StaticResource InputStyle}">
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#D32F2F" Padding="15">
+            <StackPanel Orientation="Horizontal">
+                <fa:IconImage Icon="CalendarCheck" Width="24" Height="24" Foreground="White" Margin="0,0,10,0"/>
+                <TextBlock Text="{Binding TitleText}" FontSize="18" FontWeight="Bold" Foreground="White"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="Mã Lịch tập" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtMaLichTap" Text="{Binding MaLichTap}" Style="{StaticResource DisplayOnlyStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Tên Lớp tập" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtTenBuoiTap" Text="{Binding TenBuoiTap}" Style="{StaticResource InputStyle}" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0">
+                    <TextBlock Text="Mã Học viên" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtMaHV" Text="{Binding MaHocVien}" Style="{StaticResource InputStyle}" TextChanged="TxtMaHV_TextChanged" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="0">
+                    <TextBlock Text="Tên Học viên" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtTenHV" Text="{Binding TenHocVien}" Style="{StaticResource DisplayOnlyStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="4" Grid.Column="0">
+                    <TextBlock Text="SĐT Học viên" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtSDT" Text="{Binding SoDienThoai}" Style="{StaticResource DisplayOnlyStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="5" Grid.Column="0">
+                    <TextBlock Text="Email Học viên" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtEmail" Text="{Binding Email}" Style="{StaticResource DisplayOnlyStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="6" Grid.Column="0">
+                    <TextBlock Text="Chi nhánh" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtChiNhanh" Text="{Binding ChiNhanh}" Style="{StaticResource InputStyle}" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="7" Grid.Column="0">
+                    <TextBlock Text="Trạng thái" Style="{StaticResource LabelStyle}"/>
+                    <ComboBox x:Name="cmbTrangThai" SelectedValue="{Binding TrangThai}" Style="{StaticResource ComboBoxStyle}" IsEnabled="{Binding IsEditing}">
+                        <ComboBoxItem Content="Chưa Hoàn Thành"/>
+                        <ComboBoxItem Content="Đã Hoàn Thành"/>
+                        <ComboBoxItem Content="Đã Hủy"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="2">
+                    <TextBlock Text="Mã PT" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtMaPT" Text="{Binding MaPTInput}" Style="{StaticResource InputStyle}" TextChanged="TxtMaPT_TextChanged" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Tên PT" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtTenPT" Text="{Binding TenPT}" Style="{StaticResource DisplayOnlyStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="2">
+                    <TextBlock Text="Ngày tập" Style="{StaticResource LabelStyle}"/>
+                    <DatePicker x:Name="dpNgayTap" SelectedDate="{Binding NgayTap}" Style="{StaticResource InputStyle}" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="2">
+                    <TextBlock Text="Giờ bắt đầu (HH:mm)" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtGioBD" Text="{Binding GioBatDau}" Style="{StaticResource InputStyle}" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="4" Grid.Column="2">
+                    <TextBlock Text="Giờ kết thúc (HH:mm)" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="txtGioKT" Text="{Binding GioKetThuc}" Style="{StaticResource InputStyle}" IsEnabled="{Binding IsEditing}"/>
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="#DDD" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                <Button x:Name="btnEdit" Background="#FF9800" Margin="0,0,10,0" Style="{StaticResource ActionButtonStyle}" Click="BtnEdit_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="PencilAlt" Width="14" Height="14" Foreground="White" Margin="0,0,5,0"/>
+                            <TextBlock Text="Chỉnh sửa"/>
+                        </StackPanel>
+                    </Button.Content>
+                    <Button.Visibility>
+                        <Binding Path="IsEditing" Converter="{StaticResource BooleanToVisibilityConverter}" ConverterParameter="Inverse"/>
+                    </Button.Visibility>
+                </Button>
+
+                <Button x:Name="btnSave" Background="#4CAF50" Margin="0,0,10,0" Style="{StaticResource ActionButtonStyle}" Click="BtnSave_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="Save" Width="14" Height="14" Foreground="White" Margin="0,0,5,0"/>
+                            <TextBlock Text="Lưu"/>
+                        </StackPanel>
+                    </Button.Content>
+                    <Button.Visibility>
+                        <Binding Path="IsEditing" Converter="{StaticResource BooleanToVisibilityConverter}"/>
+                    </Button.Visibility>
+                </Button>
+
+                <Button x:Name="btnCancel" Background="#F44336" Style="{StaticResource ActionButtonStyle}" Click="BtnCancel_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="TimesCircle" Width="14" Height="14" Foreground="White" Margin="0,0,5,0"/>
+                            <TextBlock Text="Hủy"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

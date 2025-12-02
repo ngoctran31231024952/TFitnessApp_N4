@@ -4,16 +4,280 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TFitnessApp"
+      xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="LichTapPage">
+      d:DesignHeight="600" d:DesignWidth="1200"
+      Title="LichTapPage"
+      Background="White">
 
-    <Grid>
-        <Grid Background="White">
-            <TextBlock Text="Đây là trang Quản lý Lịch tập" 
-               FontSize="30" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"/>
+    <Page.Resources>
+        <Style x:Key="CenteredColumnStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="HeaderCenteredStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ActionIconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="Xem chi tiết/Chỉnh sửa"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="20"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="{Binding Tag, RelativeSource={RelativeSource AncestorType=Button}}" 
+                                              Width="14" 
+                                              Height="14" 
+                                              Foreground="{TemplateBinding Foreground}" 
+                                              Margin="0,0,6,0" 
+                                              VerticalAlignment="Center"/>
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           Foreground="{TemplateBinding Foreground}" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="13" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#D32F2F" Offset="0.0"/>
+                                            <GradientStop Color="#E53935" Offset="0.5"/>
+                                            <GradientStop Color="#D32F2F" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterDatePickerStyle" TargetType="DatePicker">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#E8E8E8"/>
+            <Setter Property="Margin" Value="15,0,5,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FilterComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#E8E8E8"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+    </Page.Resources>
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="15,15,15,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#D32F2F" CornerRadius="5" Padding="20,10" VerticalAlignment="Center">
+                <TextBlock Text="Danh sách lịch tập" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+            </Border>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="15,0,15,0" VerticalAlignment="Center">
+
+                <DatePicker x:Name="NgayFilterDatePicker" 
+                            Width="150"
+                            Style="{StaticResource FilterDatePickerStyle}"
+                            ToolTip="Chọn ngày tập"
+                            SelectedDateChanged="NgayFilterDatePicker_SelectedDateChanged"/>
+
+                <ComboBox x:Name="ChiNhanhFilterComboBox" 
+                          Width="150"
+                          Style="{StaticResource FilterComboBoxStyle}"
+                          ToolTip="Chọn chi nhánh"
+                          SelectionChanged="ChiNhanhFilterComboBox_SelectionChanged"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="Tất cả"/>
+                    <ComboBoxItem Content="CN1"/>
+                    <ComboBoxItem Content="CN2"/>
+                    <ComboBoxItem Content="CN3"/>
+                    <ComboBoxItem Content="CN4"/>
+                    <ComboBoxItem Content="CN5"/>
+                </ComboBox>
+
+                <Border Background="#E8E8E8" CornerRadius="20" Height="40" VerticalAlignment="Center" Margin="15,0,0,0" Width="400">
+                    <Grid Margin="15,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="SearchTextBox" 
+                                 Text="Tìm kiếm Mã HĐ, Tên HV, Mã PT..."
+                                 BorderThickness="0" 
+                                 Background="Transparent"
+                                 VerticalContentAlignment="Center"
+                                 FontSize="13"
+                                 Foreground="#999"
+                                 GotFocus="SearchTextBox_GotFocus"
+                                 LostFocus="SearchTextBox_LostFocus"
+                                 TextChanged="SearchTextBox_TextChanged"/>
+
+                        <TextBlock Grid.Column="1" Text="🔍" FontSize="16" Foreground="#666" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Tạo mới" Tag="PlusSquare" Style="{StaticResource ActionButtonStyle}" Click="CreateButton_Click"/>
+                <Button Content="Xóa" Tag="Trash" Style="{StaticResource ActionButtonStyle}" Click="DeleteButton_Click"/>
+                <Button Content="Làm mới" Tag="SyncAlt" Style="{StaticResource ActionButtonStyle}" Click="RefreshButton_Click"/>
+            </StackPanel>
         </Grid>
+
+        <DataGrid Grid.Row="1" 
+                  x:Name="LichTapDataGrid" 
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  HeadersVisibility="Column"
+                  BorderThickness="0"
+                  GridLinesVisibility="Horizontal"
+                  RowHeight="50"
+                  Background="White"
+                  Margin="15,15,15,15"
+                  AlternationCount="2"
+                  SelectionMode="Extended">
+
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#4682B4"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#4682B4"/>
+            </DataGrid.Resources>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="White"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FFE0E0"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#4682B4"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="AlternationIndex" Value="1">
+                            <Setter Property="Background" Value="#F9F9F9"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+
+                <DataGridTemplateColumn Width="40" HeaderStyle="{StaticResource HeaderCenteredStyle}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <CheckBox x:Name="chkSelectAll" ToolTip="Chọn tất cả" Click="SelectAllCheckBox_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Chi tiết" Width="80" HeaderStyle="{StaticResource HeaderCenteredStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource ActionIconButtonStyle}" Click="ViewDetailButton_Click" Tag="{Binding MaLichTap}">
+                                <fa:IconImage Icon="Eye" Width="16" Height="16" Foreground="#666"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Mã học viên" Binding="{Binding MaHocVien}" Width="100" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Tên học viên" Binding="{Binding TenHocVien}" Width="150" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="SĐT" Binding="{Binding SoDienThoai}" Width="100" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Ngày tập" Binding="{Binding NgayTap, StringFormat='dd/MM/yyyy'}" Width="100" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Bắt đầu" Binding="{Binding GioBatDau}" Width="80" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Kết thúc" Binding="{Binding GioKetThuc}" Width="80" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Lớp tập" Binding="{Binding TenBuoiTap}" Width="120" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTextColumn Header="Chi nhánh" Binding="{Binding ChiNhanh}" Width="80" ElementStyle="{StaticResource CenteredColumnStyle}" HeaderStyle="{StaticResource HeaderCenteredStyle}"/>
+
+                <DataGridTemplateColumn Header="Trạng thái" Width="*" HeaderStyle="{StaticResource HeaderCenteredStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border x:Name="StatusBorder"
+                                    CornerRadius="10"
+                                    Padding="10,5"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{Binding TrangThai}">
+                                <TextBlock Text="{Binding TrangThai}"
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"/>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã Hoàn Thành">
+                                    <Setter TargetName="StatusBorder" Property="Background" Value="#4CAF50"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TrangThai}" Value="Chưa Hoàn Thành">
+                                    <Setter TargetName="StatusBorder" Property="Background" Value="#FFC107"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã Hủy">
+                                    <Setter TargetName="StatusBorder" Property="Background" Value="#F44336"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

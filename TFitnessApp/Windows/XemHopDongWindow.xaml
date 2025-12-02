@@ -1,0 +1,289 @@
+﻿<Window x:Class="TFitnessApp.Windows.XemHopDongWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TFitnessApp.Windows"
+        mc:Ignorable="d"
+        Title="Xem Chi Tiết Hợp Đồng" Height="580" Width="900"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="White"
+        AllowsTransparency="True">
+
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <Style x:Key="ViewTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+        </Style>
+
+        <Style x:Key="ViewComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsEnabled" Value="False"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+        </Style>
+
+        <Style x:Key="ViewDatePickerStyle" TargetType="DatePicker">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsEnabled" Value="False"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="20"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="Content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#D32F2F" Offset="0.0"/>
+                                            <GradientStop Color="#E53935" Offset="0.5"/>
+                                            <GradientStop Color="#D32F2F" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="Content" Property="TextElement.Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#D32F2F" BorderThickness="1" CornerRadius="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#D32F2F" CornerRadius="5,5,0,0" MouseDown="Header_MouseDown">
+                <Grid Margin="15,10">
+                    <TextBlock Text="Chi tiết và Chỉnh sửa Hợp đồng" 
+                               FontSize="16" 
+                               FontWeight="SemiBold" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"/>
+                    <Button Content="✕" 
+                            HorizontalAlignment="Right" 
+                            VerticalAlignment="Top"
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="White" 
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Click="CloseButton_Click"
+                            Cursor="Hand"
+                            Padding="5"
+                            Margin="0,-5,0,0"/>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="30,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Mã hợp đồng:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="MaHDTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Ngày bắt đầu:" Style="{StaticResource LabelStyle}"/>
+                        <DatePicker x:Name="NgayBatDauDatePicker" Style="{StaticResource ViewDatePickerStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Ngày hết hạn:" Style="{StaticResource LabelStyle}"/>
+                        <DatePicker x:Name="NgayKetThucDatePicker" Style="{StaticResource ViewDatePickerStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Loại hợp đồng:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="LoaiHopDongComboBox" Style="{StaticResource ViewComboBoxStyle}">
+                            <ComboBoxItem Content="Mới"/>
+                            <ComboBoxItem Content="Gia hạn"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="TrangThaiComboBox" Style="{StaticResource ViewComboBoxStyle}">
+                            <ComboBoxItem Content="Còn hiệu lực"/>
+                            <ComboBoxItem Content="Hết hiệu lực"/>
+                            <ComboBoxItem Content="Đã hủy"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Mã gói tập:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="MaGoiTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,0,15,10">
+                        <TextBlock Text="Thành tiền:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="TongTienTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,15,10">
+                        <TextBlock Text="Chi nhánh tập:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="MaCNComboBox" Style="{StaticResource ViewComboBoxStyle}">
+                            <ComboBoxItem Content="CN1"/>
+                            <ComboBoxItem Content="CN2"/>
+                            <ComboBoxItem Content="CN3"/>
+                            <ComboBoxItem Content="CN4"/>
+                            <ComboBoxItem Content="CN5"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,15,10">
+                        <TextBlock Text="Mã PT:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="MaPTTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,15,10">
+                        <TextBlock Text="Tên PT:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="PTTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.Column="1" Grid.RowSpan="5" Margin="15,0,15,10">
+                        <TextBlock Text="Ghi chú:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="GhiChuTextBox" 
+                                 Style="{StaticResource ViewTextBoxStyle}" 
+                                 Height="180" 
+                                 TextWrapping="Wrap" 
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="15,0,0,10">
+                        <TextBlock Text="Mã học viên:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="MaHVTextBox" 
+                                 Style="{StaticResource ViewTextBoxStyle}"
+                                 TextChanged="MaHVTextBox_TextChanged"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="15,0,0,10">
+                        <TextBlock Text="Tên học viên:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="HoTenHocVienTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="2" Margin="15,0,0,10">
+                        <TextBlock Text="Giới tính:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="GioiTinhComboBox" Style="{StaticResource ViewComboBoxStyle}">
+                            <ComboBoxItem Content="Nam"/>
+                            <ComboBoxItem Content="Nữ"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.Column="2" Margin="15,0,0,10">
+                        <TextBlock Text="Số điện thoại:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="SDTTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.Column="2" Margin="15,0,0,10">
+                        <TextBlock Text="Địa chỉ email:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="EmailTextBox" Style="{StaticResource ViewTextBoxStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,30,20">
+
+                <Button Click="EditButton_Click"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Margin="0,0,15,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✏️" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,5,0" 
+                                   FontFamily="Segoe UI Symbol" 
+                                   FontSize="16"/>
+                        <TextBlock Text="Chỉnh sửa" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="SaveButton"
+                        Click="SaveButton_Click"
+                        Style="{StaticResource ActionButtonStyle}"
+                        IsEnabled="False"
+                        Margin="0,0,15,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="💾" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,5,0" 
+                                   FontFamily="Segoe UI Symbol" 
+                                   FontSize="16"/>
+                        <TextBlock Text="Lưu" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="PrintButton_Click"
+                        Style="{StaticResource ActionButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🖨" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,5,0" 
+                                   FontFamily="Segoe UI Symbol" 
+                                   FontSize="16"/>
+                        <TextBlock Text="In phiếu" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</Window>

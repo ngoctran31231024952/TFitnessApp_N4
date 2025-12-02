@@ -1,0 +1,248 @@
+﻿<Window x:Class="TFitnessApp.Windows.ThemLichTapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp"
+        mc:Ignorable="d"
+        Title="Tạo Lịch Tập Mới" Height="650" Width="950"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="White"
+        AllowsTransparency="True">
+
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="InputDatePickerStyle" TargetType="DatePicker">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="AutoFillTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="25,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="20"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <fa:IconImage Icon="{Binding Tag, RelativeSource={RelativeSource AncestorType=Button}}" 
+                                              Width="14" 
+                                              Height="14" 
+                                              Foreground="{TemplateBinding Foreground}" 
+                                              Margin="0,0,6,0" 
+                                              VerticalAlignment="Center"/>
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           Foreground="{TemplateBinding Foreground}" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="13" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#D32F2F" Offset="0.0"/>
+                                            <GradientStop Color="#E53935" Offset="0.5"/>
+                                            <GradientStop Color="#D32F2F" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#D32F2F" BorderThickness="1" CornerRadius="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#D32F2F" CornerRadius="5,5,0,0" MouseDown="Header_MouseDown">
+                <Grid Margin="15,10">
+                    <TextBlock Text="Tạo Lịch Tập Mới" 
+                               FontSize="16" 
+                               FontWeight="SemiBold" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"/>
+                    <Button Content="✕" 
+                            HorizontalAlignment="Right" 
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="White" 
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Click="CloseButton_Click"
+                            Cursor="Hand"
+                            Padding="5"
+                            Margin="0,-5,0,0"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="30,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Mã lịch tập:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="MaLichTapTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Ngày tập:" Style="{StaticResource LabelStyle}"/>
+                    <DatePicker x:Name="NgayTapDatePicker" Style="{StaticResource InputDatePickerStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Thời gian bắt đầu (HH:MM):" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="GioBatDauTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Thời gian kết thúc (HH:MM):" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="GioKetThucTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Lớp tập:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="LopTapTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
+                    <ComboBox x:Name="TrangThaiComboBox" Style="{StaticResource InputComboBoxStyle}" SelectedIndex="0">
+                        <ComboBoxItem Content="Đã Hoàn Thành"/>
+                        <ComboBoxItem Content="Chưa Hoàn Thành"/>
+                        <ComboBoxItem Content="Đã Hủy"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,15,10">
+                    <TextBlock Text="Mã PT:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="MaPTTextBox" Style="{StaticResource InputTextBoxStyle}" TextChanged="MaPTTextBox_TextChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,15,10">
+                    <TextBlock Text="Tên PT:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TenPTTextBox" Style="{StaticResource AutoFillTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,15,10">
+                    <TextBlock Text="Chi nhánh:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="MaCNTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="1" Grid.RowSpan="4" Margin="15,0,15,10">
+                    <TextBlock Text="Ghi chú:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="GhiChuTextBox" 
+                             Style="{StaticResource InputTextBoxStyle}" 
+                             Height="180" 
+                             TextWrapping="Wrap" 
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="15,0,0,10">
+                    <TextBlock Text="Mã học viên:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="MaHVTextBox" Style="{StaticResource InputTextBoxStyle}" TextChanged="MaHVTextBox_TextChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="15,0,0,10">
+                    <TextBlock Text="Tên học viên:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TenHocVienTextBox" Style="{StaticResource AutoFillTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="2" Margin="15,0,0,10">
+                    <TextBlock Text="Số điện thoại:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="SDTTextBox" Style="{StaticResource AutoFillTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="2" Margin="15,0,0,10">
+                    <TextBlock Text="Địa chỉ email:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="EmailTextBox" Style="{StaticResource AutoFillTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="4" Grid.Column="2" Margin="15,0,0,10">
+                    <TextBlock Text="Giới tính:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="GioiTinhTextBox" Style="{StaticResource AutoFillTextBoxStyle}"/>
+                </StackPanel>
+
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
+                <Button Content="Tạo mới" 
+                        Click="CreateButton_Click"
+                        Tag="Plus"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#D32F2F"
+                        Foreground="White"
+                        Margin="0,0,20,0"/>
+
+                <Button Content="Hủy" 
+                        Click="CancelButton_Click"
+                        Tag="Times"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#E0E0E0"
+                        Foreground="Black"/>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</Window>
