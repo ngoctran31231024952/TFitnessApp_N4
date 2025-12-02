@@ -5,12 +5,16 @@ using System.ComponentModel;
 using Microsoft.Data.Sqlite;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
+    // Lớp Window4 hiển thị chi tiết và cho phép chỉnh sửa/xóa tài khoản
     public partial class Window4 : Window, INotifyPropertyChanged
     {
-        private string _chuoiKetNoi;
+        #region Khai báo biến 
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         private MoDonDuLieuTaiKhoan _taiKhoan;
         private string _maTK;
         private string _hoTen;
@@ -24,7 +28,9 @@ namespace TFitnessApp.Windows
 
         // Biến để kiểm tra xem có đang trong chế độ chỉnh sửa không
         private bool _isEditMode = false;
+        #endregion
 
+        #region Thuộc tính Binding 
         public string MaTK
         {
             get => _maTK;
@@ -79,6 +85,7 @@ namespace TFitnessApp.Windows
             set { _trangThai = value; OnPropertyChanged(nameof(TrangThai)); }
         }
 
+        // Thuộc tính tính toán để format ngày tạo theo định dạng dd/MM/yyyy
         public string NgayTaoFormatted
         {
             get
@@ -91,39 +98,41 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Thuộc tính kiểm soát chế độ chỉnh sửa (Dùng cho UI)
         public bool IsEditMode
         {
             get => _isEditMode;
             set { _isEditMode = value; OnPropertyChanged(nameof(IsEditMode)); }
         }
+        #endregion
 
-        // Constructor nhận đối tượng MoDonDuLieuTaiKhoan
+        #region Khởi tạo và Tải dữ liệu
+        // Constructor nhận đối tượng MoDonDuLieuTaiKhoan để khởi tạo
         public Window4(MoDonDuLieuTaiKhoan taiKhoan)
         {
             InitializeComponent();
 
-            // Khởi tạo chuỗi kết nối
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            _chuoiKetNoi = $"Data Source={duongDanDB};";
+            _dbAccess = new DbAccess();
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
 
             // Lưu đối tượng tài khoản
             _taiKhoan = taiKhoan;
 
-            // Gán dữ liệu cơ bản từ đối tượng tài khoản
+            // Gán dữ liệu cơ bản từ đối tượng tài khoản (nhận từ danh sách)
             GanDuLieuCoBanTuTaiKhoan(taiKhoan);
 
-            // Tải thông tin đầy đủ từ database (bao gồm số điện thoại, email, phân quyền, trạng thái)
+            // Tải thông tin đầy đủ từ database
             TaiThongTinDayDuTuDatabase();
 
-            // Khởi tạo chế độ xem
+            // Khởi tạo chế độ xem (mặc định là chế độ chỉ đọc)
             SetEditMode(false);
         }
 
+        // Gán các trường dữ liệu cơ bản từ đối tượng được truyền vào
         private void GanDuLieuCoBanTuTaiKhoan(MoDonDuLieuTaiKhoan taiKhoan)
         {
-            // Chỉ gán các trường cơ bản từ đối tượng tài khoản
             MaTK = taiKhoan.MaTK;
             HoTen = taiKhoan.HoTen;
             TenDangNhap = taiKhoan.TenDangNhap;
@@ -131,26 +140,24 @@ namespace TFitnessApp.Windows
             PhanQuyen = taiKhoan.PhanQuyen;
             TrangThai = taiKhoan.TrangThai;
             NgayTao = taiKhoan.NgayTao.ToString();
-
-            // Các trường PhanQuyen, Email, SoDienThoai, TrangThai sẽ được lấy từ database
-            // để đảm bảo dữ liệu mới nhất
         }
 
+        // Tải thông tin Email và SDT từ database để đảm bảo dữ liệu đầy đủ và mới nhất
         private void TaiThongTinDayDuTuDatabase()
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
 
-                    // Lấy thông tin đầy đủ từ database
+                    // Query lấy Email và SDT theo MaTK
                     string query = @"
                         SELECT Email, SDT  
                         FROM TaiKhoan
                         WHERE MaTK = @MaTK";
 
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaTK", MaTK);
 
@@ -158,7 +165,7 @@ namespace TFitnessApp.Windows
                         {
                             if (reader.Read())
                             {
-                                // Cập nhật tất cả các trường từ database với xử lý NULL
+                                // Cập nhật Email và SDT (xử lý trường hợp DBNull)
                                 Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "";
                                 SDT = reader["SDT"] != DBNull.Value ? reader["SDT"].ToString() : "";
 
@@ -178,8 +185,10 @@ namespace TFitnessApp.Windows
                 MessageBox.Show($"Lỗi khi tải thông tin đầy đủ: {ex.Message}");
             }
         }
+        #endregion
 
-        // Phương thức debug để kiểm tra dữ liệu đã lấy được
+        #region Xử lý UI và Chế độ Chỉnh sửa
+        // Phương thức debug để in dữ liệu tài khoản ra Console
         private void DebugDuLieu()
         {
             Console.WriteLine($"=== DEBUG DỮ LIỆU TÀI KHOẢN {MaTK} ===");
@@ -191,11 +200,12 @@ namespace TFitnessApp.Windows
             Console.WriteLine("=====================================");
         }
 
+        // Đặt chế độ hiển thị cho các control nhập liệu (chỉ đọc/chỉnh sửa)
         private void SetEditMode(bool isEdit)
         {
             IsEditMode = isEdit;
 
-            // Cập nhật trạng thái các control có thể chỉnh sửa
+            // Cập nhật thuộc tính IsReadOnly và IsEnabled cho các control
             if (txtTenDangNhap != null)
                 txtTenDangNhap.IsReadOnly = !isEdit;
 
@@ -217,7 +227,7 @@ namespace TFitnessApp.Windows
             if (cbTrangThai != null)
                 cbTrangThai.IsEnabled = isEdit;
 
-            // Cập nhật nút
+            // Cập nhật văn bản trên nút "Sửa" thành "Lưu" hoặc ngược lại
             if (btnSua != null)
             {
                 var stackPanel = btnSua.Content as StackPanel;
@@ -228,11 +238,10 @@ namespace TFitnessApp.Windows
                         textBlock.Text = isEdit ? "Lưu" : "Sửa";
                 }
             }
-
-            // Cập nhật style cho các textbox
-            UpdateTextBoxStyles();
+            UpdateTextBoxStyles();            // Cập nhật style cho các textbox (chuyển đổi giữa ReadOnlyStyle và EditableStyle)
         }
 
+        // Cập nhật Style (màu nền, border) cho các TextBox dựa trên IsEditMode
         private void UpdateTextBoxStyles()
         {
             var editableStyle = (Style)FindResource("EditableTextBoxStyle");
@@ -254,17 +263,22 @@ namespace TFitnessApp.Windows
                 txtSoDienThoai.Style = IsEditMode ? editableStyle : readOnlyStyle;
         }
 
+        // Cho phép di chuyển cửa sổ bằng chuột
         private void Header_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
                 this.DragMove();
         }
 
+        // Đóng cửa sổ
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
+        #endregion
 
+        #region Xử lý CRUD (Sửa và Xóa)
+        // Sự kiện khi nhấn nút "Sửa" / "Lưu"
         private void btnSua_Click(object sender, RoutedEventArgs e)
         {
             if (!IsEditMode)
@@ -274,7 +288,7 @@ namespace TFitnessApp.Windows
             }
             else
             {
-                // Lưu thay đổi
+                // Lưu thay đổi (Thực hiện cập nhật Database)
                 try
                 {
                     // Validate dữ liệu
@@ -344,28 +358,28 @@ namespace TFitnessApp.Windows
                         return;
                     }
 
-                    // Cập nhật giá trị
-                    using (var connection = new SqliteConnection(_chuoiKetNoi))
+                    // Cập nhật giá trị vào Database
+                    using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
-                        connection.Open();
+                        conn.Open();
                         string query = @"
                             UPDATE TaiKhoan 
                             SET TenDangNhap = @TenDangNhap, 
                                 MatKhau = @MatKhau, 
                                 HoTen = @HoTen, 
                                 Email = @Email, 
-                                SDT = @SDT,  -- SỬA: SoDienThoai -> SDT
+                                SDT = @SDT, 
                                 PhanQuyen = @PhanQuyen, 
                                 TrangThai = @TrangThai
                             WHERE MaTK = @MaTK";
 
-                        using (var command = new SqliteCommand(query, connection))
+                        using (var command = new SqliteCommand(query, conn))
                         {
                             command.Parameters.AddWithValue("@TenDangNhap", TenDangNhap);
                             command.Parameters.AddWithValue("@MatKhau", MatKhau);
                             command.Parameters.AddWithValue("@HoTen", HoTen);
                             command.Parameters.AddWithValue("@Email", Email);
-                            command.Parameters.AddWithValue("@SDT", SDT);  // SỬA: @SoDienThoai -> @SDT
+                            command.Parameters.AddWithValue("@SDT", SDT);
                             command.Parameters.AddWithValue("@PhanQuyen", PhanQuyen);
                             command.Parameters.AddWithValue("@TrangThai", TrangThai);
                             command.Parameters.AddWithValue("@MaTK", MaTK);
@@ -377,7 +391,7 @@ namespace TFitnessApp.Windows
                                     MessageBoxButton.OK, MessageBoxImage.Information);
                                 SetEditMode(false);
 
-                                // Cập nhật lại đối tượng tài khoản
+                                // Cập nhật lại đối tượng tài khoản (trong bộ nhớ)
                                 _taiKhoan.TenDangNhap = TenDangNhap;
                                 _taiKhoan.MatKhau = MatKhau;
                                 _taiKhoan.HoTen = HoTen;
@@ -401,21 +415,24 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Sự kiện khi nhấn nút "Xóa"
         private void btnXoa_Click(object sender, RoutedEventArgs e)
         {
+            // Hiển thị hộp thoại xác nhận xóa
             var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa tài khoản {MaTK} - {HoTen} không?\n\nHành động này không thể hoàn tác!", "Xác nhận xóa",
-                                       MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
+                // Thực hiện xóa tài khoản khỏi Database
                 try
                 {
-                    using (var connection = new SqliteConnection(_chuoiKetNoi))
+                    using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
-                        connection.Open();
+                        conn.Open();
                         string query = "DELETE FROM TaiKhoan WHERE MaTK = @MaTK";
 
-                        using (var command = new SqliteCommand(query, connection))
+                        using (var command = new SqliteCommand(query, conn))
                         {
                             command.Parameters.AddWithValue("@MaTK", MaTK);
                             int rowsAffected = command.ExecuteNonQuery();
@@ -424,7 +441,7 @@ namespace TFitnessApp.Windows
                             {
                                 MessageBox.Show("Xóa tài khoản thành công!", "Thành công",
                                     MessageBoxButton.OK, MessageBoxImage.Information);
-                                this.Close();
+                                this.Close(); // Đóng cửa sổ sau khi xóa thành công
                             }
                             else
                             {
@@ -441,7 +458,10 @@ namespace TFitnessApp.Windows
                 }
             }
         }
+        #endregion
 
+        #region Phương thức Kiểm tra Dữ liệu
+        // Phương thức kiểm tra định dạng email có hợp lệ không
         private bool KiemTraEmailHopLe(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -458,21 +478,23 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Phương thức kiểm tra sự tồn tại của một giá trị trong cột/bảng (trừ tài khoản hiện tại)
         private bool KiemTraTonTai(string tableName, string columnName, string value, string excludeMaTK = null)
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";
 
+                    // Thêm điều kiện loại trừ tài khoản hiện tại nếu excludeMaTK được cung cấp
                     if (!string.IsNullOrEmpty(excludeMaTK))
                     {
                         query += " AND MaTK != @ExcludeMaTK";
                     }
 
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@Value", value);
                         if (!string.IsNullOrEmpty(excludeMaTK))
@@ -491,11 +513,17 @@ namespace TFitnessApp.Windows
                 return false;
             }
         }
+        #endregion
 
+        #region Triển khai INotifyPropertyChanged
+        // Triển khai sự kiện PropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
+
+        // Phương thức gọi sự kiện PropertyChanged khi giá trị thuộc tính thay đổi
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
     }
 }

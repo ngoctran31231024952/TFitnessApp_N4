@@ -11,7 +11,8 @@
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Background="Transparent"
-        MouseDown="Window_MouseDown">
+        MouseDown="Window_MouseDown"
+        Icon="/Images/Logo.ico">
 
     <Window.Resources>
         <Color x:Key="ColorRedMain">#C71A1B</Color>

@@ -4,12 +4,16 @@ using System.Data;
 using System.Windows;
 using System.ComponentModel;
 using Microsoft.Data.Sqlite;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
+    // Lớp Window1 dùng để tạo mới giao dịch
     public partial class Window1 : Window, INotifyPropertyChanged
     {
-        private string _chuoiKetNoi;
+        #region Trường Dữ liệu Nội bộ
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         private string _maHocVien;
         private string _hoTenHocVien;
         private string _maGoi;
@@ -22,10 +26,13 @@ namespace TFitnessApp.Windows
         private string _phuongThucThanhToan;
         private string _trangThaiThanhToan;
         private DateTime _ngayGiaoDich = DateTime.Now;
+        #endregion
 
+        #region Thuộc tính Binding (Public Properties)
         public string MaHocVien
         {
             get => _maHocVien;
+            // Gọi hàm tải thông tin học viên mỗi khi MaHocVien thay đổi
             set { _maHocVien = value; OnPropertyChanged(nameof(MaHocVien)); TaiThongTinHocVien(); }
         }
 
@@ -38,6 +45,7 @@ namespace TFitnessApp.Windows
         public string MaGoi
         {
             get => _maGoi;
+            // Gọi hàm tải thông tin gói tập mỗi khi MaGoi thay đổi
             set { _maGoi = value; OnPropertyChanged(nameof(MaGoi)); TaiThongTinGoiTap(); }
         }
 
@@ -50,6 +58,7 @@ namespace TFitnessApp.Windows
         public string MaNhanVien
         {
             get => _maNhanVien;
+            // Gọi hàm tải thông tin nhân viên mỗi khi MaNhanVien thay đổi
             set { _maNhanVien = value; OnPropertyChanged(nameof(MaNhanVien)); TaiThongTinNhanVien(); }
         }
 
@@ -62,12 +71,14 @@ namespace TFitnessApp.Windows
         public decimal TongTien
         {
             get => _tongTien;
+            // Tính lại số tiền nợ mỗi khi TongTien thay đổi
             set { _tongTien = value; OnPropertyChanged(nameof(TongTien)); TinhSoTienNo(); }
         }
 
         public decimal DaThanhToan
         {
             get => _daThanhToan;
+            // Tính lại số tiền nợ mỗi khi DaThanhToan thay đổi
             set { _daThanhToan = value; OnPropertyChanged(nameof(DaThanhToan)); TinhSoTienNo(); }
         }
 
@@ -94,27 +105,34 @@ namespace TFitnessApp.Windows
             get => _ngayGiaoDich;
             set { _ngayGiaoDich = value; OnPropertyChanged(nameof(NgayGiaoDich)); }
         }
+        #endregion
 
+        #region Khởi tạo
         public Window1()
         {
             InitializeComponent();
 
-            // Khởi tạo chuỗi kết nối
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            _chuoiKetNoi = $"Data Source={duongDanDB};";
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
 
-            // Set default values
+            // Thiết lập giá trị mặc định cho ComboBox
             PhuongThucThanhToan = "Tiền mặt";
             TrangThaiThanhToan = "Chưa Thanh Toán";
         }
+        #endregion
 
+        #region Xử lý UI và Tải dữ liệu
+        // Đóng cửa sổ
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        // Tải thông tin Họ tên học viên từ database dựa trên MaHocVien
         private void TaiThongTinHocVien()
         {
             if (string.IsNullOrEmpty(MaHocVien))
@@ -126,11 +144,12 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
+
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = "SELECT HoTen FROM HocVien WHERE MaHV = @MaHV";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaHV", MaHocVien);
                         var result = command.ExecuteScalar();
@@ -155,6 +174,7 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Tải thông tin Tên gói tập và Tổng tiền từ database dựa trên MaGoi
         private void TaiThongTinGoiTap()
         {
             if (string.IsNullOrEmpty(MaGoi))
@@ -167,11 +187,11 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = "SELECT TenGoi, GiaNiemYet FROM GoiTap WHERE MaGoi = @MaGoi";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaGoi", MaGoi);
                         using (var reader = command.ExecuteReader())
@@ -199,6 +219,7 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Tải thông tin Họ tên nhân viên từ database dựa trên MaNhanVien
         private void TaiThongTinNhanVien()
         {
             if (string.IsNullOrEmpty(MaNhanVien))
@@ -210,11 +231,11 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = "SELECT HoTen FROM TaiKhoan WHERE MaTK = @MaTK";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaTK", MaNhanVien);
                         var result = command.ExecuteScalar();
@@ -239,17 +260,21 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Tính toán số tiền nợ (còn lại)
         private void TinhSoTienNo()
         {
             SoTienNo = TongTien - DaThanhToan;
         }
+        #endregion
 
+        #region Xử lý Thêm Giao Dịch và Database
+        // Sự kiện khi nhấn nút "Tạo" giao dịch
         private void TaoGiaoDichButton_Click(object sender, RoutedEventArgs e)
         {
             // Tính toán số tiền nợ cuối cùng trước khi lưu
             TinhSoTienNo();
 
-            // Kiểm tra dữ liệu
+            // Kiểm tra dữ liệu bắt buộc
             if (string.IsNullOrEmpty(MaHocVien) || string.IsNullOrEmpty(MaGoi) || string.IsNullOrEmpty(MaNhanVien))
             {
                 MessageBox.Show("Vui lòng nhập đầy đủ mã học viên, mã gói tập và mã nhân viên!");
@@ -275,6 +300,7 @@ namespace TFitnessApp.Windows
                 return;
             }
 
+            // Kiểm tra tính hợp lệ của số tiền thanh toán
             if (DaThanhToan < 0)
             {
                 MessageBox.Show("Số tiền đã thanh toán không được âm!");
@@ -290,23 +316,24 @@ namespace TFitnessApp.Windows
             // Tạo mã giao dịch tự động
             string maGD = TaoMaGiaoDich();
 
-            // Tạo giao dịch mới
+            // Tạo giao dịch mới (INSERT INTO GiaoDich)
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = @"
                         INSERT INTO GiaoDich (MaGD, TongTien, DaThanhToan, SoTienNo, PhuongThuc, NgayGD, TrangThai, MaHV, MaGoi, MaTK)
                         VALUES (@MaGD, @TongTien, @DaThanhToan, @SoTienNo, @PhuongThuc, @NgayGD, @TrangThai, @MaHV, @MaGoi, @MaTK)";
 
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaGD", maGD);
                         command.Parameters.AddWithValue("@TongTien", TongTien);
                         command.Parameters.AddWithValue("@DaThanhToan", DaThanhToan);
                         command.Parameters.AddWithValue("@SoTienNo", SoTienNo);
                         command.Parameters.AddWithValue("@PhuongThuc", PhuongThucThanhToan);
+                        // Lưu ngày giao dịch với định dạng yyyy-MM-dd
                         command.Parameters.AddWithValue("@NgayGD", NgayGiaoDich.ToString("yyyy-MM-dd"));
                         command.Parameters.AddWithValue("@TrangThai", TrangThaiThanhToan);
                         command.Parameters.AddWithValue("@MaHV", MaHocVien);
@@ -332,15 +359,16 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Kiểm tra sự tồn tại của một mã (MaHV, MaGoi, MaTK) trong database
         private bool KiemTraTonTai(string tableName, string columnName, string value)
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@Value", value);
                         var result = command.ExecuteScalar();
@@ -355,15 +383,16 @@ namespace TFitnessApp.Windows
             }
         }
 
+        // Tạo mã giao dịch tự động (GD0001, GD0002,...)
         private string TaoMaGiaoDich()
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = "SELECT MaGD FROM GiaoDich ORDER BY MaGD DESC LIMIT 1";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         var result = command.ExecuteScalar();
 
@@ -373,25 +402,30 @@ namespace TFitnessApp.Windows
                         }
 
                         string lastMa = result.ToString();
+                        // Tăng giá trị số lên 1
                         if (lastMa.StartsWith("GD") && int.TryParse(lastMa.Substring(2), out int number))
                         {
                             return $"GD{(number + 1):D4}";
                         }
 
-                        return "GD0001";
+                        return "GD0001"; // Mã mặc định nếu không parse được
                     }
                 }
             }
             catch (Exception)
             {
-                return "GD0001";
+                return "GD0001"; // Trả về mã mặc định khi có lỗi kết nối/query
             }
         }
+        #endregion
 
+        #region Triển khai INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
+        // Phương thức gọi sự kiện PropertyChanged khi giá trị thuộc tính thay đổi
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
     }
 }

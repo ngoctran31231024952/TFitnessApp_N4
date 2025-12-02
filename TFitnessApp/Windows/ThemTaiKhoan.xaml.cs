@@ -4,19 +4,25 @@ using System.Windows;
 using System.ComponentModel;
 using Microsoft.Data.Sqlite;
 using System.Text.RegularExpressions;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
+    // Lớp Window3 thực hiện giao diện INotifyPropertyChanged để hỗ trợ Data Binding
     public partial class Window3 : Window, INotifyPropertyChanged
     {
-        private string _chuoiKetNoi;
+        #region Trường Dữ liệu Nội bộ
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         private string _hoTen;
         private string _tenDangNhap;
         private string _email;
         private string _sdt;
         private string _phanQuyen;
         private string _trangThai;
+        #endregion
 
+        #region Thuộc tính Binding (Public Properties)
         public string HoTen
         {
             get => _hoTen;
@@ -52,117 +58,37 @@ namespace TFitnessApp.Windows
             get => _trangThai;
             set { _trangThai = value; OnPropertyChanged(nameof(TrangThai)); }
         }
+        #endregion
 
+        #region Khởi tạo
+        // Constructor của Window3
         public Window3()
         {
             InitializeComponent();
 
-            // Khởi tạo chuỗi kết nối
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            _chuoiKetNoi = $"Data Source={duongDanDB};";
+            _dbAccess = new DbAccess();
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
 
         }
+        #endregion
 
+        #region Xử lý Sự kiện UI
+        // Sự kiện dùng để di chuyển cửa sổ (DragMove)
         private void Header_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
                 this.DragMove();
         }
 
+        // Sự kiện đóng cửa sổ
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private string TaoMaTaiKhoan()
-        {
-            try
-            {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
-                {
-                    connection.Open();
-                    string query = "SELECT COUNT(*) FROM TaiKhoan";
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        var result = command.ExecuteScalar();
-                        int count = result != null ? Convert.ToInt32(result) : 0;
-                        return $"TK{count + 1:000}";
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                return "TK001";
-            }
-        }
-
-        private string TaoMatKhau()
-        {
-            Random random = new Random();
-            string matKhau;
-            bool trung;
-
-            do
-            {
-                int soNgauNhien = random.Next(100000, 999999); // Số 6 chữ số
-                matKhau = $"TF@{soNgauNhien}";
-                trung = KiemTraMatKhauTrung(matKhau);
-            } while (trung);
-
-            return matKhau;
-        }
-
-        private bool KiemTraMatKhauTrung(string matKhau)
-        {
-            try
-            {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
-                {
-                    connection.Open();
-                    string query = "SELECT COUNT(1) FROM TaiKhoan WHERE MatKhau = @MatKhau";
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@MatKhau", matKhau);
-                        var result = command.ExecuteScalar();
-                        int count = result != null ? Convert.ToInt32(result) : 0;
-                        return count > 0;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        private bool KiemTraEmailHopLe(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
-            try
-            {
-                string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-                return Regex.IsMatch(email, pattern);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private bool KiemTraSoDienThoaiHopLe(string soDienThoai)
-        {
-            if (string.IsNullOrWhiteSpace(soDienThoai))
-                return false;
-
-            // Kiểm tra số điện thoại Việt Nam (10-11 số, bắt đầu bằng 0)
-            string pattern = @"^0\d{9,10}$";
-            return Regex.IsMatch(soDienThoai, pattern);
-        }
-
+        // Sự kiện chính: Xử lý khi nhấn nút "Tạo Tài khoản"
         private void TaoTaiKhoanButton_Click(object sender, RoutedEventArgs e)
         {
             // Kiểm tra dữ liệu
@@ -241,21 +167,21 @@ namespace TFitnessApp.Windows
                 return;
             }
 
-            // Thêm tài khoản mới
+            // Thêm tài khoản mới vào cơ sở dữ liệu
             try
             {
-                // Tạo mã tài khoản và mật khẩu
+                // Tạo mã tài khoản và mật khẩu ngẫu nhiên
                 string maTaiKhoan = TaoMaTaiKhoan();
                 string matKhau = TaoMatKhau();
 
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = @"
                         INSERT INTO TaiKhoan (MaTK, HoTen, PhanQuyen, TenDangNhap, MatKhau, Email, SDT, NgayTao, TrangThai)
                         VALUES (@MaTK, @HoTen, @PhanQuyen, @TenDangNhap, @MatKhau, @Email, @SDT, @NgayTao, @TrangThai)";
 
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@MaTK", maTaiKhoan);
                         command.Parameters.AddWithValue("@HoTen", HoTen);
@@ -288,16 +214,110 @@ namespace TFitnessApp.Windows
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        #endregion
 
+        #region Phương thức Tạo và Kiểm tra Dữ liệu
+        // Phương thức tạo mã tài khoản dựa trên số lượng tài khoản hiện có
+        private string TaoMaTaiKhoan()
+        {
+            try
+            {
+                using (SqliteConnection conn = DbAccess.CreateConnection())
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(*) FROM TaiKhoan";
+                    using (var command = new SqliteCommand(query, conn))
+                    {
+                        var result = command.ExecuteScalar();
+                        int count = result != null ? Convert.ToInt32(result) : 0;
+                        return $"TK{count + 1:000}";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return "TK001";
+            }
+        }
+
+        // Phương thức tạo mật khẩu ngẫu nhiên không trùng lặp
+        private string TaoMatKhau()
+        {
+            Random random = new Random();
+            string matKhau;
+            bool trung;
+
+            do
+            {
+                int soNgauNhien = random.Next(100000, 999999);
+                matKhau = $"TF@{soNgauNhien}";
+                trung = KiemTraMatKhauTrung(matKhau);
+            } while (trung);
+
+            return matKhau;
+        }
+
+        // Phương thức kiểm tra mật khẩu có bị trùng trong database không
+        private bool KiemTraMatKhauTrung(string matKhau)
+        {
+            try
+            {
+                using (SqliteConnection conn = DbAccess.CreateConnection())
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(1) FROM TaiKhoan WHERE MatKhau = @MatKhau";
+                    using (var command = new SqliteCommand(query, conn))
+                    {
+                        command.Parameters.AddWithValue("@MatKhau", matKhau);
+                        var result = command.ExecuteScalar();
+                        int count = result != null ? Convert.ToInt32(result) : 0;
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        // Phương thức kiểm tra định dạng email có hợp lệ không
+        private bool KiemTraEmailHopLe(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+                return Regex.IsMatch(email, pattern);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // Phương thức kiểm tra định dạng số điện thoại Việt Nam
+        private bool KiemTraSoDienThoaiHopLe(string soDienThoai)
+        {
+            if (string.IsNullOrWhiteSpace(soDienThoai))
+                return false;
+
+            string pattern = @"^0\d{9,10}$";
+            return Regex.IsMatch(soDienThoai, pattern);
+        }
+
+        // Phương thức kiểm tra sự tồn tại của một giá trị trong cột/bảng
         private bool KiemTraTonTai(string tableName, string columnName, string value)
         {
             try
             {
-                using (var connection = new SqliteConnection(_chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";
-                    using (var command = new SqliteCommand(query, connection))
+                    using (var command = new SqliteCommand(query, conn))
                     {
                         command.Parameters.AddWithValue("@Value", value);
                         var result = command.ExecuteScalar();
@@ -311,11 +331,17 @@ namespace TFitnessApp.Windows
                 return false;
             }
         }
+        #endregion
 
+        #region Triển khai INotifyPropertyChanged
+        // Triển khai sự kiện PropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
+
+        // Phương thức gọi sự kiện PropertyChanged khi giá trị thuộc tính thay đổi
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
     }
 }
