@@ -140,7 +140,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <Grid x:Name="popupBoLoc" Visibility="Collapsed" Panel.ZIndex="1000" Grid.RowSpan="2" Background="#80000000">
             <Border Background="White" CornerRadius="12" Width="450" Height="550" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30">
                 <Grid>
@@ -156,11 +155,10 @@
                     </Grid>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-
                             <TextBlock Text="Mã học viên:" Style="{StaticResource LabelStyle}"/>
                             <TextBox x:Name="txtLocMaHV" Height="35" FontSize="15" FontFamily="{StaticResource LatoRegular}"
-                                     Padding="15,0" BorderThickness="0" Background="#F5F5F5" VerticalContentAlignment="Center"
-                                     TextChanged="TxtLocMaHV_TextChanged"/>
+                                      Padding="15,0" BorderThickness="0" Background="#F5F5F5" VerticalContentAlignment="Center"
+                                      TextChanged="TxtLocMaHV_TextChanged"/>
 
                             <TextBlock Text="Họ tên:" Style="{StaticResource LabelStyle}"/>
                             <Border Height="35" Background="#E9ECEF" BorderThickness="0.5" CornerRadius="0">
@@ -216,7 +214,6 @@
                 </Grid>
             </Border>
         </Grid>
-
         <Grid Grid.Row="0" Height="100" Margin="0,0,0,25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -265,7 +262,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="380"/>
@@ -389,7 +385,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border CornerRadius="8" Padding="0" Height="45"
-                                 BorderThickness="0" Background="#F5F5F5">
+                                BorderThickness="0" Background="#F5F5F5">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -412,9 +408,9 @@
                         </Border>
 
                         <Button x:Name="btnTimKiem" Grid.Column="1" Width="100" Height="45"
-                                 Background="#28A745" Foreground="White"
-                                 BorderThickness="0" Margin="12,0,0,0"
-                                 Click="BtnTimKiem_Click" Cursor="Hand">
+                                Background="#28A745" Foreground="White"
+                                BorderThickness="0" Margin="12,0,0,0"
+                                Click="BtnTimKiem_Click" Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}" CornerRadius="8">
@@ -431,9 +427,9 @@
                         </Button>
 
                         <Button Grid.Column="2" Width="100" Height="45"
-                                 Background="#DC3545" Foreground="White"
-                                 BorderThickness="0" Margin="12,0,0,0"
-                                 Click="BtnMoBoLoc_Click" Cursor="Hand">
+                                Background="#DC3545" Foreground="White"
+                                BorderThickness="0" Margin="12,0,0,0"
+                                Click="BtnMoBoLoc_Click" Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}" CornerRadius="8">
@@ -442,8 +438,14 @@
                                 </ControlTemplate>
                             </Button.Template>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="☰" FontSize="18" Margin="0,0,8,0"/>
-                                <TextBlock Text="Lọc" FontSize="16"/>
+                                <TextBlock Text="&#xE71C;" 
+                                           FontFamily="Segoe MDL2 Assets" 
+                                           VerticalAlignment="Center" 
+                                           Margin="0,0,5,0" 
+                                           FontSize="14" RenderTransformOrigin="0.546,0.457"/>
+                                <TextBlock Text="Lọc" VerticalAlignment="Center" 
+                                           FontFamily="{StaticResource LatoRegular}" 
+                                           Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -548,7 +550,6 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-
                             </GridView>
                         </ListView.View>
                     </ListView>

@@ -8,27 +8,22 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
         <FontFamily x:Key="LatoRegular">/TFitnessApp;component/Fonts/#Lato Regular</FontFamily>
         <FontFamily x:Key="LatoBold">/TFitnessApp;component/Fonts/#Lato Bold</FontFamily>
         <FontFamily x:Key="LatoSemibold">/TFitnessApp;component/Fonts/#Lato Semibold</FontFamily>
         <FontFamily x:Key="LatoLight">/TFitnessApp;component/Fonts/#Lato Light</FontFamily>
-
         <Style TargetType="TextBlock" x:Key="BaseTextStyle">
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
             <Setter Property="Foreground" Value="#333"/>
         </Style>
-
         <Style TargetType="TextBlock" x:Key="HeaderTextStyle" BasedOn="{StaticResource BaseTextStyle}">
             <Setter Property="FontFamily" Value="{StaticResource LatoBold}"/>
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
-
         <Style TargetType="TextBox">
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
-
         <Style TargetType="Button" x:Key="ActionButton">
             <Setter Property="Background" Value="#DC143C"/>
             <Setter Property="Foreground" Value="White"/>
@@ -55,7 +50,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
         <Style TargetType="Button" x:Key="IconButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#666"/>
@@ -64,6 +58,44 @@
             <Setter Property="Margin" Value="3,0"/>
             <Setter Property="Padding" Value="5"/>
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
+        </Style>
+        <Style x:Key="CloseFilterButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DC143C"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PaginationNavButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="#DC143C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DC143C"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="0"/>
         </Style>
     </UserControl.Resources>
 
@@ -77,35 +109,29 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Row 0: Header (nếu cần thêm) -->
-
-                <!-- Row 1: Search và Action Buttons -->
                 <Grid Grid.Row="1" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Search Box -->
-                    <Grid Grid.Column="0" HorizontalAlignment="Left">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                         <Border BorderBrush="#DDD" BorderThickness="1"
                                 CornerRadius="20" Height="40" Padding="15,0" 
-                                Background="White" VerticalAlignment="Center" Width="350">
+                                Background="White" VerticalAlignment="Center" Width="300">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox x:Name="SearchBox" 
+                                <TextBox x:Name="TimKiemBox" 
                                          Grid.Column="0"
                                          Padding="0"
                                          BorderThickness="0"
-                                         Text="Tìm kiếm học viên" 
                                          Foreground="#999"
-                                         GotFocus="SearchBox_GotFocus" 
-                                         LostFocus="SearchBox_LostFocus"
-                                         TextChanged="SearchBox_TextChanged"/>
+                                         GotFocus="TimKiemBox_GotFocus" 
+                                         LostFocus="TimKiemBox_LostFocus"/>
 
                                 <TextBlock Grid.Column="1" 
                                            Text="🔍" 
@@ -116,24 +142,30 @@
                                            FontSize="14"/>
                             </Grid>
                         </Border>
-                    </Grid>
 
-                    <!-- Action Buttons -->
+                        <Button Content="Tìm kiếm"
+                                Style="{StaticResource ActionButton}"
+                                Click="TimKiemButton_Click" 
+                                Margin="10,0,0,0" 
+                                VerticalAlignment="Center"
+                                Height="31"/>
+                    </StackPanel>
+
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Style="{StaticResource ActionButton}" Click="Add_Click">
+                        <Button Style="{StaticResource ActionButton}" Click="FilterButton_Click">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE71C;" 
                                            FontFamily="Segoe MDL2 Assets" 
                                            VerticalAlignment="Center" 
                                            Margin="0,0,5,0" 
-                                           FontSize="14"/>
+                                           FontSize="14" RenderTransformOrigin="0.546,0.457"/>
                                 <TextBlock Text="Lọc" VerticalAlignment="Center" 
                                            FontFamily="{StaticResource LatoRegular}" 
                                            Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="Add_Click">
+                        <Button Style="{StaticResource ActionButton}" Click="SelectAll_Click" Width="110">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE73A;" 
                                            FontFamily="Segoe MDL2 Assets" 
@@ -146,7 +178,7 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="Add_Click">
+                        <Button Style="{StaticResource ActionButton}" Click="Add_Click" Width="79">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE710;" 
                                            FontFamily="Segoe MDL2 Assets" 
@@ -159,7 +191,7 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="Delete_Click">
+                        <Button Style="{StaticResource ActionButton}" Click="Delete_Click" Width="70">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE74D;" 
                                            FontFamily="Segoe MDL2 Assets" 
@@ -173,8 +205,6 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-
-                <!-- Row 2: Data Table -->
                 <Border Grid.Row="2" BorderBrush="#E0E0E0" BorderThickness="1" 
                         CornerRadius="5" Background="White">
                     <Grid>
@@ -183,7 +213,6 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Header Row -->
                         <Border Grid.Row="0" Background="#F9F9F9" BorderBrush="#E0E0E0" 
                                 BorderThickness="0,0,0,1" Padding="15,12">
                             <Grid>
@@ -197,51 +226,41 @@
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="110"/>
                                 </Grid.ColumnDefinitions>
 
-                                <CheckBox Grid.Column="0" x:Name="SelectAllCheckBox" 
-                                          Checked="SelectAllCheckBox_Changed" 
-                                          Unchecked="SelectAllCheckBox_Changed" 
+                                <CheckBox Grid.Column="0" x:Name="ChonTatCaCheckBox" 
+                                          Checked="ChonTatCaCheckBox_Changed" 
+                                          Unchecked="ChonTatCaCheckBox_Changed" 
                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
-
                                 <TextBlock Grid.Column="1" Text="Mã phiếu đo" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="2" Text="Mã học viên" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="3" Text="Họ tên học viên" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="4" Text="Ngày đo" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="5" Text="Chiều cao" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="6" Text="Cân nặng" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="7" Text="BMI" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="8" Text="TDEE" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
                                 <TextBlock Grid.Column="9" Text="Mục tiêu sức khỏe" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-
-                                <TextBlock Grid.Column="10" Text="Thao tác" 
+                                <TextBlock Grid.Column="11" Text="Thao tác" 
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333" 
                                            HorizontalAlignment="Center"/>
                             </Grid>
                         </Border>
 
-                        <!-- Data Rows -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
-                            <ItemsControl x:Name="StudentListControl">
+                            <ItemsControl x:Name="DanhSachChiSoControl">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1" 
@@ -252,6 +271,9 @@
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter Property="Background" Value="#FAFAFA"/>
                                                         </Trigger>
+                                                        <DataTrigger Binding="{Binding DaChon}" Value="True">
+                                                            <Setter Property="Background" Value="#F0F0F0"/>
+                                                        </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
@@ -267,64 +289,48 @@
                                                     <ColumnDefinition Width="90"/>
                                                     <ColumnDefinition Width="80"/>
                                                     <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="110"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- Checkbox -->
                                                 <CheckBox Grid.Column="0" IsChecked="{Binding DaChon, Mode=TwoWay}" 
-                                                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                          VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                          Checked="DataGridRow_CheckBox_Changed"
+                                                          Unchecked="DataGridRow_CheckBox_Changed"/>
 
-                                                <!-- Mã phiếu đo -->
                                                 <TextBlock Grid.Column="1" Text="{Binding MaPhieuDo}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Mã học viên -->
                                                 <TextBlock Grid.Column="2" Text="{Binding MaHocVien}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Họ tên học viên -->
                                                 <TextBlock Grid.Column="3" Text="{Binding HoTenHocVien}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Ngày đo -->
                                                 <TextBlock Grid.Column="4" Text="{Binding NgayDo, StringFormat=dd/MM/yyyy}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Chiều cao -->
                                                 <TextBlock Grid.Column="5" Text="{Binding ChieuCao}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Cân nặng -->
                                                 <TextBlock Grid.Column="6" Text="{Binding CanNang}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- BMI -->
                                                 <TextBlock Grid.Column="7" Text="{Binding BMI}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- TDEE -->
                                                 <TextBlock Grid.Column="8" Text="{Binding TDEE}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Mục tiêu sức khỏe -->
                                                 <TextBlock Grid.Column="9" Text="{Binding MucTieuSucKhoe}" 
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-
-                                                <!-- Action buttons -->
-                                                <StackPanel Grid.Column="10" Orientation="Horizontal" 
+                                                <StackPanel Grid.Column="11" Orientation="Horizontal" 
                                                             HorizontalAlignment="Center" Margin="5,0">
-                                                    <Button Content="&#xE7C5;" FontFamily="Segoe MDL2 Assets" Width="20"
+                                                    <Button Content="☰" FontFamily="Segoe MDL2 Assets" Width="50" Foreground="#DC3545"
                                                             Style="{StaticResource IconButton}" 
-                                                            ToolTip="Xem chi tiết" Click="ViewDetail_Click" 
+                                                            ToolTip="Xem chi tiết" Click="XemChiTiet_Click" 
                                                             Tag="{Binding}" Margin="2,0"/>
-
-                                                    <Button Content="&#xE70F;" FontFamily="Segoe MDL2 Assets" Width="20"
-                                                            Style="{StaticResource IconButton}" 
-                                                            ToolTip="Chỉnh sửa" Click="Edit_Click" 
-                                                            Tag="{Binding}" Margin="2,0"/>
-
-                                                    <Button Content="&#xE74D;" FontFamily="Segoe MDL2 Assets" Width="20"
+                                                    <Button HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Margin="0.2" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                            Click="Edit_Click"  
+                                                            Tag="{Binding}" Width="35" Height="35">
+                                                        <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"  
+                                                              Fill="#DC3545" Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                    </Button>
+                                                    <Button Content="✕" FontFamily="Segoe MDL2 Assets" Width="50" Foreground="#DC3545"
                                                             Style="{StaticResource IconButton}" 
                                                             ToolTip="Xóa" Click="DeleteSingle_Click" 
                                                             Tag="{Binding}" Margin="2,0"/>
@@ -335,113 +341,31 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
+
                     </Grid>
                 </Border>
-
-                <!-- Row 3: Pagination -->
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" 
                             Margin="0,30,0,0">
-                    <StackPanel.Resources>
-                        <Style x:Key="PaginationNavButtonStyle" TargetType="Button" 
-                               BasedOn="{StaticResource IconButton}">
-                            <Setter Property="Width" Value="40"/>
-                            <Setter Property="Height" Value="40"/>
-                            <Setter Property="Background" Value="#DC143C"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderThickness" Value="1"/>
-                            <Setter Property="BorderBrush" Value="#DC143C"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Margin" Value="5,0"/>
-                            <Setter Property="Padding" Value="0"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="4">
-                                            <ContentPresenter HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#C41230"/>
-                                                <Setter Property="BorderBrush" Value="#C41230"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </StackPanel.Resources>
-
                     <Button Content="&lt;&lt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="FirstPage_Click" x:Name="FirstButton" 
-                            Margin="0,0,5,0" Height="30"/>
-
+                            Click="FirstPage_Click" x:Name="FirstButton"/>
                     <Button Content="&lt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="PreviousPage_Click" x:Name="PrevButton" 
-                            Margin="0,0,5,0" Height="30"/>
-
-                    <ItemsControl x:Name="PageNumbersControl" Margin="10,0">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding PageNumber}" Width="40" Height="40" 
-                                        Margin="2,0" Click="PageNumber_Click" Tag="{Binding PageNumber}">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
-                                            <Setter Property="Background" Value="#F5F5F5"/>
-                                            <Setter Property="Foreground" Value="#333"/>
-                                            <Setter Property="BorderThickness" Value="1"/>
-                                            <Setter Property="BorderBrush" Value="#DDD"/>
-                                            <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="{TemplateBinding Background}"
-                                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                                CornerRadius="4">
-                                                            <ContentPresenter HorizontalAlignment="Center" 
-                                                                              VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCurrentPage}" Value="True">
-                                                    <Setter Property="Background" Value="#DC143C"/>
-                                                    <Setter Property="Foreground" Value="White"/>
-                                                    <Setter Property="BorderBrush" Value="#DC143C"/>
-                                                </DataTrigger>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#E0E0E0"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
+                            Click="PreviousPage_Click" x:Name="PrevButton"/>
+                    <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" 
+                            VerticalAlignment="Center" Margin="5,0" Padding="10,5">
+                        <TextBlock x:Name="PageInfoTextBlock" Text="Trang 1/1" 
+                                   Style="{StaticResource BaseTextStyle}" 
+                                   VerticalAlignment="Center" Foreground="#333"/>
+                    </Border>
                     <Button Content="&gt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="NextPage_Click" x:Name="NextButton" Height="30"/>
-
+                            Click="NextPage_Click" x:Name="NextButton"/>
                     <Button Content="&gt;&gt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="LastPage_Click" x:Name="LastButton" Height="30"/>
+                            Click="LastPage_Click" x:Name="LastButton"/>
                 </StackPanel>
             </Grid>
         </ScrollViewer>
 
-        <!-- Popup Overlay -->
-        <Grid x:Name="PopupOverlay" Background="#80000000" Visibility="Collapsed">
-            <Border Background="White" Width="500" MaxHeight="600" CornerRadius="8" 
+        <Grid x:Name="FilterOverlay" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="100">
+            <Border Background="White" Width="600" MaxHeight="650" CornerRadius="8" 
                     VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Grid Margin="25">
                     <Grid.RowDefinitions>
@@ -450,58 +374,122 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Popup Title -->
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock Text="Lọc dữ liệu" 
+                                   Style="{StaticResource HeaderTextStyle}"
+                                   FontSize="18" FontWeight="Bold" 
+                                   VerticalAlignment="Center"/>
+                        <Button Content="X" 
+                                Style="{StaticResource CloseFilterButtonStyle}"
+                                Click="CloseFilter_Click" 
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"/>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="450">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Mã phiếu đo" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterMaPhieuTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Mã học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterMaHVTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Họ tên học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterHoTenTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterChieuCaoTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterCanNangTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterBMITextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterTDEETextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Tuổi" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterTuoiTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Mục tiêu sức khỏe" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="FilterMucTieuTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Ngày đo (dd/MM/yyyy)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <DatePicker x:Name="FilterNgayDoDatePicker" Height="35" Margin="0,0,0,15" 
+                                            FontFamily="{StaticResource LatoRegular}" />
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" 
+                                Margin="0,20,0,0">
+                        <Button Content="Hủy lọc" Width="100" Style="{StaticResource ActionButton}" 
+                                Click="CancelFilter_Click" />
+                        <Button Content="Áp dụng" Width="100" Style="{StaticResource ActionButton}" 
+                                Click="ApplyFilter_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid x:Name="PopupOverlay" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="101">
+            <Border Background="White" Width="500" MaxHeight="600" CornerRadius="8" 
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                <Grid Margin="25">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
                     <TextBlock Grid.Row="0" x:Name="PopupTitle" Text="Thêm chỉ số sức khỏe" 
                                Style="{StaticResource HeaderTextStyle}"
                                FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
-
-                    <!-- Popup Content -->
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
-                        <StackPanel>
-                            <TextBlock Text="Học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <ComboBox x:Name="StudentComboBox" Height="35" Margin="0,0,0,15" 
-                                      DisplayMemberPath="StudentName" SelectedValuePath="StudentId" 
-                                      FontFamily="{StaticResource LatoRegular}"/>
 
+                        <StackPanel>
+                            <TextBlock Text="Mã học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                       Style="{StaticResource BaseTextStyle}"/>
+                            <TextBox x:Name="MaHVTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                     TextChanged="MaHVTextBox_TextChanged"/>
                             <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5" 
                                        Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="WeightTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-
+                            <TextBox x:Name="CanNangTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                     TextChanged="CanNangTextBox_TextChanged"/>
                             <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5" 
                                        Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="HeightTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-
+                            <TextBox x:Name="ChieuCaoTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                     TextChanged="ChieuCaoTextBox_TextChanged"/>
                             <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5" 
                                        Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="BMITextBox" Height="35" Padding="10,0" Margin="0,0,0,15" 
+                            <TextBox x:Name="BMITextBoxPopUp" Height="35" Padding="10,0" Margin="0,0,0,15" 
                                      IsReadOnly="True" Background="#F5F5F5"/>
-
-                            <TextBlock Text="% Mỡ cơ thể" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="BodyFatTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-
-                            <TextBlock Text="Cơ khối (kg)" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="MuscleMassTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-
                             <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5" 
                                        Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="TDEETextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-
+                            <TextBox x:Name="TDEETextBoxPopUp" Height="35" Padding="10,0" Margin="0,0,0,15"/>
                             <TextBlock Text="Ngày đo" FontWeight="SemiBold" Margin="0,0,0,5" 
                                        Style="{StaticResource BaseTextStyle}"/>
-                            <DatePicker x:Name="MeasurementDatePicker" Height="35" Margin="0,0,0,15" 
+                            <DatePicker x:Name="NgayDoDatePickerPopUp" Height="35" Margin="0,0,0,15" 
                                         FontFamily="{StaticResource LatoRegular}"/>
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Popup Buttons -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" 
                                 Margin="0,20,0,0">
                         <Button Content="Hủy" Width="100" Style="{StaticResource ActionButton}" 
-                                Background="White" Foreground="#666" BorderThickness="1" 
-                                BorderBrush="#DDD" Click="CancelPopup_Click"/>
+                                Click="CancelPopup_Click"/>
                         <Button Content="Lưu" Width="100" Style="{StaticResource ActionButton}" 
                                 Click="SavePopup_Click"/>
                     </StackPanel>

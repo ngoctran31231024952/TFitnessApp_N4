@@ -1,55 +1,50 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Linq;
-using System.Windows.Media;
 using System.Windows.Input;
-using System.Globalization;
-using System.Text;
+using System.Windows.Media;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
     public partial class DiemDanhPage : Page
     {
-        private string chuoiKetNoi;
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
         private List<MoDonDuLieuDiemDanh> tatCaDiemDanh = new List<MoDonDuLieuDiemDanh>();
         private List<string> danhSachChiNhanh = new List<string>();
-
-        // Theo dõi Mã điểm danh đang được chỉnh sửa. Null nếu là Thêm mới.
         private string _maDiemDanhDangChinhSua = null;
 
-        // Khai báo hằng số cho placeholder
+        // Hằng số Placeholder
         private const string VAN_BAN_TIM_KIEM_MAC_DINH = "Tìm kiếm học viên...";
         private const string VAN_BAN_CHON_GIO = "Giờ";
         private const string VAN_BAN_CHON_PHUT = "Phút";
         private const string VAN_BAN_CN_DEFAULT = "Chọn chi nhánh";
 
-        // Lưu trữ Mã CN gốc của lịch tập (cho chức năng chỉnh sửa)
+        // Biến trạng thái
         private string _maCNDangChinhSua = null;
-
-        // Biến private để lưu trữ tạm thời dữ liệu tự động điền (Họ tên, Mã CN, Tên buổi tập)
         private string _hoTenThemMoi = null;
         private string _maCNThemMoi = null;
         private string _tenBuoiTapThemMoi = null;
-
-        // Biến tạm thời cho form Bộ lọc
         private string _hoTenLoc = null;
         private string _maCNLoc = null;
 
+        // ----------------------------------------------------------------------
+        // #region LOGIC HỖ TRỢ CSDL
+        // ----------------------------------------------------------------------
 
-        #region Logic Helper Functions
-
-        // Truy vấn Họ tên từ Mã HV
         private string LayHoTenHocVien(string maHV)
         {
             if (string.IsNullOrWhiteSpace(maHV)) return null;
-
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"SELECT HoTen FROM HocVien WHERE MaHV = @maHV";
@@ -68,12 +63,11 @@ namespace TFitnessApp
             }
         }
 
-        // Tạo Mã Điểm Danh (MaDD) theo format DDXXXXX (tăng tự động).
         private string TaoMaDiemDanhMoi()
         {
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"SELECT MAX(MaDD) FROM DiemDanh WHERE MaDD LIKE 'DD%'";
@@ -81,14 +75,9 @@ namespace TFitnessApp
                     {
                         var maxMaDD = cmd.ExecuteScalar()?.ToString();
                         int nextNumber = 1;
-
-                        if (!string.IsNullOrEmpty(maxMaDD) && maxMaDD.Length > 2 && maxMaDD.StartsWith("DD"))
+                        if (!string.IsNullOrEmpty(maxMaDD) && maxMaDD.StartsWith("DD") && int.TryParse(maxMaDD.Substring(2), out int currentMax))
                         {
-                            string numPart = maxMaDD.Substring(2);
-                            if (int.TryParse(numPart, out int currentMax))
-                            {
-                                nextNumber = currentMax + 1;
-                            }
+                            nextNumber = currentMax + 1;
                         }
                         return "DD" + nextNumber.ToString("D5");
                     }
@@ -101,23 +90,17 @@ namespace TFitnessApp
             }
         }
 
-        /// <summary>
-        /// Lấy Mã chi nhánh và Tên buổi tập gần nhất.
-        /// </summary>
         private (string MaCN, string TenBuoiTap) LayMaCNVaTenBuoiTap(string maHV)
         {
             (string MaCN, string TenBuoiTap) ketQua = (null, null);
-
             if (string.IsNullOrWhiteSpace(maHV)) return ketQua;
-
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string ngayHienTai = DateTime.Today.ToString("yyyy-MM-dd");
 
-                    // 1. Ưu tiên tra cứu thông tin từ LichTap
                     string sqlLichTap = @"
                         SELECT MaCN, TenBuoiTap
                         FROM LichTap
@@ -130,7 +113,6 @@ namespace TFitnessApp
                     {
                         cmd.Parameters.AddWithValue("@maHV", maHV);
                         cmd.Parameters.AddWithValue("@ngayHienTai", ngayHienTai);
-
                         using (SqliteDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
@@ -141,16 +123,9 @@ namespace TFitnessApp
                         }
                     }
 
-                    // 2. Nếu MaCN vẫn chưa có, lấy MaCN từ HopDong gần nhất
                     if (string.IsNullOrWhiteSpace(ketQua.MaCN))
                     {
-                        string sqlHopDong = @"
-                            SELECT MaCN
-                            FROM HopDong
-                            WHERE MaHV = @maHV
-                            ORDER BY NgayHetHan DESC
-                            LIMIT 1";
-
+                        string sqlHopDong = @"SELECT MaCN FROM HopDong WHERE MaHV = @maHV ORDER BY NgayHetHan DESC LIMIT 1";
                         using (SqliteCommand cmdHopDong = new SqliteCommand(sqlHopDong, conn))
                         {
                             cmdHopDong.Parameters.AddWithValue("@maHV", maHV);
@@ -167,16 +142,14 @@ namespace TFitnessApp
             {
                 MessageBox.Show($"Lỗi tra cứu CSDL: {ex.Message}", "Lỗi CSDL", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
             return ketQua;
         }
 
-        // Kiểm tra xem hợp đồng còn hiệu lực
         private bool KiemTraHopDongHopLe(string maHV, DateTime ngayDiemDanh)
         {
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"
@@ -185,12 +158,10 @@ namespace TFitnessApp
                         WHERE MaHV = @maHV
                         ORDER BY NgayHetHan DESC
                         LIMIT 1";
-
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@maHV", maHV);
                         var result = cmd.ExecuteScalar();
-
                         if (result != null && result != DBNull.Value)
                         {
                             if (DateTime.TryParse(result.ToString(), out DateTime ngayHetHan))
@@ -209,30 +180,23 @@ namespace TFitnessApp
             return false;
         }
 
-        // Tính toán trạng thái lịch tập dựa trên thời gian hiện tại
         private string TinhTrangThaiLichTap(DateTime thoiGianBatDau, DateTime thoiGianKetThuc)
         {
             DateTime now = DateTime.Now;
-
             if (now < thoiGianBatDau) return "Chưa bắt đầu";
             if (now >= thoiGianBatDau && now < thoiGianKetThuc) return "Đang tập";
             if (now >= thoiGianKetThuc) return "Đã hoàn thành";
-
             return "Không xác định";
         }
 
-        // Cập nhật trạng thái của một lịch tập trong CSDL (dùng cho Check-in/Check-out hôm nay)
         private void CapNhatTrangThaiLichTap(string maHV, string tenBuoiTap, string trangThaiMoi)
         {
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
-                    string sql = @"UPDATE LichTap 
-                                   SET TrangThai = @trangThaiMoi 
-                                   WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap 
-                                   AND date(ThoiGianBatDau) = date('now', 'localtime')";
+                    string sql = @"UPDATE LichTap SET TrangThai = @trangThaiMoi WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap AND date(ThoiGianBatDau) = date('now', 'localtime')";
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@trangThaiMoi", trangThaiMoi);
@@ -248,33 +212,19 @@ namespace TFitnessApp
             }
         }
 
-        // Overload: Cập nhật trạng thái của một lịch tập trong CSDL dựa trên ngày (dùng cho Chỉnh sửa)
         private void CapNhatTrangThaiLichTap(string maHV, string tenBuoiTap, string ngayDD_DB, string trangThaiMoi)
         {
-            // Chuyển trạng thái hiển thị trên UI thành trạng thái lưu trong CSDL
             string trangThaiLuuDB = trangThaiMoi;
-            if (trangThaiMoi == "Đang tập")
-            {
-                trangThaiLuuDB = "Đang tập";
-            }
-            else if (trangThaiMoi == "Đã hoàn thành")
-            {
-                trangThaiLuuDB = "Đã Hoàn Thành";
-            }
-            else if (trangThaiMoi.Contains("hủy"))
-            {
-                trangThaiLuuDB = "Đã Hủy";
-            }
+            if (trangThaiMoi == "Đang tập") trangThaiLuuDB = "Đang tập";
+            else if (trangThaiMoi == "Đã hoàn thành") trangThaiLuuDB = "Đã Hoàn Thành";
+            else if (trangThaiMoi.Contains("hủy")) trangThaiLuuDB = "Đã Hủy";
 
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
-                    string sql = @"UPDATE LichTap 
-                                   SET TrangThai = @trangThaiMoi 
-                                   WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap 
-                                   AND date(ThoiGianBatDau) = date(@ngayDD_DB)";
+                    string sql = @"UPDATE LichTap SET TrangThai = @trangThaiMoi WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap AND date(ThoiGianBatDau) = date(@ngayDD_DB)";
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@trangThaiMoi", trangThaiLuuDB);
@@ -291,8 +241,6 @@ namespace TFitnessApp
             }
         }
 
-
-        // Kiểm tra lịch tập hợp lệ (sai lệch tối đa 1 tiếng)
         private bool KiemTraLichTapHopLe(string maHV, string tenBuoiTap, string MaCN, DateTime thoiGianDiemDanh, string trangThaiDiemDanh, out DateTime thoiGianBatDau, out DateTime thoiGianKetThuc)
         {
             thoiGianBatDau = DateTime.MinValue;
@@ -300,7 +248,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string ngayDiemDanh = thoiGianDiemDanh.ToString("yyyy-MM-dd");
@@ -308,11 +256,7 @@ namespace TFitnessApp
                     string sql = @"
                         SELECT ThoiGianBatDau, ThoiGianKetThuc
                         FROM LichTap
-                        WHERE MaHV = @maHV
-                          AND TenBuoiTap = @tenBuoiTap
-                          AND MaCN = @maCN
-                          AND date(ThoiGianBatDau) = date(@ngayDiemDanh)
-                          LIMIT 1";
+                        WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap AND MaCN = @maCN AND date(ThoiGianBatDau) = date(@ngayDiemDanh) LIMIT 1";
 
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
@@ -332,18 +276,11 @@ namespace TFitnessApp
                                 {
                                     DateTime checkinMin = thoiGianBatDau.AddHours(-1);
                                     DateTime checkinMax = thoiGianBatDau.AddHours(1);
-
-                                    if (thoiGianDiemDanh >= checkinMin && thoiGianDiemDanh <= checkinMax)
-                                    {
-                                        return true;
-                                    }
+                                    if (thoiGianDiemDanh >= checkinMin && thoiGianDiemDanh <= checkinMax) return true;
                                 }
                                 else if (trangThaiDiemDanh == "Check-out")
                                 {
-                                    if (thoiGianDiemDanh >= thoiGianBatDau)
-                                    {
-                                        return true;
-                                    }
+                                    if (thoiGianDiemDanh >= thoiGianBatDau) return true;
                                 }
                             }
                         }
@@ -355,33 +292,22 @@ namespace TFitnessApp
                 MessageBox.Show($"Lỗi kiểm tra lịch tập: {ex.Message}", "Lỗi CSDL", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-
             return false;
         }
 
-        // Tra cứu MaHV, NgayDD, MaCN, TenBT dựa trên MaDD
         private (string MaHV, string NgayDD, string MaCN, string TenBT) LayChiTietDiemDanh(string maDD)
         {
             (string MaHV, string NgayDD, string MaCN, string TenBT) ketQua = (null, null, null, null);
 
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
-
                     string sql = @"
-                     SELECT 
-                         d.MaHV, 
-                         d.NgayDD, 
-                         lt.MaCN, 
-                         lt.TenBuoiTap 
-                     FROM DiemDanh d
-                     LEFT JOIN LichTap lt ON 
-                         d.MaHV = lt.MaHV AND 
-                         date(d.NgayDD) = date(lt.ThoiGianBatDau)
-                     WHERE d.MaDD = @maDD
-                     LIMIT 1";
+                        SELECT d.MaHV, d.NgayDD, lt.MaCN, lt.TenBuoiTap FROM DiemDanh d
+                        LEFT JOIN LichTap lt ON d.MaHV = lt.MaHV AND date(d.NgayDD) = date(lt.ThoiGianBatDau)
+                        WHERE d.MaDD = @maDD LIMIT 1";
 
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
@@ -406,27 +332,23 @@ namespace TFitnessApp
             return ketQua;
         }
 
-        #endregion
+        // ----------------------------------------------------------------------
+        // #region KHỞI TẠO VÀ TẢI DỮ LIỆU
+        // ----------------------------------------------------------------------
 
-        #region Initialization and Data Loading
-
-        // Tải danh sách tất cả các Mã Chi Nhánh.
         private void TaiDanhSachChiNhanh()
         {
             danhSachChiNhanh.Clear();
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = "SELECT DISTINCT MaCN FROM ChiNhanh ORDER BY MaCN ASC";
                     using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     using (SqliteDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
-                            danhSachChiNhanh.Add(reader["MaCN"].ToString());
-                        }
+                        while (reader.Read()) danhSachChiNhanh.Add(reader["MaCN"].ToString());
                     }
                 }
             }
@@ -439,13 +361,12 @@ namespace TFitnessApp
         public DiemDanhPage()
         {
             InitializeComponent();
-            string duongDanDB = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            chuoiKetNoi = $"Data Source={duongDanDB};";
+            _dbAccess = new DbAccess();
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
-            if (!File.Exists(duongDanDB))
+            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db")))
             {
-                MessageBox.Show($"Không tìm thấy cơ sở dữ liệu tại:\n{duongDanDB}",
-                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Không tìm thấy cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -461,13 +382,11 @@ namespace TFitnessApp
 
             TaiThongKe();
             TaiDanhSachDiemDanh();
-
             DatThoiGianMacDinh();
             CapNhatTrangThaiThoiGian(null);
             CapNhatTrangThaiThoiGianChinhSua(null);
         }
 
-        // Đặt giá trị ComboBox giờ/phút về thời gian hiện tại.
         private void DatThoiGianMacDinh()
         {
             DateTime now = DateTime.Now;
@@ -479,7 +398,6 @@ namespace TFitnessApp
             if (cmbGioRa != null && cmbGioRa.Items.Count > 0) cmbGioRa.SelectedValue = currentHour;
             if (cmbPhutRa != null && cmbPhutRa.Items.Count > 0) cmbPhutRa.SelectedValue = currentMinute;
 
-            // Đặt về giá trị hiện tại (để khi mở form, nếu là Đã hoàn thành sẽ điền giá trị này trước khi bị ghi đè)
             if (cmbGioVao_ChinhSua != null && cmbGioVao_ChinhSua.Items.Count > 0) cmbGioVao_ChinhSua.SelectedValue = currentHour;
             if (cmbPhutVao_ChinhSua != null && cmbPhutVao_ChinhSua.Items.Count > 0) cmbPhutVao_ChinhSua.SelectedValue = currentMinute;
             if (cmbGioRa_ChinhSua != null && cmbGioRa_ChinhSua.Items.Count > 0) cmbGioRa_ChinhSua.SelectedValue = currentHour;
@@ -490,11 +408,9 @@ namespace TFitnessApp
         {
             var danhSachGio = Enumerable.Range(0, 24).Select(h => h.ToString("00")).ToList();
             danhSachGio.Insert(0, VAN_BAN_CHON_GIO);
-
             var danhSachPhut = Enumerable.Range(0, 60).Select(m => m.ToString("00")).ToList();
             danhSachPhut.Insert(0, VAN_BAN_CHON_PHUT);
 
-            // Cho Form Thêm mới
             if (cmbGioVao != null) cmbGioVao.ItemsSource = danhSachGio;
             if (cmbGioRa != null) cmbGioRa.ItemsSource = danhSachGio;
             if (cmbPhutVao != null) cmbPhutVao.ItemsSource = danhSachPhut;
@@ -505,7 +421,6 @@ namespace TFitnessApp
             if (cmbPhutVao != null && cmbPhutVao.Items.Count > 0) cmbPhutVao.SelectedIndex = 0;
             if (cmbPhutRa != null && cmbPhutRa.Items.Count > 0) cmbPhutRa.SelectedIndex = 0;
 
-            // Cho Popup Chỉnh sửa
             if (cmbGioVao_ChinhSua != null) cmbGioVao_ChinhSua.ItemsSource = danhSachGio;
             if (cmbGioRa_ChinhSua != null) cmbGioRa_ChinhSua.ItemsSource = danhSachGio;
             if (cmbPhutVao_ChinhSua != null) cmbPhutVao_ChinhSua.ItemsSource = danhSachPhut;
@@ -529,12 +444,11 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string homNay = DateTime.Today.ToString("yyyy-MM-dd");
 
-                    // 1. Số điểm danh hôm nay (Sử dụng CSDL)
                     string sql1 = "SELECT COUNT(DISTINCT MaHV) FROM DiemDanh WHERE date(NgayDD) = date(@homNay)";
                     using (SqliteCommand cmd = new SqliteCommand(sql1, conn))
                     {
@@ -542,34 +456,20 @@ namespace TFitnessApp
                         txtSoDiemDanhHomNay.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                     }
 
-                    // 2. Đang tập luyện (Sử dụng CSDL)
-                    string sql2 = @"SELECT COUNT(DISTINCT MaHV) FROM DiemDanh 
-                                   WHERE date(NgayDD) = date(@homNay) 
-                                   AND ThoiGianVao IS NOT NULL 
-                                   AND (ThoiGianRa IS NULL OR ThoiGianRa = '')";
+                    string sql2 = @"SELECT COUNT(DISTINCT MaHV) FROM DiemDanh WHERE date(NgayDD) = date(@homNay) AND ThoiGianVao IS NOT NULL AND (ThoiGianRa IS NULL OR ThoiGianRa = '')";
                     using (SqliteCommand cmd = new SqliteCommand(sql2, conn))
                     {
                         cmd.Parameters.AddWithValue("@homNay", homNay);
                         txtDangTapLuyen.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                     }
 
-                    // 3. Đã hoàn thành (Sử dụng CSDL) - Vẫn giữ logic cũ để tránh thay đổi quá nhiều cấu trúc
                     string sql3 = "SELECT COUNT(*) FROM LichTap WHERE TrangThai = 'Đã Hoàn Thành'";
                     using (SqliteCommand cmd = new SqliteCommand(sql3, conn))
                     {
                         txtDaHoanThanh.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                     }
 
-                    // 4. Thời gian trung bình (Sử dụng CSDL)
-                    string sql4 = @"SELECT AVG(
-                                             CAST((julianday(datetime(NgayDD || ' ' || ThoiGianRa)) - 
-                                                   julianday(datetime(NgayDD || ' ' || ThoiGianVao))) * 24 AS REAL)
-                                             ) 
-                                             FROM DiemDanh 
-                                             WHERE ThoiGianRa IS NOT NULL 
-                                             AND ThoiGianRa != '' 
-                                             AND ThoiGianVao IS NOT NULL
-                                             AND ThoiGianRa > ThoiGianVao";
+                    string sql4 = @"SELECT AVG(CAST((julianday(datetime(NgayDD || ' ' || ThoiGianRa)) - julianday(datetime(NgayDD || ' ' || ThoiGianVao))) * 24 AS REAL)) FROM DiemDanh WHERE ThoiGianRa IS NOT NULL AND ThoiGianRa != '' AND ThoiGianVao IS NOT NULL AND ThoiGianRa > ThoiGianVao";
                     using (SqliteCommand cmd = new SqliteCommand(sql4, conn))
                     {
                         var ketQua = cmd.ExecuteScalar();
@@ -587,8 +487,7 @@ namespace TFitnessApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi tải thống kê: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi tải thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 DatMacDinhThongKe();
             }
         }
@@ -601,11 +500,10 @@ namespace TFitnessApp
             {
                 tatCaDiemDanh.Clear();
 
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
 
-                    // Sử dụng LEFT JOIN để đảm bảo bản ghi DiemDanh vẫn được hiển thị dù không có LichTap tương ứng
                     string sql = @"
                         SELECT d.MaDD, d.MaHV, h.HoTen, d.NgayDD, d.ThoiGianVao, d.ThoiGianRa,
                                lt.TrangThai AS LichTapTrangThai, lt.ThoiGianBatDau, lt.ThoiGianKetThuc
@@ -622,12 +520,10 @@ namespace TFitnessApp
                             string ngayDD_DB = reader["NgayDD"].ToString();
                             DateTime ngayDiemDanhDate;
 
-                            if (!DateTime.TryParseExact(ngayDD_DB, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate))
+                            if (!DateTime.TryParseExact(ngayDD_DB, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate) &&
+                                !DateTime.TryParseExact(ngayDD_DB, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate))
                             {
-                                if (!DateTime.TryParseExact(ngayDD_DB, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDiemDanhDate))
-                                {
-                                    continue;
-                                }
+                                continue;
                             }
 
                             var item = new MoDonDuLieuDiemDanh
@@ -638,37 +534,36 @@ namespace TFitnessApp
                                 NgayDiemDanh = ngayDiemDanhDate.ToString("dd/MM/yyyy"),
                                 ThoiGianVao = reader["ThoiGianVao"]?.ToString() ?? "--:--",
                                 ThoiGianRa = reader["ThoiGianRa"]?.ToString() ?? "--:--",
-                                // Lấy trạng thái từ LichTap, nhưng sẽ bị ghi đè bởi logic Check-in/out dưới đây
                                 TrangThai = reader["LichTapTrangThai"]?.ToString() ?? ""
                             };
 
-                            // Logic xác định trạng thái hiển thị (Chỉ dựa trên DiemDanh)
+                            string lichTapTrangThai = reader["LichTapTrangThai"]?.ToString() ?? "Chưa hoàn thành";
+
+                            // Logic xác định trạng thái hiển thị (Ưu tiên DiemDanh > LichTap)
                             if (item.ThoiGianVao != "--:--" && item.ThoiGianRa != "--:--")
                             {
-                                // TH1: Có giờ vào và giờ ra -> Đã hoàn thành
                                 item.TrangThai = "Đã hoàn thành";
-                                item.MauTrangThai = "#51E689"; // Xanh lá
+                                item.MauTrangThai = "#51E689";
                             }
                             else if (item.ThoiGianVao != "--:--" && item.ThoiGianRa == "--:--")
                             {
-                                // TH2: Có giờ vào, chưa có giờ ra -> Đang tập
                                 item.TrangThai = "Đang tập";
-                                item.MauTrangThai = "#DC3545"; // Đỏ (Dùng màu đỏ như yêu cầu)
+                                item.MauTrangThai = "#DC3545";
                             }
                             else
                             {
-                                // TH3: Chưa có giờ vào (hoặc cả 2 rỗng) -> Vẫn hiển thị trạng thái LichTap nếu có, nếu không là "Chưa hoàn thành"
-                                if (item.TrangThai.Contains("Hủy"))
+                                // Sử dụng trạng thái từ LichTap (dùng làm fallback)
+                                if (lichTapTrangThai.Contains("Hủy"))
                                 {
                                     item.TrangThai = "Đã hủy";
                                     item.MauTrangThai = "#DC3545";
                                 }
-                                else if (item.TrangThai.Contains("Hoàn Thành"))
+                                else if (lichTapTrangThai.Contains("Hoàn Thành"))
                                 {
                                     item.TrangThai = "Đã hoàn thành";
                                     item.MauTrangThai = "#51E689";
                                 }
-                                else if (item.TrangThai.Contains("Chưa bắt đầu"))
+                                else if (lichTapTrangThai.Contains("Chưa bắt đầu"))
                                 {
                                     item.TrangThai = "Chưa bắt đầu";
                                     item.MauTrangThai = "#7AAEFF";
@@ -681,12 +576,10 @@ namespace TFitnessApp
                             }
 
                             item.ChuCaiDau = string.IsNullOrEmpty(item.HoTen) ? "?" : item.HoTen[0].ToString().ToUpper();
-
                             tatCaDiemDanh.Add(item);
                         }
                     }
                 }
-
                 lvLichSuDiemDanh.ItemsSource = tatCaDiemDanh;
             }
             catch (Exception ex)
@@ -695,16 +588,15 @@ namespace TFitnessApp
             }
         }
 
-        #endregion
+        // ----------------------------------------------------------------------
+        // #region LƯU DỮ LIỆU
+        // ----------------------------------------------------------------------
 
-        #region Save Data
-
-        // Xử lý cập nhật thông tin điểm danh
         private bool CapNhatDiemDanh(string maDD, string ngayDD_DB, string tgVao, string tgRa)
         {
             try
             {
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sqlUpdate = @"
@@ -721,8 +613,7 @@ namespace TFitnessApp
                         cmd.Parameters.AddWithValue("@tgRa", tgRa ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@maDD", maDD);
 
-                        if (cmd.ExecuteNonQuery() > 0)
-                            return true;
+                        if (cmd.ExecuteNonQuery() > 0) return true;
                     }
                 }
             }
@@ -742,9 +633,7 @@ namespace TFitnessApp
 
             try
             {
-                // 1. Thu thập và kiểm tra dữ liệu nhập cơ bản
                 string maHV = txtMaHocVien.Text.Trim();
-
                 string hoTen = _hoTenThemMoi;
                 string MaCN = _maCNThemMoi;
                 string tenBuoiTap = _tenBuoiTapThemMoi;
@@ -759,7 +648,6 @@ namespace TFitnessApp
 
                 string trangThaiDiemDanh = (cmbTrangThai.SelectedItem as ComboBoxItem)?.Content.ToString();
 
-                // KIỂM TRA LỖI NHẬP LIỆU BẮT BUỘC
                 if (string.IsNullOrWhiteSpace(maHV))
                 {
                     MessageBox.Show("Vui lòng nhập Mã học viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -771,81 +659,55 @@ namespace TFitnessApp
                     return;
                 }
 
-                // Kiểm tra MaCN và Hợp đồng
-                if (string.IsNullOrWhiteSpace(MaCN))
-                {
-                    if (!KiemTraHopDongHopLe(maHV, ngayDiemDanhDate))
-                    {
-                        MessageBox.Show("Học viên không có Hợp đồng hợp lệ và Mã chi nhánh không xác định. Không thể tiếp tục.",
-                                         "Lỗi Hợp đồng/Chi nhánh", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                }
-
                 if (trangThaiDiemDanh == "Chọn trạng thái" || trangThaiDiemDanh == null)
                 {
                     MessageBox.Show("Vui lòng chọn trạng thái!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(tenBuoiTap))
+                if (string.IsNullOrWhiteSpace(MaCN))
                 {
                     if (!KiemTraHopDongHopLe(maHV, ngayDiemDanhDate))
                     {
-                        MessageBox.Show("Lưu không thành công! Học viên không có Lịch tập hôm nay và Hợp đồng đã hết hạn hoặc không tồn tại.",
-                                         "Lỗi Hợp đồng", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Học viên không có Hợp đồng hợp lệ và Mã chi nhánh không xác định. Không thể tiếp tục.", "Lỗi Hợp đồng/Chi nhánh", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
                 }
-                else
+
+                if (!string.IsNullOrWhiteSpace(tenBuoiTap))
                 {
                     DateTime thoiGianBatDauLich;
                     DateTime thoiGianKetThucLich;
-
                     if (!KiemTraLichTapHopLe(maHV, tenBuoiTap, MaCN, thoiGianDiemDanh, trangThaiDiemDanh, out thoiGianBatDauLich, out thoiGianKetThucLich))
                     {
-                        MessageBox.Show("Lưu không thành công! Học viên không có lịch tập phù hợp tại thời điểm này (sai lệch tối đa 1 tiếng).",
-                                         "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show("Lưu không thành công! Học viên không có lịch tập phù hợp tại thời điểm này (sai lệch tối đa 1 tiếng).", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
                 }
 
-                // TẠO MÃ DD MỚI
                 string maDDMoi = TaoMaDiemDanhMoi();
-
-                // Chuẩn bị thời gian vào/ra
                 string thoiGianVao = (trangThaiDiemDanh == "Check-in") ? tgDiemDanhGioPhut : null;
                 string thoiGianRa = (trangThaiDiemDanh == "Check-out") ? tgDiemDanhGioPhut : null;
 
-                // 3. Lưu dữ liệu vào database
-                using (SqliteConnection conn = new SqliteConnection(chuoiKetNoi))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
 
                     if (trangThaiDiemDanh == "Check-in")
                     {
-                        // Kiểm tra trùng lặp Check-in
-                        string sqlCheck = @"SELECT MaDD FROM DiemDanh 
-                                           WHERE MaHV = @maHV AND date(NgayDD) = date(@ngayDD)
-                                           AND (ThoiGianRa IS NULL OR ThoiGianRa = '') 
-                                           ORDER BY ThoiGianVao DESC LIMIT 1";
+                        string sqlCheck = @"SELECT MaDD FROM DiemDanh WHERE MaHV = @maHV AND date(NgayDD) = date(@ngayDD) AND (ThoiGianRa IS NULL OR ThoiGianRa = '') ORDER BY ThoiGianVao DESC LIMIT 1";
                         using (SqliteCommand cmdCheck = new SqliteCommand(sqlCheck, conn))
                         {
                             cmdCheck.Parameters.AddWithValue("@maHV", maHV);
                             cmdCheck.Parameters.AddWithValue("@ngayDD", ngayDD_DB);
                             if (cmdCheck.ExecuteScalar() != null)
                             {
-                                MessageBox.Show($"Học viên {maHV} đã Check-in và chưa Check-out.",
-                                                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                                MessageBox.Show($"Học viên {maHV} đã Check-in và chưa Check-out.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                                 return;
                             }
                         }
 
-                        // Thực hiện INSERT
-                        string sqlInsert = @"
-                            INSERT INTO DiemDanh 
-                            (MaDD, MaHV, NgayDD, ThoiGianVao, TenBuoiTap, MaCN) 
-                            VALUES (@maDD, @maHV, @ngayDD, @tgVao, @tenBuoiTap, @MaCN)";
+                        string sqlInsert = @"INSERT INTO DiemDanh (MaDD, MaHV, NgayDD, ThoiGianVao, TenBuoiTap, MaCN) VALUES (@maDD, @maHV, @ngayDD, @tgVao, @tenBuoiTap, @MaCN)";
                         using (SqliteCommand cmd = new SqliteCommand(sqlInsert, conn))
                         {
                             cmd.Parameters.AddWithValue("@maDD", maDDMoi);
@@ -856,19 +718,11 @@ namespace TFitnessApp
                             cmd.Parameters.AddWithValue("@MaCN", MaCN ?? (object)DBNull.Value);
                             cmd.ExecuteNonQuery();
                         }
-
-                        // Cập nhật trạng thái LichTap
-                        if (!string.IsNullOrWhiteSpace(tenBuoiTap))
-                            CapNhatTrangThaiLichTap(maHV, tenBuoiTap, "Đang tập");
-
+                        if (!string.IsNullOrWhiteSpace(tenBuoiTap)) CapNhatTrangThaiLichTap(maHV, tenBuoiTap, "Đang tập");
                     }
                     else if (trangThaiDiemDanh == "Check-out")
                     {
-                        // Tìm bản ghi Check-in chưa Check-out
-                        string sqlCheckin = @"SELECT MaDD FROM DiemDanh 
-                                           WHERE MaHV = @maHV AND date(NgayDD) = date(@ngayDD) 
-                                           AND (ThoiGianRa IS NULL OR ThoiGianRa = '')
-                                           ORDER BY ThoiGianVao DESC LIMIT 1";
+                        string sqlCheckin = @"SELECT MaDD FROM DiemDanh WHERE MaHV = @maHV AND date(NgayDD) = date(@ngayDD) AND (ThoiGianRa IS NULL OR ThoiGianRa = '') ORDER BY ThoiGianVao DESC LIMIT 1";
                         string maDDCanUpdate = null;
                         using (SqliteCommand cmdCheckin = new SqliteCommand(sqlCheckin, conn))
                         {
@@ -877,34 +731,25 @@ namespace TFitnessApp
                             maDDCanUpdate = cmdCheckin.ExecuteScalar()?.ToString();
                         }
 
-                        // Xử lý không tìm thấy
                         if (string.IsNullOrWhiteSpace(maDDCanUpdate))
                         {
-                            MessageBox.Show($"Không tìm thấy lần Check-in chưa hoàn thành nào của học viên {maHV} trong ngày này.",
-                                                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show($"Không tìm thấy lần Check-in chưa hoàn thành nào của học viên {maHV} trong ngày này.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                             return;
                         }
 
-                        // Thực hiện UPDATE
-                        string sqlUpdate = @"UPDATE DiemDanh 
-                                             SET ThoiGianRa = @tgRa 
-                                             WHERE MaDD = @maDDCanUpdate";
+                        string sqlUpdate = @"UPDATE DiemDanh SET ThoiGianRa = @tgRa WHERE MaDD = @maDDCanUpdate";
                         using (SqliteCommand cmd = new SqliteCommand(sqlUpdate, conn))
                         {
                             cmd.Parameters.AddWithValue("@tgRa", thoiGianRa);
                             cmd.Parameters.AddWithValue("@maDDCanUpdate", maDDCanUpdate);
                             cmd.ExecuteNonQuery();
                         }
-
-                        // Cập nhật trạng thái LichTap
-                        if (!string.IsNullOrWhiteSpace(tenBuoiTap))
-                            CapNhatTrangThaiLichTap(maHV, tenBuoiTap, "Đã hoàn thành");
+                        if (!string.IsNullOrWhiteSpace(tenBuoiTap)) CapNhatTrangThaiLichTap(maHV, tenBuoiTap, "Đã hoàn thành");
                     }
                 }
 
                 MessageBox.Show($"{trangThaiDiemDanh} thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Reset form và biến private
                 txtMaHocVien.Clear();
                 txtHoTen.Text = "";
                 txtMaCN_ThemMoi.Text = "";
@@ -922,12 +767,10 @@ namespace TFitnessApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi lưu dữ liệu:\n{ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi lưu dữ liệu:\n{ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Xử lý sự kiện click nút Lưu trong Popup Chỉnh sửa
         private void BtnLuuChinhSua_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_maDiemDanhDangChinhSua))
@@ -938,9 +781,7 @@ namespace TFitnessApp
 
             string maDD = _maDiemDanhDangChinhSua;
             string maHV = txtMaHV_ChinhSua.Text.Trim();
-            // MaCN lấy từ biến tạm
             string MaCN = _maCNDangChinhSua;
-
             string trangThai = (cmbTrangThai_ChinhSua.SelectedItem as ComboBoxItem)?.Content.ToString();
             DateTime? ngayDDDate = dpNgayDD_ChinhSua.SelectedDate;
 
@@ -951,14 +792,12 @@ namespace TFitnessApp
             }
 
             string ngayDD_DB = ngayDDDate.Value.ToString("yyyy-MM-dd");
-
             var chiTietDDGoc = LayChiTietDiemDanh(maDD);
             string tenBuoiTapGoc = chiTietDDGoc.TenBT;
 
             string tgVaoDeLuu = null;
             string tgRaDeLuu = null;
 
-            // Lấy giá trị thời gian chỉ khi ComboBox không bị disabled VÀ có giá trị khác "Giờ"/"Phút"
             string gioVao = cmbGioVao_ChinhSua.IsEnabled && cmbGioVao_ChinhSua.SelectedIndex > 0 ? cmbGioVao_ChinhSua.SelectedValue.ToString() : null;
             string phutVao = cmbPhutVao_ChinhSua.IsEnabled && cmbPhutVao_ChinhSua.SelectedIndex > 0 ? cmbPhutVao_ChinhSua.SelectedValue.ToString() : null;
             string tgVao = (gioVao != null && phutVao != null) ? $"{gioVao}:{phutVao}" : null;
@@ -969,26 +808,12 @@ namespace TFitnessApp
 
             var diemDanhGoc = tatCaDiemDanh.FirstOrDefault(d => d.MaDiemDanh == maDD);
 
-            // Logic xử lý trạng thái chỉnh sửa
             if (trangThai == "Đang tập")
             {
-                // 1. Xử lý Thời gian vào: Ưu tiên giá trị mới (nếu người dùng chọn), nếu không, lấy giá trị gốc.
-                if (tgVao == null)
-                {
-                    // Lấy giá trị gốc từ danh sách đã tải
-                    tgVaoDeLuu = diemDanhGoc.ThoiGianVao == "--:--" ? null : diemDanhGoc.ThoiGianVao;
-                }
-                else
-                {
-                    // Dùng giá trị mới mà người dùng đã chọn
-                    tgVaoDeLuu = tgVao;
-                }
-
-                // 2. Xử lý Thời gian ra: Luôn là NULL đối với trạng thái Đang tập
-                // Điều này sẽ xóa ThoiGianRa khỏi DB, làm cho ListView hiển thị "Đang tập"
+                if (tgVao == null) tgVaoDeLuu = diemDanhGoc.ThoiGianVao == "--:--" ? null : diemDanhGoc.ThoiGianVao;
+                else tgVaoDeLuu = tgVao;
                 tgRaDeLuu = null;
 
-                // Yêu cầu: Nếu TG VÀO rỗng, không cho phép lưu trạng thái ĐANG TẬP
                 if (tgVaoDeLuu == null)
                 {
                     MessageBox.Show("Không thể chuyển sang trạng thái 'Đang tập' khi chưa có Thời gian vào.", "Lỗi dữ liệu", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -997,14 +822,12 @@ namespace TFitnessApp
             }
             else if (trangThai == "Đã hoàn thành")
             {
-                // Kiểm tra bắt buộc: Đã hoàn thành phải có TG Vào và TG Ra hợp lệ.
                 if (tgVao == null || tgRa == null)
                 {
                     MessageBox.Show("Trạng thái 'Đã hoàn thành' yêu cầu phải có đầy đủ thời gian vào và thời gian ra.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Kiểm tra logic thời gian
                 if (TimeSpan.TryParse(tgVao, out TimeSpan tsVao) && TimeSpan.TryParse(tgRa, out TimeSpan tsRa))
                 {
                     if (tsVao > tsRa)
@@ -1018,8 +841,6 @@ namespace TFitnessApp
             }
             else
             {
-                // Đối với các trạng thái khác ("Chọn trạng thái")
-                // Giữ nguyên thời gian vào/ra gốc
                 tgVaoDeLuu = diemDanhGoc?.ThoiGianVao == "--:--" ? null : diemDanhGoc?.ThoiGianVao;
                 tgRaDeLuu = diemDanhGoc?.ThoiGianRa == "--:--" ? null : diemDanhGoc?.ThoiGianRa;
 
@@ -1028,15 +849,12 @@ namespace TFitnessApp
                     MessageBox.Show("Vui lòng chọn trạng thái hợp lệ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                // Nếu là 'Đã hủy' hoặc các trạng thái không được hỗ trợ, ta vẫn cập nhật DB nhưng giữ thời gian
             }
-
 
             if (CapNhatDiemDanh(maDD, ngayDD_DB, tgVaoDeLuu, tgRaDeLuu))
             {
                 if (!string.IsNullOrWhiteSpace(tenBuoiTapGoc))
                 {
-                    // Cập nhật trạng thái trong LichTap.
                     CapNhatTrangThaiLichTap(maHV, tenBuoiTapGoc, ngayDD_DB, trangThai);
                 }
 
@@ -1046,42 +864,29 @@ namespace TFitnessApp
                 _maDiemDanhDangChinhSua = null;
                 _maCNDangChinhSua = null;
                 TaiThongKe();
-                TaiDanhSachDiemDanh(); // Tải lại listview với logic trạng thái mới
+                TaiDanhSachDiemDanh();
             }
         }
 
-        #endregion
+        // ----------------------------------------------------------------------
+        // #region XỬ LÝ SỰ KIỆN UI
+        // ----------------------------------------------------------------------
 
-        #region UI Control & Event Handlers
-
-        // Đổ dữ liệu của hàng được chọn lên popup để chỉnh sửa.
         private void BtnChinhSua_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var diemDanhItem = button?.Tag as MoDonDuLieuDiemDanh;
-
-            if (diemDanhItem != null)
-            {
-                HienThiChiTietDiemDanh(diemDanhItem);
-            }
+            var diemDanhItem = (sender as Button)?.Tag as MoDonDuLieuDiemDanh;
+            if (diemDanhItem != null) HienThiChiTietDiemDanh(diemDanhItem);
         }
 
         private void HienThiChiTietDiemDanh(MoDonDuLieuDiemDanh item)
         {
             _maDiemDanhDangChinhSua = item.MaDiemDanh;
-
             var chiTietDD = LayChiTietDiemDanh(item.MaDiemDanh);
             _maCNDangChinhSua = chiTietDD.MaCN;
 
-            // 1. Fill thông tin cơ bản
             txtMaHV_ChinhSua.Text = item.MaHocVien;
+            if (txtMaCN_ChinhSua != null) txtMaCN_ChinhSua.Text = chiTietDD.MaCN ?? "Không tìm thấy";
 
-            if (txtMaCN_ChinhSua != null)
-            {
-                txtMaCN_ChinhSua.Text = chiTietDD.MaCN ?? "Không tìm thấy";
-            }
-
-            // 2. Fill Ngày điểm danh
             if (DateTime.TryParseExact(item.NgayDiemDanh, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime ngayDD))
             {
                 dpNgayDD_ChinhSua.SelectedDate = ngayDD;
@@ -1091,27 +896,15 @@ namespace TFitnessApp
                 dpNgayDD_ChinhSua.SelectedDate = null;
             }
 
-            // 3. Set Trạng thái và gọi CapNhatTrangThaiThoiGianChinhSua để thiết lập Enabled
-            string trangThaiText = item.TrangThai; // Lấy trạng thái đã được xác định ở TaiDanhSachDiemDanh
-
+            string trangThaiText = item.TrangThai;
             var selectedItem = cmbTrangThai_ChinhSua.Items.Cast<ComboBoxItem>().FirstOrDefault(i => i.Content.ToString() == trangThaiText);
-            if (selectedItem != null)
-            {
-                cmbTrangThai_ChinhSua.SelectedItem = selectedItem;
-            }
-            else
-            {
-                // Nếu trạng thái phức tạp (ví dụ: "Chưa bắt đầu"), đặt về Đang tập (để sửa) hoặc Chọn trạng thái
-                cmbTrangThai_ChinhSua.SelectedIndex = 0;
-                trangThaiText = (cmbTrangThai_ChinhSua.SelectedItem as ComboBoxItem)?.Content.ToString();
-            }
 
-            // GỌI HÀM NÀY ĐỂ THIẾT LẬP ENABLED/DISABLED và reset TG Ra
+            if (selectedItem != null) cmbTrangThai_ChinhSua.SelectedItem = selectedItem;
+            else cmbTrangThai_ChinhSua.SelectedIndex = 0;
+
+            trangThaiText = (cmbTrangThai_ChinhSua.SelectedItem as ComboBoxItem)?.Content.ToString();
             CapNhatTrangThaiThoiGianChinhSua(trangThaiText);
 
-            // 4. Set Giờ Vào/Ra 
-
-            // Thời gian vào: Luôn cố gắng điền giá trị cũ (vì luôn enabled, trừ khi trạng thái là 'Chọn trạng thái')
             if (GridThoiGianVao_ChinhSua.IsEnabled && item.ThoiGianVao != "--:--")
             {
                 if (DateTime.TryParseExact(item.ThoiGianVao, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgVao))
@@ -1122,11 +915,9 @@ namespace TFitnessApp
             }
             else if (GridThoiGianVao_ChinhSua.IsEnabled)
             {
-                // Nếu enabled nhưng không có giá trị cũ (hoặc giá trị cũ là '--:--'), đặt về thời gian hiện tại
                 DatThoiGianMacDinhChoPopup();
             }
 
-            // Thời gian ra: Chỉ điền giá trị cũ nếu được enabled (chỉ khi là Đã hoàn thành)
             if (GridThoiGianRa_ChinhSua.IsEnabled && item.ThoiGianRa != "--:--")
             {
                 if (DateTime.TryParseExact(item.ThoiGianRa, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tgRa))
@@ -1136,27 +927,28 @@ namespace TFitnessApp
                 }
             }
 
-
             popupChinhSua.Visibility = Visibility.Visible;
         }
 
-        // Helper để đặt thời gian hiện tại cho ComboBox (chỉ dùng khi nạp dữ liệu lần đầu nếu không có giá trị cũ)
         private void DatThoiGianMacDinhChoPopup()
         {
             DateTime now = DateTime.Now;
             string currentHour = now.Hour.ToString("00");
             string currentMinute = now.Minute.ToString("00");
 
-            // Chỉ set cho TG vào nếu nó enabled
-            if (GridThoiGianVao_ChinhSua.IsEnabled && cmbGioVao_ChinhSua != null && cmbGioVao_ChinhSua.Items.Count > 0) cmbGioVao_ChinhSua.SelectedValue = currentHour;
-            if (GridThoiGianVao_ChinhSua.IsEnabled && cmbPhutVao_ChinhSua != null && cmbPhutVao_ChinhSua.Items.Count > 0) cmbPhutVao_ChinhSua.SelectedValue = currentMinute;
+            if (GridThoiGianVao_ChinhSua.IsEnabled)
+            {
+                cmbGioVao_ChinhSua.SelectedValue = currentHour;
+                cmbPhutVao_ChinhSua.SelectedValue = currentMinute;
+            }
 
-            // Chỉ set cho TG ra nếu nó enabled
-            if (GridThoiGianRa_ChinhSua.IsEnabled && cmbGioRa_ChinhSua != null && cmbGioRa_ChinhSua.Items.Count > 0) cmbGioRa_ChinhSua.SelectedValue = currentHour;
-            if (GridThoiGianRa_ChinhSua.IsEnabled && cmbPhutRa_ChinhSua != null && cmbPhutRa_ChinhSua.Items.Count > 0) cmbPhutRa_ChinhSua.SelectedValue = currentMinute;
+            if (GridThoiGianRa_ChinhSua.IsEnabled)
+            {
+                cmbGioRa_ChinhSua.SelectedValue = currentHour;
+                cmbPhutRa_ChinhSua.SelectedValue = currentMinute;
+            }
         }
 
-        // Xử lý đóng Popup chỉnh sửa
         private void BtnDongPopupChinhSua_Click(object sender, RoutedEventArgs e)
         {
             popupChinhSua.Visibility = Visibility.Collapsed;
@@ -1165,20 +957,15 @@ namespace TFitnessApp
             cmbTrangThai_ChinhSua.SelectedIndex = 0;
         }
 
-        /// <summary>
-        /// Đặt trạng thái Enabled cho các ComboBox Giờ/Phút trong popup chỉnh sửa theo yêu cầu.
-        /// </summary>
         private void CapNhatTrangThaiThoiGianChinhSua(string trangThai)
         {
             if (GridThoiGianVao_ChinhSua == null || GridThoiGianRa_ChinhSua == null) return;
 
-            // B1: Luôn reset ComboBox TG RA về mặc định ("Giờ"/"Phút")
             cmbGioRa_ChinhSua.SelectedIndex = 0;
             cmbPhutRa_ChinhSua.SelectedIndex = 0;
 
             if (trangThai == "Chọn trạng thái")
             {
-                // Disabled cả 2 và reset TG Vào
                 cmbGioVao_ChinhSua.SelectedIndex = 0;
                 cmbPhutVao_ChinhSua.SelectedIndex = 0;
                 GridThoiGianVao_ChinhSua.IsEnabled = false;
@@ -1186,19 +973,16 @@ namespace TFitnessApp
             }
             else if (trangThai == "Đang tập")
             {
-                // TG Vào: Enabled. TG Ra: Disabled và reset
                 GridThoiGianVao_ChinhSua.IsEnabled = true;
                 GridThoiGianRa_ChinhSua.IsEnabled = false;
             }
             else if (trangThai == "Đã hoàn thành")
             {
-                // Cho phép chỉnh sửa cả 2.
                 GridThoiGianVao_ChinhSua.IsEnabled = true;
                 GridThoiGianRa_ChinhSua.IsEnabled = true;
             }
             else
             {
-                // Các trạng thái khác (Chưa hoàn thành/Chưa bắt đầu)
                 GridThoiGianVao_ChinhSua.IsEnabled = true;
                 GridThoiGianRa_ChinhSua.IsEnabled = false;
             }
@@ -1211,12 +995,10 @@ namespace TFitnessApp
             CapNhatTrangThaiThoiGianChinhSua(selectedContent);
         }
 
-        // Xử lý sự kiện TextChanged của Mã học viên (Form Thêm mới)
         private void TxtMaHocVien_TextChanged(object sender, TextChangedEventArgs e)
         {
             string maHV = txtMaHocVien.Text.Trim();
 
-            // Reset
             txtHoTen.Text = "";
             txtMaCN_ThemMoi.Text = "";
             txtTenBuoiTap.Text = "";
@@ -1226,7 +1008,6 @@ namespace TFitnessApp
 
             if (maHV.Length >= 4)
             {
-                // Truy vấn Họ tên
                 string hoTen = LayHoTenHocVien(maHV);
                 if (!string.IsNullOrWhiteSpace(hoTen))
                 {
@@ -1238,23 +1019,19 @@ namespace TFitnessApp
                 {
                     txtHoTen.Text = "Không tìm thấy học viên";
                     txtHoTen.Foreground = Brushes.Red;
-                    txtMaCN_ThemMoi.Text = "Không tìm thấy CN"; // Hiển thị mặc định lỗi
+                    txtMaCN_ThemMoi.Text = "Không tìm thấy CN";
                     txtMaCN_ThemMoi.Foreground = Brushes.Red;
                     return;
                 }
 
-
-                // Truy vấn Mã CN và Tên Buổi tập
                 var info = LayMaCNVaTenBuoiTap(maHV);
 
-                // Cập nhật TextBlock và Lưu giá trị vào biến private
                 txtTenBuoiTap.Text = info.TenBuoiTap ?? "Không tìm thấy lịch tập hôm nay";
                 _tenBuoiTapThemMoi = info.TenBuoiTap;
 
                 txtMaCN_ThemMoi.Text = info.MaCN ?? "Không tìm thấy CN";
                 _maCNThemMoi = info.MaCN;
 
-                // Cập nhật màu chữ cho TextBlock Mã CN
                 if (string.IsNullOrWhiteSpace(info.MaCN))
                 {
                     txtMaCN_ThemMoi.Foreground = Brushes.Red;
@@ -1266,12 +1043,10 @@ namespace TFitnessApp
             }
         }
 
-        // Xử lý sự kiện TextChanged của Mã học viên (Form Bộ lọc)
         private void TxtLocMaHV_TextChanged(object sender, TextChangedEventArgs e)
         {
             string maHV = txtLocMaHV.Text.Trim();
 
-            // Reset
             if (txtLocHoTen != null) txtLocHoTen.Text = "";
             if (txtLocMaCN != null) txtLocMaCN.Text = "";
             _hoTenLoc = null;
@@ -1323,8 +1098,6 @@ namespace TFitnessApp
             }
         }
 
-
-        // Logic để bật/tắt các ComboBox giờ vào/ra
         private void CapNhatTrangThaiThoiGian(string trangThai)
         {
             if (GridThoiGianVao == null || GridThoiGianRa == null) return;
@@ -1373,10 +1146,10 @@ namespace TFitnessApp
             CapNhatTrangThaiThoiGian(selectedContent);
         }
 
-        #endregion
+        // ----------------------------------------------------------------------
+        // #region TÌM KIẾM
+        // ----------------------------------------------------------------------
 
-        #region Search Functions
-        // Hàm xử lý Focus/LostFocus/KeyDown
         private void TxtTimKiem_NhanFocus(object sender, RoutedEventArgs e)
         {
             if (txtTimKiem.Text == VAN_BAN_TIM_KIEM_MAC_DINH)
@@ -1397,10 +1170,7 @@ namespace TFitnessApp
 
         private void TxtTimKiem_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                ThucHienTimKiem();
-            }
+            if (e.Key == Key.Enter) ThucHienTimKiem();
         }
 
         private void BtnTimKiem_Click(object sender, RoutedEventArgs e)
@@ -1430,8 +1200,7 @@ namespace TFitnessApp
 
             if (ketQuaTimKiem.Count == 0)
             {
-                MessageBox.Show($"Không tìm thấy học viên nào với từ khóa: {tuKhoa}",
-                    "Kết quả tìm kiếm", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Không tìm thấy học viên nào với từ khóa: {tuKhoa}", "Kết quả tìm kiếm", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -1453,13 +1222,12 @@ namespace TFitnessApp
             return result.ToString().Normalize(NormalizationForm.FormC);
         }
 
-        #endregion
-
-        #region Filter Functions
+        // ----------------------------------------------------------------------
+        // #region BỘ LỌC
+        // ----------------------------------------------------------------------
 
         private void BtnMoBoLoc_Click(object sender, RoutedEventArgs e)
         {
-            // Reset các trường phụ thuộc (HoTen, MaCN) trong popup bộ lọc
             if (txtLocMaHV != null) TxtLocMaHV_TextChanged(txtLocMaHV, null);
             popupBoLoc.Visibility = Visibility.Visible;
         }
@@ -1471,7 +1239,6 @@ namespace TFitnessApp
 
         private void BtnXoaBoLoc_Click(object sender, RoutedEventArgs e)
         {
-            // Chỉnh lại: Dùng TextBlock thay vì TextBox cho HoTen và MaCN
             if (txtLocHoTen != null) txtLocHoTen.Text = "";
             if (txtLocMaCN != null) txtLocMaCN.Text = "";
             if (txtLocMaHV != null) txtLocMaHV.Clear();
@@ -1492,34 +1259,25 @@ namespace TFitnessApp
         {
             var ketQuaLoc = tatCaDiemDanh.AsEnumerable();
 
-            // Lọc theo Mã HV
             if (txtLocMaHV != null && !string.IsNullOrWhiteSpace(txtLocMaHV.Text))
             {
                 string maHVLoc = txtLocMaHV.Text.Trim().ToLower();
-                ketQuaLoc = ketQuaLoc.Where(d =>
-                    d.MaHocVien.ToLower().Contains(maHVLoc)
-                );
+                ketQuaLoc = ketQuaLoc.Where(d => d.MaHocVien.ToLower().Contains(maHVLoc));
             }
 
-            // Lọc theo Họ tên (sử dụng biến tạm _hoTenLoc đã được điền tự động)
             if (!string.IsNullOrWhiteSpace(_hoTenLoc) && txtLocHoTen.Text != "Không tìm thấy học viên")
             {
                 string hoTenLoc = BoQuyenDau(_hoTenLoc).ToLower();
-                ketQuaLoc = ketQuaLoc.Where(d =>
-                    BoQuyenDau(d.HoTen).ToLower().Contains(hoTenLoc)
-                );
+                ketQuaLoc = ketQuaLoc.Where(d => BoQuyenDau(d.HoTen).ToLower().Contains(hoTenLoc));
             }
 
-            // Lọc ngày tháng
             if (dpLocTuNgay != null && dpLocTuNgay.SelectedDate.HasValue)
             {
                 DateTime tuNgay = dpLocTuNgay.SelectedDate.Value.Date;
                 ketQuaLoc = ketQuaLoc.Where(d =>
                 {
                     DateTime ngayDD;
-                    // Chú ý: Sử dụng định dạng dd/MM/yyyy vì đây là định dạng chuỗi hiển thị trong UI (NgayDiemDanh)
-                    if (DateTime.TryParseExact(d.NgayDiemDanh, "dd/MM/yyyy",
-                        CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDD))
+                    if (DateTime.TryParseExact(d.NgayDiemDanh, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDD))
                     {
                         return ngayDD >= tuNgay;
                     }
@@ -1533,9 +1291,7 @@ namespace TFitnessApp
                 ketQuaLoc = ketQuaLoc.Where(d =>
                 {
                     DateTime ngayDD;
-                    // Chú ý: Sử dụng định dạng dd/MM/yyyy vì đây là định dạng chuỗi hiển thị trong UI (NgayDiemDanh)
-                    if (DateTime.TryParseExact(d.NgayDiemDanh, "dd/MM/yyyy",
-                        CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDD))
+                    if (DateTime.TryParseExact(d.NgayDiemDanh, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayDD))
                     {
                         return ngayDD <= denNgay;
                     }
@@ -1544,7 +1300,6 @@ namespace TFitnessApp
             }
 
             string trangThaiLoc = (cmbLocTrangThai?.SelectedItem as ComboBoxItem)?.Content.ToString();
-            // Lọc theo trạng thái đã chọn
             if (trangThaiLoc != "Tất cả" && !string.IsNullOrEmpty(trangThaiLoc))
             {
                 string normalizedLoc = trangThaiLoc.Replace(" ", "").ToLower();
@@ -1552,7 +1307,6 @@ namespace TFitnessApp
                 ketQuaLoc = ketQuaLoc.Where(d =>
                 {
                     string normalizedDD = d.TrangThai.Replace(" ", "").ToLower();
-                    // So sánh trạng thái
                     return normalizedDD.Equals(normalizedLoc);
                 });
             }
@@ -1562,15 +1316,15 @@ namespace TFitnessApp
 
             if (popupBoLoc != null) popupBoLoc.Visibility = Visibility.Collapsed;
 
-            MessageBox.Show($"Đã lọc được {danhSachLoc.Count} kết quả!",
-                "Kết quả lọc", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Đã lọc được {danhSachLoc.Count} kết quả!", "Kết quả lọc", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        #endregion
+        // ----------------------------------------------------------------------
+        // #endregion
+        // ----------------------------------------------------------------------
 
         private void lvLichSuDiemDanh_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
     }
     public class MoDonDuLieuDiemDanh
