@@ -945,9 +945,9 @@ namespace TFitnessApp
         public bool IsSelected { get; set; }
 
         // Format properties for display
-        public string TongTienFormatted => TongTien == 0 ? "" : $"{TongTien:N0} VNĐ";
-        public string DaThanhToanFormatted => DaThanhToan == 0 ? "" : $"{DaThanhToan:N0} VNĐ";
-        public string SoTienNoFormatted => SoTienNo == 0 ? "" : $"{SoTienNo:N0} VNĐ";
+        public string TongTienFormatted => $"{TongTien:N0} VNĐ";
+        public string DaThanhToanFormatted => $"{DaThanhToan:N0} VNĐ";
+        public string SoTienNoFormatted => $"{SoTienNo:N0} VNĐ";
 
         // SỬA: Hiển thị ngày theo định dạng Việt Nam, xử lý trường hợp ngày không hợp lệ
         public string NgayGDFormatted
