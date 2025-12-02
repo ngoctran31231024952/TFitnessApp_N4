@@ -173,7 +173,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Database\DbAcess.cs" />
+    <Compile Include="Database\DbAccess.cs" />
     <Compile Include="Pages\BaoCaoDoanhThuPage.xaml.cs">
       <DependentUpon>BaoCaoDoanhThuPage.xaml</DependentUpon>
     </Compile>
