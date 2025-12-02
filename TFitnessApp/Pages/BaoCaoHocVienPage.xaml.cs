@@ -24,5 +24,20 @@ namespace TFitnessApp
         {
             InitializeComponent();
         }
+
+        private void ChartCard_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ChartCard_Loaded_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ChartCard_Loaded_2(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
