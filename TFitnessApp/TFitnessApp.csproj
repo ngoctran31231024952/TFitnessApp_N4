@@ -210,6 +210,12 @@
     <Compile Include="Windows\ThemHocVienWindow.xaml.cs">
       <DependentUpon>ThemHocVienWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ThemHopDongWindow.xaml.cs">
+      <DependentUpon>ThemHopDongWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ThemLichTapWindow.xaml.cs">
+      <DependentUpon>ThemLichTapWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\ThemPTWindow.xaml.cs">
       <DependentUpon>ThemPTWindow.xaml</DependentUpon>
     </Compile>
@@ -218,6 +224,12 @@
     </Compile>
     <Compile Include="Windows\XemGiaoDichWindow.xaml.cs">
       <DependentUpon>XemGiaoDichWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\XemHopDongWindow.xaml.cs">
+      <DependentUpon>XemHopDongWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\XemLichTapWindow.xaml.cs">
+      <DependentUpon>XemLichTapWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\XemTaiKhoan.xaml.cs">
       <DependentUpon>XemTaiKhoan.xaml</DependentUpon>
@@ -333,6 +345,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\ThemHopDongWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ThemLichTapWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\ThemPTWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -342,6 +362,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\XemGiaoDichWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\XemHopDongWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\XemLichTapWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
