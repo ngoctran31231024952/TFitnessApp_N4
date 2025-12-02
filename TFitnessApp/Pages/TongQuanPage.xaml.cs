@@ -923,5 +923,10 @@ namespace TFitnessApp.Pages
         {
             if (CheckInTooltip != null) CheckInTooltip.Visibility = Visibility.Collapsed;
         }
+
+        private void ChartDoanhThu_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

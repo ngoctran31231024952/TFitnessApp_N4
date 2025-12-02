@@ -196,7 +196,7 @@ namespace TFitnessApp
                         Title = "Doanh thu",
                         Values = values,
                         Fill = Brushes.IndianRed,
-                        DataLabels = true,
+                        DataLabels = false,
                         LabelPoint = p => p.Y > 0 ? p.Y.ToString("N0") : ""
                     });
                 }
@@ -209,7 +209,7 @@ namespace TFitnessApp
                         Stroke = Brushes.IndianRed,
                         Fill = Brushes.Transparent, // Không tô màu nền dưới đường
                         PointGeometrySize = 10,
-                        DataLabels = true
+                        DataLabels = false
                     });
                 }
 
@@ -397,7 +397,7 @@ namespace TFitnessApp
                     Title = "Doanh thu",
                     Values = new ChartValues<double>(listTopCN.Select(x => x.Value)),
                     Fill = Brushes.DodgerBlue,
-                    DataLabels = true,
+                    DataLabels = false,
                     LabelPoint = p => p.X.ToString("N0")
                 });
                 NhanTenCN = listTopCN.Select(x => x.Key).ToArray();
@@ -410,7 +410,7 @@ namespace TFitnessApp
                     Title = "Doanh thu",
                     Values = new ChartValues<double>(listTopKH.Select(x => x.Value)),
                     Fill = Brushes.Orange,
-                    DataLabels = true,
+                    DataLabels = false,
                     LabelPoint = p => p.X.ToString("N0")
                 });
                 NhanTenKH = listTopKH.Select(x => x.Key).ToArray();
