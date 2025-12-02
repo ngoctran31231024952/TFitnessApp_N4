@@ -1,8 +1,10 @@
 ﻿<Application x:Class="TFitnessApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="Windows/LoginWindow.xaml">
+             xmlns:local="clr-namespace:TFitnessApp"
+    StartupUri="Windows/LoginWindow.xaml">
     <Application.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <SolidColorBrush x:Key="TFitness.PrimaryRed" Color="#c71a1b"/>
         <SolidColorBrush x:Key="TFitness.White" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="TFitness.SecondaryBackground" Color="#F7F8FC"/>
@@ -24,6 +26,150 @@
         </Style>
         <Style TargetType="{x:Type Button}">
             <Setter Property="FontFamily" Value="{StaticResource LatoFont}"/>
+        </Style>
+        <!-- Dashboard -->
+        <!-- 1. Converter và Colors (không phụ thuộc cái khác) -->
+        <BooleanToVisibilityConverter x:Key="ChuyenDoiBoolSangHienThi"/>
+
+
+        <SolidColorBrush x:Key="MauDoChinh" Color="#c0392b"/>
+        <SolidColorBrush x:Key="MauChuXam" Color="#555"/>
+
+        <!-- 2. Các Template cơ bản (được dùng bởi Styles) -->
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Border" 
+                Grid.ColumnSpan="2"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0" />
+
+                <Path x:Name="Arrow" Grid.Column="1" 
+              Fill="#c0392b" HorizontalAlignment="Center" VerticalAlignment="Center"
+              Data="M0,0 L4,4 L8,0Z"/>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="FlatComboBoxTemplate" TargetType="ComboBox">
+            <Grid>
+                <ToggleButton Name="ToggleButton" 
+                      Template="{StaticResource ComboBoxToggleButton}" 
+                      Grid.Column="2" 
+                      Focusable="false"
+                      IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                      ClickMode="Press"/>
+                <ContentPresenter Name="ContentSite" 
+                          IsHitTestVisible="False" 
+                          Content="{TemplateBinding SelectionBoxItem}"
+                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                          Margin="10,0,23,0"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Left" />
+                <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                    <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                        <Border x:Name="DropDownBorder" Background="White" BorderThickness="1" BorderBrush="#DDD" CornerRadius="4">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                        </Border>
+                        <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                        </ScrollViewer>
+                    </Grid>
+                </Popup>
+            </Grid>
+        </ControlTemplate>
+
+        <!-- 3. Các Style cơ bản -->
+        <Style x:Key="KieuNutMenu" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="{StaticResource MauDoChinh}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="vien" Background="{TemplateBinding Background}" Padding="10,0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="vien" Property="Background" Value="#FFF0F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="KieuNutChuyen" TargetType="ToggleButton">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        CornerRadius="4">
+                            <Grid>
+                                <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                <Path Data="M0,0 L8,0 L4,4 Z" Fill="Gray" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 4. Các Style phức tạp hơn (dùng các style cơ bản) -->
+        <Style x:Key="CleanComboBox" TargetType="ComboBox">
+            <Setter Property="Template" Value="{StaticResource FlatComboBoxTemplate}"/>
+            <Setter Property="Foreground" Value="#c0392b"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
+        <!-- 5. Các Style cho layout -->
+        <Style x:Key="KieuThe" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#DDD" Direction="270" ShadowDepth="3" BlurRadius="10" Opacity="0.5"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="KieuTieuDeBieuDo" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,10,0,10"/>
+            <Setter Property="Foreground" Value="#333"/>
+        </Style>
+
+        <!-- 6. ALIAS - ĐẶT CUỐI CÙNG (dùng các style đã định nghĩa) -->
+        <Style x:Key="MenuItemBtnStyle" TargetType="Button" BasedOn="{StaticResource KieuNutMenu}"/>
+        <Style x:Key="DropdownToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource KieuNutChuyen}"/>
+        <!-- Style cho DatePicker để đồng bộ -->
+        <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
         </Style>
 
     </Application.Resources>
