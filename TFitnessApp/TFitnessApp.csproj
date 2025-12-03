@@ -173,6 +173,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\ChartCard.xaml.cs">
+      <DependentUpon>ChartCard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DashboardFilter.xaml.cs">
+      <DependentUpon>DashboardFilter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DateRangeFilter.xaml.cs">
+      <DependentUpon>DateRangeFilter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DbAccess.cs" />
     <Compile Include="Pages\BaoCaoDoanhThuPage.xaml.cs">
       <DependentUpon>BaoCaoDoanhThuPage.xaml</DependentUpon>
@@ -195,6 +204,7 @@
     <Compile Include="Pages\TongQuanPage.xaml.cs">
       <DependentUpon>TongQuanPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\DashboardViewModel.cs" />
     <Compile Include="Windows\LocGoiTapWindow.xaml.cs">
       <DependentUpon>LocGoiTapWindow.xaml</DependentUpon>
     </Compile>
@@ -243,6 +253,18 @@
     <Compile Include="Windows\XemThongTinPTWindow.xaml.cs">
       <DependentUpon>XemThongTinPTWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\ChartCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DashboardFilter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DateRangeFilter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\BaoCaoDoanhThuPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

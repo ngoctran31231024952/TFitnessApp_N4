@@ -176,7 +176,7 @@ namespace TFitnessApp
                                      NgayTao,
                                      TrangThai,
                                      Email,
-                                     SoDienThoai
+                                     SDT
                                      FROM TaiKhoan
                                      ORDER BY NgayTao DESC";
 
@@ -233,7 +233,7 @@ namespace TFitnessApp
                                 NgayTao = ngayTao,
                                 TrangThai = reader["TrangThai"]?.ToString() ?? "Không xác định",
                                 Email = reader["Email"]?.ToString() ?? "",
-                                SoDienThoai = reader["SoDienThoai"]?.ToString() ?? "",
+                                SDT = reader["SDT"]?.ToString() ?? "",
                                 IsSelected = false
                             };
 
@@ -726,7 +726,7 @@ namespace TFitnessApp
         public DateTime NgayTao { get; set; }
         public string TrangThai { get; set; }
         public string Email { get; set; }
-        public string SoDienThoai { get; set; }
+        public string SDT { get; set; }
         public bool IsSelected { get; set; }
 
         // Thuộc tính định dạng ngày tạo cho hiển thị trên DataGrid
