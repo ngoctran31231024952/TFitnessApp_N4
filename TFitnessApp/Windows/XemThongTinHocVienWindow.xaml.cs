@@ -3,23 +3,24 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using TFitnessApp;
-using Microsoft.Data.Sqlite; 
+using Microsoft.Data.Sqlite;
+using TFitnessApp.Database;
 
 namespace TFitnessApp.Windows
 {
     public partial class XemThongTinHocVienWindow : Window
     {
-        private string _dbPath;
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
 
         public XemThongTinHocVienWindow(HocVien hv)
         {
             InitializeComponent();
 
-            _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            if (!File.Exists(_dbPath))
-            {
-                _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
-            }
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             if (hv != null)
             {
@@ -40,12 +41,13 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (var connection = new SqliteConnection($"Data Source={_dbPath}"))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
+
                 {
-                    connection.Open();
+                    conn.Open();
 
                     string sqlNgayThamGia = "SELECT NgayBatDau FROM HopDong WHERE MaHV = @MaHV AND LoaiHopDong = 'Mới' ORDER BY NgayBatDau ASC LIMIT 1";
-                    using (var cmd = new SqliteCommand(sqlNgayThamGia, connection))
+                    using (var cmd = new SqliteCommand(sqlNgayThamGia, conn))
                     {
                         cmd.Parameters.AddWithValue("@MaHV", maHV);
                         var result = cmd.ExecuteScalar();
@@ -79,7 +81,7 @@ namespace TFitnessApp.Windows
                         ORDER BY h.NgayBatDau DESC
                         LIMIT 1";
 
-                    using (var cmd = new SqliteCommand(sqlThongTinGanNhat, connection))
+                    using (var cmd = new SqliteCommand(sqlThongTinGanNhat, conn))
                     {
                         cmd.Parameters.AddWithValue("@MaHV", maHV);
                         using (var reader = cmd.ExecuteReader())
