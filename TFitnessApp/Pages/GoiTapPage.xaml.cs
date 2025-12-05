@@ -10,6 +10,7 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using System.ComponentModel; // Cần thiết cho INotifyPropertyChanged
 using TFitnessApp.Windows;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
@@ -288,16 +289,15 @@ namespace TFitnessApp
     // ==========================================
     public class GoiTapRepository
     {
-        private readonly string _connectionString;
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
 
         public GoiTapRepository()
         {
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            if (!File.Exists(dbPath))
-            {
-                dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
-            }
-            _connectionString = $"Data Source={dbPath};";
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
         }
 
         // --- HÀM LỌC NÂNG CAO ---
@@ -333,7 +333,7 @@ namespace TFitnessApp
 
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand(sql, conn))
@@ -381,7 +381,7 @@ namespace TFitnessApp
             string newMa = "GT001";
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = "SELECT MaGoi FROM GoiTap ORDER BY length(MaGoi) DESC, MaGoi DESC LIMIT 1";
@@ -397,7 +397,7 @@ namespace TFitnessApp
 
         public bool CheckMaGoiExists(string maGoi)
         {
-            using (var conn = new SqliteConnection(_connectionString))
+            using (SqliteConnection conn = DbAccess.CreateConnection())
             {
                 conn.Open();
                 string sql = "SELECT COUNT(*) FROM GoiTap WHERE MaGoi = @id";
@@ -413,7 +413,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"INSERT INTO GoiTap (MaGoi, TenGoi, ThoiHan, GiaNiemYet, SoBuoiPT, DichVuDacBiet, TrangThai) 
@@ -438,7 +438,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"UPDATE GoiTap SET TenGoi=@TenGoi, ThoiHan=@ThoiHan, GiaNiemYet=@Gia, SoBuoiPT=@SoBuoi, DichVuDacBiet=@DV, TrangThai=@TrangThai 
@@ -463,7 +463,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = "DELETE FROM GoiTap WHERE MaGoi = @id";

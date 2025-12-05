@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using System.ComponentModel;
 using TFitnessApp.Windows;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
@@ -178,12 +179,15 @@ namespace TFitnessApp
 
     public class HocVienRepository
     {
-        private readonly string _connectionString;
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
+
         public HocVienRepository()
         {
-            string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            if (!System.IO.File.Exists(dbPath)) dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
-            _connectionString = $"Data Source={dbPath};";
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
         }
 
         public List<ComboBoxItemData> GetList(string tableName, string idCol, string nameCol)
@@ -191,7 +195,7 @@ namespace TFitnessApp
             var list = new List<ComboBoxItemData>();
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand($"SELECT {idCol}, {nameCol} FROM {tableName}", conn))
@@ -232,7 +236,7 @@ namespace TFitnessApp
 
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand(sql, conn))
@@ -294,7 +298,7 @@ namespace TFitnessApp
             string newMa = "HV0001";
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = "SELECT MaHV FROM HocVien ORDER BY length(MaHV) DESC, MaHV DESC LIMIT 1";
@@ -316,7 +320,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"INSERT INTO HocVien (MaHV, HoTen, NgaySinh, GioiTinh, Email, SDT) VALUES (@MaHV, @HoTen, @NgaySinh, @GioiTinh, @Email, @SDT)";
@@ -338,7 +342,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = @"UPDATE HocVien SET HoTen=@HoTen, NgaySinh=@NgaySinh, GioiTinh=@GioiTinh, Email=@Email, SDT=@SDT WHERE MaHV=@MaHV";
@@ -360,7 +364,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     string sql = "DELETE FROM HocVien WHERE MaHV = @MaHV";
@@ -375,7 +379,7 @@ namespace TFitnessApp
         }
         public bool CheckMaHVExists(string maHV)
         {
-            using (var conn = new SqliteConnection(_connectionString))
+            using (SqliteConnection conn = DbAccess.CreateConnection())
             {
                 conn.Open();
                 string sql = "SELECT COUNT(*) FROM HocVien WHERE MaHV = @MaHV";

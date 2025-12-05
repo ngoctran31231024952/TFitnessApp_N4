@@ -10,6 +10,7 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using System.ComponentModel; // Cần thêm namespace này
 using TFitnessApp.Windows;
+using TFitnessApp.Database;
 
 namespace TFitnessApp
 {
@@ -290,12 +291,15 @@ namespace TFitnessApp
     // ==========================================
     public class PTRepository
     {
-        private readonly string _connectionString;
+        private string _ChuoiKetNoi;
+        private readonly DbAccess _dbAccess;
+
         public PTRepository()
         {
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-            if (!File.Exists(dbPath)) dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TFitness.db");
-            _connectionString = $"Data Source={dbPath};";
+            // Khởi tạo đối tượng DbAccess
+            _dbAccess = new DbAccess();
+            // Lấy chuỗi kết nối
+            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
         }
         public List<PT> FindPT(string keyword, string gioiTinh = "Tất cả", string maCN = "Tất cả")
         {
@@ -311,7 +315,7 @@ namespace TFitnessApp
 
             try
             {
-                using (var conn = new SqliteConnection(_connectionString))
+                using (SqliteConnection conn = DbAccess.CreateConnection())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand(sql, conn))
@@ -342,11 +346,11 @@ namespace TFitnessApp
             catch { }
             return list;
         }
-        public string GenerateNewMaPT() { string newMa = "PT001"; try { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); string sql = "SELECT MaPT FROM PT ORDER BY length(MaPT) DESC, MaPT DESC LIMIT 1"; using (var cmd = new SqliteCommand(sql, conn)) { var result = cmd.ExecuteScalar(); if (result != null) { string maxMa = result.ToString(); if (maxMa.Length > 2 && int.TryParse(maxMa.Substring(2), out int currentNum)) newMa = $"PT{(currentNum + 1).ToString("D3")}"; } } } } catch { } return newMa; }
-        public List<ChiNhanhSimple> GetAllChiNhanh() { List<ChiNhanhSimple> list = new List<ChiNhanhSimple>(); try { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); using (var cmd = new SqliteCommand("SELECT MaCN, TenCN FROM ChiNhanh", conn)) using (var reader = cmd.ExecuteReader()) { while (reader.Read()) list.Add(new ChiNhanhSimple { MaCN = reader["MaCN"].ToString(), TenCN = reader["TenCN"].ToString() }); } } } catch { } return list; }
-        public bool CheckMaPTExists(string maPT) { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); using (var cmd = new SqliteCommand("SELECT COUNT(*) FROM PT WHERE MaPT = @id", conn)) { cmd.Parameters.AddWithValue("@id", maPT); return (long)cmd.ExecuteScalar() > 0; } } }
-        public bool AddPT(PT pt) { try { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); string sql = @"INSERT INTO PT (MaPT, HoTen, Email, SDT, GioiTinh, MaCN) VALUES (@MaPT, @HoTen, @Email, @SDT, @GioiTinh, @MaCN)"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@MaPT", pt.MaPT); cmd.Parameters.AddWithValue("@HoTen", pt.HoTen); cmd.Parameters.AddWithValue("@Email", pt.Email); cmd.Parameters.AddWithValue("@SDT", pt.SDT); cmd.Parameters.AddWithValue("@GioiTinh", pt.GioiTinh); cmd.Parameters.AddWithValue("@MaCN", pt.MaCN); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
-        public bool UpdatePT(PT pt) { try { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); string sql = @"UPDATE PT SET HoTen=@HoTen, Email=@Email, SDT=@SDT, GioiTinh=@GioiTinh, MaCN=@MaCN WHERE MaPT=@MaPT"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@MaPT", pt.MaPT); cmd.Parameters.AddWithValue("@HoTen", pt.HoTen); cmd.Parameters.AddWithValue("@Email", pt.Email); cmd.Parameters.AddWithValue("@SDT", pt.SDT); cmd.Parameters.AddWithValue("@GioiTinh", pt.GioiTinh); cmd.Parameters.AddWithValue("@MaCN", pt.MaCN); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
-        public bool DeletePT(string maPT) { try { using (var conn = new SqliteConnection(_connectionString)) { conn.Open(); string sql = "DELETE FROM PT WHERE MaPT = @id"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@id", maPT); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
+        public string GenerateNewMaPT() { string newMa = "PT001"; try { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); string sql = "SELECT MaPT FROM PT ORDER BY length(MaPT) DESC, MaPT DESC LIMIT 1"; using (var cmd = new SqliteCommand(sql, conn)) { var result = cmd.ExecuteScalar(); if (result != null) { string maxMa = result.ToString(); if (maxMa.Length > 2 && int.TryParse(maxMa.Substring(2), out int currentNum)) newMa = $"PT{(currentNum + 1).ToString("D3")}"; } } } } catch { } return newMa; }
+        public List<ChiNhanhSimple> GetAllChiNhanh() { List<ChiNhanhSimple> list = new List<ChiNhanhSimple>(); try { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); using (var cmd = new SqliteCommand("SELECT MaCN, TenCN FROM ChiNhanh", conn)) using (var reader = cmd.ExecuteReader()) { while (reader.Read()) list.Add(new ChiNhanhSimple { MaCN = reader["MaCN"].ToString(), TenCN = reader["TenCN"].ToString() }); } } } catch { } return list; }
+        public bool CheckMaPTExists(string maPT) { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); using (var cmd = new SqliteCommand("SELECT COUNT(*) FROM PT WHERE MaPT = @id", conn)) { cmd.Parameters.AddWithValue("@id", maPT); return (long)cmd.ExecuteScalar() > 0; } } }
+        public bool AddPT(PT pt) { try { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); string sql = @"INSERT INTO PT (MaPT, HoTen, Email, SDT, GioiTinh, MaCN) VALUES (@MaPT, @HoTen, @Email, @SDT, @GioiTinh, @MaCN)"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@MaPT", pt.MaPT); cmd.Parameters.AddWithValue("@HoTen", pt.HoTen); cmd.Parameters.AddWithValue("@Email", pt.Email); cmd.Parameters.AddWithValue("@SDT", pt.SDT); cmd.Parameters.AddWithValue("@GioiTinh", pt.GioiTinh); cmd.Parameters.AddWithValue("@MaCN", pt.MaCN); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
+        public bool UpdatePT(PT pt) { try { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); string sql = @"UPDATE PT SET HoTen=@HoTen, Email=@Email, SDT=@SDT, GioiTinh=@GioiTinh, MaCN=@MaCN WHERE MaPT=@MaPT"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@MaPT", pt.MaPT); cmd.Parameters.AddWithValue("@HoTen", pt.HoTen); cmd.Parameters.AddWithValue("@Email", pt.Email); cmd.Parameters.AddWithValue("@SDT", pt.SDT); cmd.Parameters.AddWithValue("@GioiTinh", pt.GioiTinh); cmd.Parameters.AddWithValue("@MaCN", pt.MaCN); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
+        public bool DeletePT(string maPT) { try { using (SqliteConnection conn = DbAccess.CreateConnection()) { conn.Open(); string sql = "DELETE FROM PT WHERE MaPT = @id"; using (var cmd = new SqliteCommand(sql, conn)) { cmd.Parameters.AddWithValue("@id", maPT); return cmd.ExecuteNonQuery() > 0; } } } catch { return false; } }
     }
 }
