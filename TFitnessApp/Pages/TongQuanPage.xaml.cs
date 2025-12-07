@@ -717,14 +717,12 @@ namespace TFitnessApp.Pages
         private void DashboardCard_Click(object sender, MouseButtonEventArgs e)
         {
             var border = sender as Border;
-            if (border == null || border.Tag == null || NavigationService == null) return;
+            if (border == null || border.Tag == null) return;
             string tag = border.Tag.ToString();
-            switch (tag)
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
             {
-                case "DoanhThu": NavigationService.Navigate(new Uri("Pages/GiaoDichPage.xaml", UriKind.Relative)); break;
-                case "HocVien": NavigationService.Navigate(new Uri("Pages/HocVienPage.xaml", UriKind.Relative)); break;
-                case "CheckIn": NavigationService.Navigate(new Uri("Pages/DiemDanhPage.xaml", UriKind.Relative)); break;
-                case "HetHan": NavigationService.Navigate(new Uri("Pages/HopDongPage.xaml", UriKind.Relative)); break;
+                mainWindow.NavigateToTab(tag);
             }
         }
         private void Chart_DataHover(object sender, ChartPoint chartPoint)

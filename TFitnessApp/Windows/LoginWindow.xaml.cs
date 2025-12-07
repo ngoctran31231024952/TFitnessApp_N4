@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +14,20 @@ namespace TFitnessApp.Windows
     {
         private string _ChuoiKetNoi;
         private readonly DbAccess _dbAccess;
+        private string CalculateSHA256(string rawData)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
         public LoginWindow()
         {
             InitializeComponent();
@@ -54,7 +70,9 @@ namespace TFitnessApp.Windows
 
             if (hasError) return;
 
- 
+
+            string passwordHash = CalculateSHA256(password);
+
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
             using (SqliteConnection connection = DbAccess.CreateConnection())
@@ -66,7 +84,8 @@ namespace TFitnessApp.Windows
                 using (SqliteCommand command = new SqliteCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@user", username);
-                    command.Parameters.AddWithValue("@pass", password);
+
+                    command.Parameters.AddWithValue("@pass", passwordHash);
 
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
