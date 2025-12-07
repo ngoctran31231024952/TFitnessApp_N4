@@ -232,6 +232,9 @@
     <Compile Include="Windows\ThemTaiKhoan.xaml.cs">
       <DependentUpon>ThemTaiKhoan.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\LocGiaoDichWindow.xaml.cs">
+      <DependentUpon>LocGiaoDichWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\XemGiaoDichWindow.xaml.cs">
       <DependentUpon>XemGiaoDichWindow.xaml</DependentUpon>
     </Compile>
@@ -383,6 +386,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\LocGiaoDichWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\XemGiaoDichWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -431,7 +438,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Database\TFitness.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Resource Include="Fonts\Lato Black.ttf" />
     <Resource Include="Fonts\Lato Bold.ttf" />

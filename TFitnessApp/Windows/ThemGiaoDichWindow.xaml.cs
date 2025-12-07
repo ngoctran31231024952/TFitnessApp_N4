@@ -1,8 +1,12 @@
 ﻿using System;
-using System.IO;
-using System.Data;
-using System.Windows;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Data.Sqlite;
 using TFitnessApp.Database;
 
@@ -12,7 +16,6 @@ namespace TFitnessApp.Windows
     public partial class Window1 : Window, INotifyPropertyChanged
     {
         #region Trường Dữ liệu Nội bộ
-        private string _ChuoiKetNoi;
         private readonly DbAccess _dbAccess;
         private string _maHocVien;
         private string _hoTenHocVien;
@@ -23,17 +26,34 @@ namespace TFitnessApp.Windows
         private decimal _tongTien;
         private decimal _daThanhToan;
         private decimal _soTienNo;
-        private string _phuongThucThanhToan;
-        private string _trangThaiThanhToan;
+        private string _phuongThucThanhToan = "Tiền mặt";
+        private string _trangThaiThanhToan = "Chưa Thanh Toán";
         private DateTime _ngayGiaoDich = DateTime.Now;
+
+        // Danh sách MASTER (lưu trữ tất cả mã)
+        private List<string> _allMaHocVien = new List<string>();
+        private List<string> _allMaGoiTap = new List<string>();
+        private List<string> _allMaNhanVien = new List<string>();
+
+        // Danh sách cho ComboBox tìm kiếm (chỉ hiển thị các mục đã lọc)
+        public ObservableCollection<string> DanhSachMaHocVien { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> DanhSachMaGoiTap { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> DanhSachMaNhanVien { get; set; } = new ObservableCollection<string>();
         #endregion
 
         #region Thuộc tính Binding (Public Properties)
         public string MaHocVien
         {
             get => _maHocVien;
-            // Gọi hàm tải thông tin học viên mỗi khi MaHocVien thay đổi
-            set { _maHocVien = value; OnPropertyChanged(nameof(MaHocVien)); TaiThongTinHocVien(); }
+            // Chỉ gọi hàm tải thông tin khi giá trị thực sự thay đổi 
+            set
+            {
+                if (_maHocVien == value) return;
+                _maHocVien = value;
+                OnPropertyChanged(nameof(MaHocVien));
+                // LƯU Ý: Hàm TaiThongTinHocVien() sẽ được gọi khi LostFocus hoặc khi chọn từ ComboBox
+                TaiThongTinHocVien();
+            }
         }
 
         public string HoTenHocVien
@@ -45,8 +65,13 @@ namespace TFitnessApp.Windows
         public string MaGoi
         {
             get => _maGoi;
-            // Gọi hàm tải thông tin gói tập mỗi khi MaGoi thay đổi
-            set { _maGoi = value; OnPropertyChanged(nameof(MaGoi)); TaiThongTinGoiTap(); }
+            set
+            {
+                if (_maGoi == value) return;
+                _maGoi = value;
+                OnPropertyChanged(nameof(MaGoi));
+                TaiThongTinGoiTap();
+            }
         }
 
         public string TenGoiTap
@@ -58,8 +83,13 @@ namespace TFitnessApp.Windows
         public string MaNhanVien
         {
             get => _maNhanVien;
-            // Gọi hàm tải thông tin nhân viên mỗi khi MaNhanVien thay đổi
-            set { _maNhanVien = value; OnPropertyChanged(nameof(MaNhanVien)); TaiThongTinNhanVien(); }
+            set
+            {
+                if (_maNhanVien == value) return;
+                _maNhanVien = value;
+                OnPropertyChanged(nameof(MaNhanVien));
+                TaiThongTinNhanVien();
+            }
         }
 
         public string HoTenNhanVien
@@ -71,15 +101,15 @@ namespace TFitnessApp.Windows
         public decimal TongTien
         {
             get => _tongTien;
-            // Tính lại số tiền nợ mỗi khi TongTien thay đổi
-            set { _tongTien = value; OnPropertyChanged(nameof(TongTien)); TinhSoTienNo(); }
+            // Tính lại số tiền nợ và trạng thái mỗi khi TongTien thay đổi
+            set { _tongTien = value; OnPropertyChanged(nameof(TongTien)); TinhSoTienNoVaTrangThai(); }
         }
 
         public decimal DaThanhToan
         {
             get => _daThanhToan;
-            // Tính lại số tiền nợ mỗi khi DaThanhToan thay đổi
-            set { _daThanhToan = value; OnPropertyChanged(nameof(DaThanhToan)); TinhSoTienNo(); }
+            // Tính lại số tiền nợ và trạng thái mỗi khi DaThanhToan thay đổi
+            set { _daThanhToan = value; OnPropertyChanged(nameof(DaThanhToan)); TinhSoTienNoVaTrangThai(); }
         }
 
         public decimal SoTienNo
@@ -97,9 +127,11 @@ namespace TFitnessApp.Windows
         public string TrangThaiThanhToan
         {
             get => _trangThaiThanhToan;
+            // Thuộc tính này được tính toán, không cho phép set trực tiếp từ UI
             set { _trangThaiThanhToan = value; OnPropertyChanged(nameof(TrangThaiThanhToan)); }
         }
 
+        // Ngày giao dịch luôn là ngày giờ hiện tại
         public DateTime NgayGiaoDich
         {
             get => _ngayGiaoDich;
@@ -114,27 +146,275 @@ namespace TFitnessApp.Windows
 
             // Khởi tạo đối tượng DbAccess
             _dbAccess = new DbAccess();
-            // Lấy chuỗi kết nối
-            _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
 
-            // Thiết lập giá trị mặc định cho ComboBox
-            PhuongThucThanhToan = "Tiền mặt";
-            TrangThaiThanhToan = "Chưa Thanh Toán";
+            // Tải danh sách mã vào cả master list và ObservableCollection để hiển thị ban đầu
+            TaiDanhSachMa("HocVien", "MaHV", _allMaHocVien, DanhSachMaHocVien);
+            TaiDanhSachMa("GoiTap", "MaGoi", _allMaGoiTap, DanhSachMaGoiTap);
+            TaiDanhSachMa("TaiKhoan", "MaTK", _allMaNhanVien, DanhSachMaNhanVien);
+
+            // Ngày giao dịch được thiết lập mặc định là thời điểm hiện tại
+            NgayGiaoDich = DateTime.Now;
         }
         #endregion
 
         #region Xử lý UI và Tải dữ liệu
+
+        // Phương thức chung để tải danh sách mã vào List (Master) và ObservableCollection (Display)
+        private void TaiDanhSachMa(string tableName, string columnName, List<string> masterList, ObservableCollection<string> displayList)
+        {
+            masterList.Clear();
+            displayList.Clear();
+            try
+            {
+                using (SqliteConnection conn = DbAccess.CreateConnection())
+                {
+                    conn.Open();
+                    string query = $"SELECT {columnName} FROM {tableName}";
+                    using (var command = new SqliteCommand(query, conn))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string ma = reader[columnName].ToString();
+                                masterList.Add(ma);
+                                displayList.Add(ma); // Thêm vào danh sách hiển thị ban đầu
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách mã từ bảng {tableName}: {ex.Message}");
+            }
+        }
+
         // Đóng cửa sổ
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        // --- Logic Mới: Xử lý GotFocus để mở Dropdown (Xổ xuống khi nhấn vào) ---
+        private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            // Chỉ mở dropdown nếu nó chưa mở
+            if (comboBox != null && !comboBox.IsDropDownOpen)
+            {
+                comboBox.IsDropDownOpen = true;
+            }
+        }
+
+
+        // --- Logic Tìm kiếm và Lọc cho ComboBox sử dụng KeyUp ---
+
+        // Hàm hỗ trợ tìm TextBox nội bộ của ComboBox (để đặt CaretIndex)
+        private TextBox FindEditableTextBox(ComboBox comboBox)
+        {
+            if (comboBox.Template == null) return null;
+
+            // Duyệt cây trực quan để tìm TextBox nội bộ (PART_EditableTextBox)
+            DependencyObject child = null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(comboBox); i++)
+            {
+                child = VisualTreeHelper.GetChild(comboBox, i);
+                if (child is ContentPresenter)
+                {
+                    // Đôi khi TextBox nằm sâu hơn ContentPresenter
+                    if (VisualTreeHelper.GetChildrenCount(child) > 0)
+                    {
+                        child = VisualTreeHelper.GetChild(child, 0);
+                    }
+                }
+                // Tìm kiếm sâu hơn trong Template
+                if (child is Decorator decorator)
+                {
+                    child = decorator.Child;
+                }
+
+                if (child is TextBox textBox) return textBox;
+            }
+            // Thử tìm bằng cách sử dụng GetTemplateChild nếu ComboBox đã được áp dụng Template
+            var editor = comboBox.Template.FindName("PART_EditableTextBox", comboBox) as TextBox;
+            if (editor != null) return editor;
+
+            return null;
+        }
+
+        // Hàm chung để lọc dữ liệu và cập nhật ComboBox
+        private void FilterComboBox(ComboBox comboBox, List<string> masterList, ObservableCollection<string> displayList)
+        {
+            // Lấy văn bản nhập từ ComboBox
+            string filterText = comboBox.Text;
+
+            // KIỂM TRA NULL ĐỂ TRÁNH LỖI CRASH: Đảm bảo filterText không null
+            if (filterText == null)
+            {
+                filterText = string.Empty;
+            }
+
+            // Lấy vị trí con trỏ hiện tại (từ TextBox nội bộ) trước khi cập nhật ItemSource
+            int caretIndex = filterText.Length;
+            var editableTextBox = FindEditableTextBox(comboBox);
+            if (editableTextBox != null)
+            {
+                // Sử dụng try-catch để an toàn hơn khi truy cập CaretIndex trên UI Thread
+                try
+                {
+                    caretIndex = editableTextBox.CaretIndex;
+                }
+                catch (Exception)
+                {
+                    // Bỏ qua lỗi truy cập CaretIndex trong quá trình lọc nhanh
+                    caretIndex = filterText.Length;
+                }
+            }
+
+            // LƯU Ý QUAN TRỌNG: Đã BỎ KHỎI: comboBox.DataContext = null; và comboBox.DataContext = this;
+            // Việc ngắt và khôi phục DataContext làm hỏng/trì hoãn Binding
+
+            // Lọc danh sách
+            var filteredList = masterList.Where(ma => ma.ToLower().Contains(filterText.ToLower())).ToList();
+
+            // Cập nhật ObservableCollection (Display List)
+            displayList.Clear();
+            foreach (var ma in filteredList)
+            {
+                displayList.Add(ma);
+            }
+
+            // Đặt lại Text (thường là cần thiết sau khi thao tác với ItemSource)
+            comboBox.Text = filterText;
+
+            // Đặt lại vị trí con trỏ (CaretIndex) để khắc phục lỗi nhảy con trỏ
+            if (editableTextBox != null)
+            {
+                // Sử dụng try-catch khi đặt CaretIndex
+                try
+                {
+                    // Đảm bảo chỉ đặt CaretIndex nếu nó hợp lệ
+                    if (caretIndex >= 0 && caretIndex <= comboBox.Text.Length)
+                    {
+                        editableTextBox.CaretIndex = caretIndex;
+                    }
+                    else
+                    {
+                        editableTextBox.CaretIndex = comboBox.Text.Length;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Bỏ qua lỗi nếu không thể đặt CaretIndex
+                }
+            }
+
+
+            // Giữ cho dropdown mở khi gõ
+            comboBox.IsDropDownOpen = true;
+
+            // KHÔNG CẦN: Khôi phục Data Context
+        }
+
+        // Hàm xử lý sự kiện KeyUp chung cho cả 3 ComboBox
+        private void ComboBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox == null || comboBox.IsReadOnly) return;
+
+            // Bỏ qua các phím điều khiển (như Shift, Ctrl, Alt, Enter, mũi tên)
+            // Enter/Tab sẽ được xử lý qua LostFocus
+            if (e.Key == Key.Left || e.Key == Key.Right ||
+                e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Tab)
+            {
+                return;
+            }
+
+            // Dùng KeyUp để lọc
+            if (comboBox == cboMaHocVien)
+            {
+                FilterComboBox(comboBox, _allMaHocVien, DanhSachMaHocVien);
+            }
+            else if (comboBox == cboMaGoiTap)
+            {
+                FilterComboBox(comboBox, _allMaGoiTap, DanhSachMaGoiTap);
+            }
+            else if (comboBox == cboMaNhanVien)
+            {
+                FilterComboBox(comboBox, _allMaNhanVien, DanhSachMaNhanVien);
+            }
+        }
+
+        // --- Logic LostFocus để kích hoạt tải dữ liệu khi gõ xong ---
+        // LostFocus là sự kiện thích hợp nhất để xử lý Binding khi người dùng gõ xong (Enter hoặc Tab ra ngoài)
+        private void cboMaHocVien_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox != null)
+            {
+                // 1. Cập nhật thuộc tính MaHocVien bằng giá trị Text hiện tại. 
+                // Điều này sẽ kích hoạt setter MaHocVien và gọi TaiThongTinHocVien().
+                MaHocVien = comboBox.Text;
+
+                // 2. Đảm bảo Binding được cập nhật (trong trường hợp XAML không có UpdateSourceTrigger=PropertyChanged)
+                // Cập nhật thủ công:
+                var bindingExpression = comboBox.GetBindingExpression(ComboBox.TextProperty);
+                bindingExpression?.UpdateSource();
+            }
+        }
+
+        private void cboMaGoiTap_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox != null)
+            {
+                // 1. Cập nhật MaGoi
+                MaGoi = comboBox.Text;
+
+                // 2. Cập nhật thủ công Binding
+                var bindingExpression = comboBox.GetBindingExpression(ComboBox.TextProperty);
+                bindingExpression?.UpdateSource();
+            }
+        }
+
+        private void cboMaNhanVien_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox != null)
+            {
+                // 1. Cập nhật MaNhanVien
+                MaNhanVien = comboBox.Text;
+
+                // 2. Cập nhật thủ công Binding
+                var bindingExpression = comboBox.GetBindingExpression(ComboBox.TextProperty);
+                bindingExpression?.UpdateSource();
+            }
+        }
+
         // Tải thông tin Họ tên học viên từ database dựa trên MaHocVien
         private void TaiThongTinHocVien()
         {
+            // Kiểm tra xem mã đã được tìm kiếm có tồn tại trong danh sách master không
+            if (!_allMaHocVien.Any(m => m.Equals(MaHocVien, StringComparison.OrdinalIgnoreCase)))
+            {
+                // Nếu mã không nằm trong danh sách master và không rỗng
+                if (!string.IsNullOrEmpty(MaHocVien))
+                {
+                    HoTenHocVien = "";
+                    txtHocVienError.Text = "Không tồn tại mã học viên";
+                    txtHocVienError.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    HoTenHocVien = "";
+                    txtHocVienError.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
+
             if (string.IsNullOrEmpty(MaHocVien))
             {
                 HoTenHocVien = "";
@@ -145,7 +425,6 @@ namespace TFitnessApp.Windows
             try
             {
                 using (SqliteConnection conn = DbAccess.CreateConnection())
-
                 {
                     conn.Open();
                     string query = "SELECT HoTen FROM HocVien WHERE MaHV = @MaHV";
@@ -161,6 +440,7 @@ namespace TFitnessApp.Windows
                         }
                         else
                         {
+                            // Trường hợp này hiếm xảy ra nếu đã kiểm tra master list ở trên, nhưng giữ lại phòng ngừa
                             HoTenHocVien = "";
                             txtHocVienError.Text = "Không tồn tại mã học viên";
                             txtHocVienError.Visibility = Visibility.Visible;
@@ -170,6 +450,7 @@ namespace TFitnessApp.Windows
             }
             catch (Exception ex)
             {
+                // Thay thế MessageBox bằng phương thức thông báo phù hợp trong ứng dụng thực tế
                 MessageBox.Show($"Lỗi khi tải thông tin học viên: {ex.Message}");
             }
         }
@@ -177,6 +458,25 @@ namespace TFitnessApp.Windows
         // Tải thông tin Tên gói tập và Tổng tiền từ database dựa trên MaGoi
         private void TaiThongTinGoiTap()
         {
+            // Kiểm tra master list trước
+            if (!_allMaGoiTap.Any(m => m.Equals(MaGoi, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!string.IsNullOrEmpty(MaGoi))
+                {
+                    TenGoiTap = "";
+                    TongTien = 0;
+                    txtGoiTapError.Text = "Không tồn tại mã gói tập";
+                    txtGoiTapError.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    TenGoiTap = "";
+                    TongTien = 0;
+                    txtGoiTapError.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
+
             if (string.IsNullOrEmpty(MaGoi))
             {
                 TenGoiTap = "";
@@ -215,6 +515,7 @@ namespace TFitnessApp.Windows
             }
             catch (Exception ex)
             {
+                // Thay thế MessageBox bằng phương thức thông báo phù hợp trong ứng dụng thực tế
                 MessageBox.Show($"Lỗi khi tải thông tin gói tập: {ex.Message}");
             }
         }
@@ -222,6 +523,23 @@ namespace TFitnessApp.Windows
         // Tải thông tin Họ tên nhân viên từ database dựa trên MaNhanVien
         private void TaiThongTinNhanVien()
         {
+            // Kiểm tra master list trước
+            if (!_allMaNhanVien.Any(m => m.Equals(MaNhanVien, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!string.IsNullOrEmpty(MaNhanVien))
+                {
+                    HoTenNhanVien = "";
+                    txtNhanVienError.Text = "Không tồn tại mã nhân viên";
+                    txtNhanVienError.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    HoTenNhanVien = "";
+                    txtNhanVienError.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
+
             if (string.IsNullOrEmpty(MaNhanVien))
             {
                 HoTenNhanVien = "";
@@ -256,14 +574,43 @@ namespace TFitnessApp.Windows
             }
             catch (Exception ex)
             {
+                // Thay thế MessageBox bằng phương thức thông báo phù hợp trong ứng dụng thực tế
                 MessageBox.Show($"Lỗi khi tải thông tin nhân viên: {ex.Message}");
             }
         }
 
-        // Tính toán số tiền nợ (còn lại)
-        private void TinhSoTienNo()
+        // Tính toán số tiền nợ (còn lại) VÀ Trạng thái thanh toán
+        private void TinhSoTienNoVaTrangThai()
         {
+            // 1. Tính số tiền nợ
             SoTienNo = TongTien - DaThanhToan;
+
+            // 2. Tính trạng thái thanh toán dựa trên yêu cầu:
+            if (TongTien <= 0 && DaThanhToan == 0)
+            {
+                // Nếu chưa có gói tập hoặc chưa nhập gì
+                TrangThaiThanhToan = "Chưa Thanh Toán";
+            }
+            else if (SoTienNo <= 0 && TongTien > 0)
+            {
+                // Nếu số tiền nợ bằng 0 (hoặc âm, tức là trả thừa) -> Đã thanh toán
+                TrangThaiThanhToan = "Đã Thanh Toán";
+            }
+            else if (TongTien > 0 && DaThanhToan == 0)
+            {
+                // Nếu số tiền đã thanh toán bằng 0 (và có tổng tiền) -> Chưa thanh toán
+                TrangThaiThanhToan = "Chưa Thanh Toán";
+            }
+            else if (SoTienNo > 0 && SoTienNo < TongTien)
+            {
+                // Nếu số tiền nợ lớn hơn 0 và bé hơn tổng tiền -> Trả một phần
+                TrangThaiThanhToan = "Trả Một Phần";
+            }
+            else
+            {
+                // Trường hợp khác
+                TrangThaiThanhToan = "Chưa Xác Định";
+            }
         }
         #endregion
 
@@ -271,8 +618,11 @@ namespace TFitnessApp.Windows
         // Sự kiện khi nhấn nút "Tạo" giao dịch
         private void TaoGiaoDichButton_Click(object sender, RoutedEventArgs e)
         {
-            // Tính toán số tiền nợ cuối cùng trước khi lưu
-            TinhSoTienNo();
+            // Cập nhật lại ngày giao dịch là thời điểm tạo
+            NgayGiaoDich = DateTime.Now;
+
+            // Tính toán số tiền nợ và trạng thái cuối cùng trước khi lưu
+            TinhSoTienNoVaTrangThai();
 
             // Kiểm tra dữ liệu bắt buộc
             if (string.IsNullOrEmpty(MaHocVien) || string.IsNullOrEmpty(MaGoi) || string.IsNullOrEmpty(MaNhanVien))
@@ -281,7 +631,7 @@ namespace TFitnessApp.Windows
                 return;
             }
 
-            // Kiểm tra mã có tồn tại không
+            // Kiểm tra mã có tồn tại không (dùng lại hàm KiemTraTonTai)
             if (!KiemTraTonTai("HocVien", "MaHV", MaHocVien))
             {
                 MessageBox.Show("Mã học viên không tồn tại!");
@@ -313,6 +663,12 @@ namespace TFitnessApp.Windows
                 return;
             }
 
+            if (TongTien <= 0)
+            {
+                MessageBox.Show("Tổng tiền phải lớn hơn 0 để tạo giao dịch!");
+                return;
+            }
+
             // Tạo mã giao dịch tự động
             string maGD = TaoMaGiaoDich();
 
@@ -333,8 +689,8 @@ namespace TFitnessApp.Windows
                         command.Parameters.AddWithValue("@DaThanhToan", DaThanhToan);
                         command.Parameters.AddWithValue("@SoTienNo", SoTienNo);
                         command.Parameters.AddWithValue("@PhuongThuc", PhuongThucThanhToan);
-                        // Lưu ngày giao dịch với định dạng yyyy-MM-dd
-                        command.Parameters.AddWithValue("@NgayGD", NgayGiaoDich.ToString("yyyy-MM-dd"));
+                        // Lưu ngày giao dịch với định dạng yyyy-MM-dd HH:mm:ss
+                        command.Parameters.AddWithValue("@NgayGD", NgayGiaoDich.ToString("yyyy-MM-dd HH:mm:ss"));
                         command.Parameters.AddWithValue("@TrangThai", TrangThaiThanhToan);
                         command.Parameters.AddWithValue("@MaHV", MaHocVien);
                         command.Parameters.AddWithValue("@MaGoi", MaGoi);
@@ -379,6 +735,7 @@ namespace TFitnessApp.Windows
             }
             catch (Exception)
             {
+                // Xử lý lỗi kết nối/query
                 return false;
             }
         }

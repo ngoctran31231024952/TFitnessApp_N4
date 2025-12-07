@@ -176,6 +176,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Khối Tiêu đề (Danh sách Giao dịch) -->
@@ -245,8 +246,29 @@
                 </Grid>
             </Border>
 
-            <!-- Nút Tạo giao dịch mới -->
+            <!-- Nút Lọc -->
             <Border Grid.Column="2" CornerRadius="5" Margin="0,0,10,0">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
+                </Border.Effect>
+                <Button x:Name="btnFilter"
+                        Padding="15,8" 
+                        FontWeight="SemiBold" 
+                        Height="40" 
+                        VerticalAlignment="Center"
+                        ToolTip="Bộ lọc tùy chỉnh"
+                        Style="{StaticResource RoundButtonStyle}"
+                        Background="#C71A1B" 
+                        Click="FilterCommand_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="Filter" Width="15" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Lọc" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
+                    </StackPanel>
+                </Button>
+            </Border>
+            
+            <!-- Nút Tạo giao dịch mới -->
+            <Border Grid.Column="3" CornerRadius="5" Margin="0,0,10,0">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
                 </Border.Effect>
@@ -266,7 +288,7 @@
             </Border>
 
             <!-- Nút Làm mới dữ liệu -->
-            <Border Grid.Column="3" CornerRadius="5">
+            <Border Grid.Column="4" CornerRadius="5">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.2" BlurRadius="5"/>
                 </Border.Effect>

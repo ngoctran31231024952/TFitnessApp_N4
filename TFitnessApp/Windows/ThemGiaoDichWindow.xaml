@@ -15,9 +15,7 @@
         WindowStyle="None"
         Background="Transparent">
 
-    <!-- KHỐI ĐỊNH NGHĨA TÀI NGUYÊN (WINDOW.RESOURCES) -->
     <Window.Resources>
-        <!-- Style chung cho các nút tròn (RoundButtonControlTemplate) -->
         <Style x:Key="RoundButtonControlTemplate" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -33,7 +31,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <!-- Trigger hiệu ứng khi di chuột qua -->
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#A51617"/>
@@ -41,7 +38,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style cho Nút Đóng (X) trên Header màu đỏ -->
         <Style x:Key="CloseWindowButtonStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -49,7 +45,6 @@
                         <Border Background="Transparent">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <!-- Trigger đổi màu nền khi di chuột qua -->
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#A51617"/>
@@ -60,56 +55,43 @@
             </Setter>
         </Style>
 
-        <!-- Data cho ComboBox Phương thức thanh toán -->
         <x:Array x:Key="PaymentMethods" Type="{x:Type sys:String}">
             <sys:String>Tiền mặt</sys:String>
             <sys:String>Chuyển khoản</sys:String>
             <sys:String>Thẻ</sys:String>
         </x:Array>
 
-        <!-- Data cho ComboBox Trạng thái thanh toán -->
-        <x:Array x:Key="PaymentStatuses" Type="{x:Type sys:String}">
-            <sys:String>Chưa Thanh Toán</sys:String>
-            <sys:String>Trả Một Phần</sys:String>
-            <sys:String>Đã Thanh Toán</sys:String>
-        </x:Array>
-
     </Window.Resources>
 
-    <!-- KHUNG CHÍNH CỦA WINDOW -->
     <Border CornerRadius="10" Background="White" BorderBrush="#C71A1B" BorderThickness="1">
         <Grid>
-            <!-- Định nghĩa 3 dòng: Header, Nội dung, Footer -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- KHU VỰC HEADER -->
             <Grid Grid.Row="0" Background="#C71A1B" Height="50">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Text Tiêu đề -->
                 <TextBlock Grid.Column="0" Text="Tạo Giao dịch mới" 
-                        Foreground="White" FontWeight="Bold" FontSize="18"
-                        VerticalAlignment="Center" Margin="20,0,0,0"/>
+                           Foreground="White" FontWeight="Bold" FontSize="18"
+                           VerticalAlignment="Center" Margin="20,0,0,0"/>
 
-                <!-- Nút Đóng Window -->
                 <Button Grid.Column="1" Click="CloseButton_Click" Background="Transparent" BorderThickness="0" 
-                    Width="50" Cursor="Hand" Style="{DynamicResource CloseWindowButtonStyle}">
+                        Width="50" Cursor="Hand" Style="{DynamicResource CloseWindowButtonStyle}">
                     <fa:IconImage Icon="Xmark" Width="16" Height="16" Foreground="White"/>
                 </Button>
             </Grid>
 
-            <!-- KHU VỰC NỘI DUNG FORM - Dùng ScrollViewer cho phép cuộn -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30">
                 <Grid>
-                    <!-- Định nghĩa các dòng và cột cho form nhập liệu -->
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -122,122 +104,129 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- DÒNG 1: Mã học viên / Mã gói tập (Trường nhập chính) -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Mã học viên:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtMaHocVien" Text="{Binding MaHocVien, UpdateSourceTrigger=PropertyChanged}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="cboMaHocVien" 
+                                  IsEditable="True" 
+                                  Text="{Binding MaHocVien, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaHocVien}"
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
+                                  IsTextSearchEnabled="False"
+                                  StaysOpenOnEdit="True"
+                                  GotFocus="ComboBox_GotFocus"
+                                  KeyUp="ComboBox_KeyUp"
+                                  LostFocus="cboMaHocVien_LostFocus"/>
                         <TextBlock x:Name="txtHocVienError" Foreground="Red" FontSize="11" Margin="5,3,0,0" Visibility="Collapsed"/>
-                        <TextBlock Text="(Họ tên học viên thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
+                        <TextBlock Text="(Chọn, nhập hoặc tìm kiếm mã học viên)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Mã gói tập:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtMaGoiTap" Text="{Binding MaGoi, UpdateSourceTrigger=PropertyChanged}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="cboMaGoiTap" 
+                                  IsEditable="True" 
+                                  Text="{Binding MaGoi, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaGoiTap}"
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
+                                  IsTextSearchEnabled="False"
+                                  StaysOpenOnEdit="True"
+                                  GotFocus="ComboBox_GotFocus"
+                                  KeyUp="ComboBox_KeyUp"
+                                  LostFocus="cboMaGoiTap_LostFocus"/>
                         <TextBlock x:Name="txtGoiTapError" Foreground="Red" FontSize="11" Margin="5,3,0,0" Visibility="Collapsed"/>
-                        <TextBlock Text="(Mã gói thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
+                        <TextBlock Text="(Chọn, nhập hoặc tìm kiếm mã gói tập)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
-                    <!-- DÒNG 2: Họ tên học viên / Tên gói tập (Trường chỉ đọc, lấy từ database) -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Họ tên học viên:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtHoTenHocVien" Text="{Binding HoTenHocVien}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
                         <TextBlock Text="(Họ tên học viên thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Tên gói tập:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtTenGoiTap" Text="{Binding TenGoiTap}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
                         <TextBlock Text="(Tên gói tập thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
-                    <!-- DÒNG 3: Mã nhân viên / Tổng tiền (Mã NV nhập, Tổng tiền lấy từ DB/tính toán) -->
                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Mã nhân viên:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtMaNhanVien" Text="{Binding MaNhanVien, UpdateSourceTrigger=PropertyChanged}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="cboMaNhanVien" 
+                                  IsEditable="True" 
+                                  Text="{Binding MaNhanVien, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaNhanVien}"
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
+                                  IsTextSearchEnabled="False"
+                                  StaysOpenOnEdit="True"
+                                  GotFocus="ComboBox_GotFocus"
+                                  KeyUp="ComboBox_KeyUp"
+                                  LostFocus="cboMaNhanVien_LostFocus"/>
                         <TextBlock x:Name="txtNhanVienError" Foreground="Red" FontSize="11" Margin="5,3,0,0" Visibility="Collapsed"/>
-                        <TextBlock Text="(Mã nhân viên tạo giao dịch)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
+                        <TextBlock Text="(Chọn, nhập hoặc tìm kiếm mã nhân viên)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Tổng tiền:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtTongTien" Text="{Binding TongTien}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
                         <TextBlock Text="(Tổng tiền cần thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
-                    <!-- DÒNG 4: Họ tên nhân viên / Đã thanh toán (Họ tên NV lấy từ DB, Đã TT nhập) -->
                     <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Họ tên nhân viên:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtHoTenNhanVien" Text="{Binding HoTenNhanVien}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
                         <TextBlock Text="(Họ tên nhân viên tạo giao dịch)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Đã thanh toán:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox Text="{Binding DaThanhToan, UpdateSourceTrigger=PropertyChanged}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
                         <TextBlock Text="(Số tiền đã thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
-                    <!-- DÒNG 5: Số tiền nợ / PHƯƠNG THỨC THANH TOÁN -->
                     <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Số tiền nợ:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtSoTienNo" Text="{Binding SoTienNo}" 
-                                Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
-                                BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
                         <TextBlock Text="(Số tiền còn lại cần thanh toán)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="4" Grid.Column="1" Margin="15,0,0,20">
                         <TextBlock Text="Phương thức thanh toán:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <ComboBox ItemsSource="{StaticResource PaymentMethods}"
-                                SelectedItem="{Binding PhuongThucThanhToan}" 
-                                Width="300" Height="30" Padding="5,0" 
-                                BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
+                                  SelectedItem="{Binding PhuongThucThanhToan}" 
+                                  Width="300" Height="30" Padding="5,0" 
+                                  BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
                         <TextBlock Text="(Phương thức thanh toán học viên chọn)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
-                    <!-- DÒNG 6: TRẠNG THÁI / NGÀY GIAO DỊCH -->
                     <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,15,20">
                         <TextBlock Text="Trạng thái:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <ComboBox ItemsSource="{StaticResource PaymentStatuses}"
-                                SelectedItem="{Binding TrangThaiThanhToan}" 
-                                Width="300" Height="30" Padding="5,0" 
-                                BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
-                        <TextBlock Text="(Trạng thái thanh toán của học viên)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="5" Grid.Column="1" Margin="15,0,0,20">
-                        <TextBlock Text="Ngày giao dịch:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <DatePicker SelectedDate="{Binding NgayGiaoDich}" 
-                                 Width="300" Height="30" 
-                                 Padding="5,0" BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
-                        <TextBlock Text="(Ngày giao dịch thực tế)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
+                        <TextBox x:Name="txtTrangThaiThanhToan" Text="{Binding TrangThaiThanhToan}" 
+                                 Width="300" Height="30" Padding="5,0" BorderThickness="0,0,0,1" 
+                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center" IsReadOnly="True" Background="#F5F5F5"/>
+                        <TextBlock Text="(Trạng thái thanh toán tự động tính)" FontStyle="Italic" FontSize="11" Foreground="#999" Margin="5,3,0,0"/>
                     </StackPanel>
 
                 </Grid>
             </ScrollViewer>
 
-            <!-- KHU VỰC FOOTER -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,10,0,20">
-                <!-- Nút Tạo Giao Dịch -->
                 <Button Click="TaoGiaoDichButton_Click" 
-                    Style="{DynamicResource RoundButtonControlTemplate}" 
-                    Padding="30,10" FontWeight="Bold">
+                        Style="{DynamicResource RoundButtonControlTemplate}" 
+                        Padding="30,10" FontWeight="Bold">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="Plus" Width="18" Height="18" Margin="10,0,5,0" Foreground="White"/>
                         <TextBlock Text="Tạo" Margin="0,0,0,0" FontSize="24" Width="45" />

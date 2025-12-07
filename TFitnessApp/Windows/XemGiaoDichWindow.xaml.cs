@@ -86,13 +86,19 @@ namespace TFitnessApp.Windows
         public decimal DaThanhToan
         {
             get => _daThanhToan;
-            // Tính lại số tiền nợ mỗi khi DaThanhToan thay đổi
-            set { _daThanhToan = value; OnPropertyChanged(nameof(DaThanhToan)); TinhSoTienNo(); }
+            set
+            {
+                if (_daThanhToan == value) return; // Tránh cập nhật đệ quy
+                _daThanhToan = value;
+                OnPropertyChanged(nameof(DaThanhToan));
+                TinhTrangThaiThanhToan(); // Tự động tính lại số tiền nợ và trạng thái
+            }
         }
 
         public decimal SoTienNo
         {
             get => _soTienNo;
+            // Chỉ cho phép set nội bộ qua hàm TinhTrangThaiThanhToan()
             set { _soTienNo = value; OnPropertyChanged(nameof(SoTienNo)); }
         }
 
@@ -105,6 +111,7 @@ namespace TFitnessApp.Windows
         public string TrangThai
         {
             get => _trangThai;
+            // Chỉ cho phép set nội bộ qua hàm TinhTrangThaiThanhToan()
             set { _trangThai = value; OnPropertyChanged(nameof(TrangThai)); }
         }
 
@@ -202,10 +209,39 @@ namespace TFitnessApp.Windows
         #endregion
 
         #region Xử lý Logic và UI
-        // Tính toán lại số tiền nợ
-        private void TinhSoTienNo()
+
+        // Phương thức tính toán số tiền nợ VÀ Trạng thái thanh toán (được lấy từ Window1)
+        private void TinhTrangThaiThanhToan()
         {
+            // 1. Tính số tiền nợ
             SoTienNo = TongTien - DaThanhToan;
+
+            // 2. Tính trạng thái thanh toán
+            if (TongTien <= 0)
+            {
+                // Nếu chưa có gói tập
+                TrangThai = "Chưa Thanh Toán";
+            }
+            else if (SoTienNo <= 0 && TongTien > 0)
+            {
+                // Nếu số tiền nợ bằng 0 (hoặc âm, tức là trả thừa) -> Đã thanh toán
+                TrangThai = "Đã Thanh Toán";
+            }
+            else if (TongTien > 0 && DaThanhToan == 0)
+            {
+                // Nếu số tiền đã thanh toán bằng 0 (và có tổng tiền) -> Chưa thanh toán
+                TrangThai = "Chưa Thanh Toán";
+            }
+            else if (SoTienNo > 0 && SoTienNo < TongTien)
+            {
+                // Nếu số tiền nợ lớn hơn 0 và bé hơn tổng tiền -> Trả một phần
+                TrangThai = "Trả Một Phần";
+            }
+            else
+            {
+                // Trường hợp khác
+                TrangThai = "Chưa Xác Định";
+            }
         }
 
         // Thiết lập chế độ chỉnh sửa cho các control
@@ -213,13 +249,7 @@ namespace TFitnessApp.Windows
         {
             IsEditMode = isEdit;
 
-            // Cập nhật trạng thái các control có thể chỉnh sửa
-            if (dpNgayGD != null)
-                dpNgayGD.IsEnabled = isEdit;
-
-            if (cbTrangThai != null)
-                cbTrangThai.IsEnabled = isEdit;
-
+            // DaThanhToan (txtDaThanhToan) có thể chỉnh sửa
             if (txtDaThanhToan != null)
                 txtDaThanhToan.IsEnabled = isEdit;
 
@@ -252,13 +282,20 @@ namespace TFitnessApp.Windows
             }
             else
             {
-                // Lưu thay đổi (Cập nhật Database)
+                // Lưu thay đổi 
                 try
                 {
                     // Validate dữ liệu
                     if (!decimal.TryParse(txtDaThanhToan.Text, out decimal daThanhToanMoi))
                     {
                         MessageBox.Show("Số tiền đã thanh toán không hợp lệ!", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (daThanhToanMoi < 0)
+                    {
+                        MessageBox.Show("Số tiền đã thanh toán không được âm!", "Lỗi",
                             MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
@@ -270,29 +307,31 @@ namespace TFitnessApp.Windows
                         return;
                     }
 
-                    // Cập nhật giá trị
+                    // 1. Cập nhật giá trị DaThanhToan
                     DaThanhToan = daThanhToanMoi;
-                    TrangThai = cbTrangThai.SelectedItem?.ToString();
-                    NgayGD = dpNgayGD.SelectedDate ?? NgayGD;
 
-                    // Tính toán số tiền nợ
-                    TinhSoTienNo();
+                    // 2. Tự động tính toán số tiền nợ và Trạng thái mới nhất
+                    TinhTrangThaiThanhToan();
+
+                    // 3. Cập nhật Ngày giao dịch là thời điểm lưu
+                    NgayGD = DateTime.Now;
 
                     using (SqliteConnection conn = DbAccess.CreateConnection())
                     {
                         conn.Open();
                         string query = @"
                             UPDATE GiaoDich 
-                            SET NgayGD = @NgayGD, TrangThai = @TrangThai, DaThanhToan = @DaThanhToan, SoTienNo = @SoTienNo
+                            SET NgayGD = @NgayGD, TrangThai = @TrangThai, DaThanhToan = @DaThanhToan, SoTienNo = @SoTienNo, PhuongThuc = @PhuongThuc
                             WHERE MaGD = @MaGD";
 
                         using (var command = new SqliteCommand(query, conn))
                         {
-                            // Lưu ngày giao dịch với định dạng yyyy-MM-dd
-                            command.Parameters.AddWithValue("@NgayGD", NgayGD.ToString("yyyy-MM-dd"));
+                            // Lưu ngày giao dịch với định dạng dd/MM/yyyy HH:mm 
+                            command.Parameters.AddWithValue("@NgayGD", NgayGD.ToString("dd/MM/yyyy HH:mm"));
                             command.Parameters.AddWithValue("@TrangThai", TrangThai);
                             command.Parameters.AddWithValue("@DaThanhToan", DaThanhToan);
                             command.Parameters.AddWithValue("@SoTienNo", SoTienNo);
+                            command.Parameters.AddWithValue("@PhuongThuc", PhuongThuc);
                             command.Parameters.AddWithValue("@MaGD", MaGD);
 
                             int rowsAffected = command.ExecuteNonQuery();
@@ -319,7 +358,7 @@ namespace TFitnessApp.Windows
         private void btnXoa_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa giao dịch {MaGD} không?", "Xác nhận xóa",
-                                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                                             MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -367,7 +406,7 @@ namespace TFitnessApp.Windows
                     Directory.CreateDirectory(exportDirectory);
                 }
 
-                string fileName = $"HoaDon_{MaGD}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                string fileName = $"HoaDon_{MaGD}_{DateTime.Now:ddMMyyyy_HHmm}.txt";
                 string filePath = Path.Combine(exportDirectory, fileName);
 
                 // Tạo nội dung hóa đơn
@@ -390,7 +429,7 @@ namespace TFitnessApp.Windows
             return $@"HÓA ĐƠN THANH TOÁN TFITNESS
 ========================================
 Mã giao dịch: {MaGD}
-Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
+Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}
 
 THÔNG TIN HỌC VIÊN:
 - Mã học viên: {MaHV}
@@ -406,7 +445,7 @@ THÔNG TIN THANH TOÁN:
 - Số tiền nợ: {SoTienNo:N0} VNĐ
 - Phương thức: {PhuongThuc}
 - Trạng thái: {TrangThai}
-- Ngày giao dịch: {NgayGD:dd/MM/yyyy}
+- Ngày giao dịch: {NgayGD:dd/MM/yyyy HH:mm}
 
 NHÂN VIÊN XỬ LÝ:
 - Mã nhân viên: {MaTK}
