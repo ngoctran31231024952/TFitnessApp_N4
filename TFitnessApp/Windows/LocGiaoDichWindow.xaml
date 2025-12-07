@@ -133,14 +133,14 @@
 
                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
                         <TextBlock Text="Từ Ngày:" Margin="0,0,0,5"/>
-                        <DatePicker x:Name="dpTuNgay" Height="30" BorderBrush="#E0E0E0"/>
+                        <DatePicker x:Name="dpTuNgay" SelectedDateFormat="Short" Language="vi-VN" Height="30" BorderBrush="#E0E0E0"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="1" Text="—" VerticalAlignment="Center" Margin="0,25,0,0" FontSize="18"/>
 
                     <StackPanel Grid.Column="2" Margin="10,0,0,0">
                         <TextBlock Text="Đến Ngày:" Margin="0,0,0,5"/>
-                        <DatePicker x:Name="dpDenNgay" Height="30" BorderBrush="#E0E0E0"/>
+                        <DatePicker x:Name="dpDenNgay" SelectedDateFormat="Short" Language="vi-VN" Height="30" BorderBrush="#E0E0E0"/>
                     </StackPanel>
                 </Grid>
 

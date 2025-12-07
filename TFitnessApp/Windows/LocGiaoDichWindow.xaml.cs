@@ -41,6 +41,7 @@ namespace TFitnessApp.Windows
         public Window5(MoDonBoLoc boLocHienTai)
         {
             InitializeComponent();
+
             this.DataContext = this;
 
             // Tạo bản sao của bộ lọc hiện tại để chỉnh sửa
