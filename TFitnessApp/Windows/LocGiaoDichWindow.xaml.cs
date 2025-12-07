@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using TFitnessApp;
 using Microsoft.Data.Sqlite;
 using TFitnessApp.Database;
@@ -23,15 +25,23 @@ namespace TFitnessApp.Windows
             { "Trên 5.000.000 VNĐ", KhoangTongTien.Tren5Trieu }
         };
 
-        private List<ComboBoxItemData> _allMaHVs = new List<ComboBoxItemData>();
-        private List<ComboBoxItemData> _allMaGois = new List<ComboBoxItemData>();
-        private List<ComboBoxItemData> _allMaNVs = new List<ComboBoxItemData>();
+        // Danh sách MASTER (lưu trữ tất cả mã)
+        private List<string> _allMaHVs = new List<string>();
+        private List<string> _allMaGois = new List<string>();
+        private List<string> _allMaNVs = new List<string>();
 
-        private ComboBoxItemData _defaultItem = new ComboBoxItemData { ID = string.Empty, Name = "— Không Áp Dụng —" };
+        // Danh sách cho ComboBox tìm kiếm (chỉ hiển thị các mục đã lọc)
+        public ObservableCollection<string> DanhSachMaHocVien { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> DanhSachMaGoiTap { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> DanhSachMaNhanVien { get; set; } = new ObservableCollection<string>();
+
+        // Mục mặc định
+        private const string DEFAULT_ITEM = "— Không Áp Dụng —";
 
         public Window5(MoDonBoLoc boLocHienTai)
         {
             InitializeComponent();
+            this.DataContext = this;
 
             // Tạo bản sao của bộ lọc hiện tại để chỉnh sửa
             KetQuaLoc = new MoDonBoLoc();
@@ -54,10 +64,6 @@ namespace TFitnessApp.Windows
             // 2. Thiết lập ItemsSource
             cboLocTongTien.ItemsSource = CacKhoangTongTien.Keys.ToList();
 
-            cboMaHocVien.ItemsSource = _allMaHVs;
-            cboMaGoiTap.ItemsSource = _allMaGois;
-            cboMaNhanVien.ItemsSource = _allMaNVs;
-
             // 3. Đồng bộ trạng thái ban đầu
             DongBoTrangThaiVoiUI(KetQuaLoc);
         }
@@ -67,9 +73,9 @@ namespace TFitnessApp.Windows
             try
             {
                 // Thêm mục mặc định vào danh sách gốc
-                _allMaHVs.Add(_defaultItem);
-                _allMaGois.Add(_defaultItem);
-                _allMaNVs.Add(_defaultItem);
+                _allMaHVs.Add(DEFAULT_ITEM);
+                _allMaGois.Add(DEFAULT_ITEM);
+                _allMaNVs.Add(DEFAULT_ITEM);
 
                 // Load dữ liệu từ Database
                 using (SqliteConnection conn = DbAccess.CreateConnection())
@@ -85,11 +91,8 @@ namespace TFitnessApp.Windows
                         {
                             string maHV = reader["MaHV"].ToString();
                             string hoTen = reader["HoTen"].ToString();
-                            _allMaHVs.Add(new ComboBoxItemData
-                            {
-                                ID = maHV,
-                                Name = $"{maHV} - {hoTen}"
-                            });
+                            string displayText = $"{maHV} - {hoTen}";
+                            _allMaHVs.Add(displayText);
                         }
                     }
 
@@ -102,11 +105,8 @@ namespace TFitnessApp.Windows
                         {
                             string maGoi = reader["MaGoi"].ToString();
                             string tenGoi = reader["TenGoi"].ToString();
-                            _allMaGois.Add(new ComboBoxItemData
-                            {
-                                ID = maGoi,
-                                Name = $"{maGoi} - {tenGoi}"
-                            });
+                            string displayText = $"{maGoi} - {tenGoi}";
+                            _allMaGois.Add(displayText);
                         }
                     }
 
@@ -119,37 +119,31 @@ namespace TFitnessApp.Windows
                         {
                             string maTK = reader["MaTK"].ToString();
                             string hoTen = reader["HoTen"].ToString();
-                            _allMaNVs.Add(new ComboBoxItemData
-                            {
-                                ID = maTK,
-                                Name = $"{maTK} - {hoTen}"
-                            });
+                            string displayText = $"{maTK} - {hoTen}";
+                            _allMaNVs.Add(displayText);
                         }
                     }
+                }
+
+                // Thêm tất cả vào danh sách hiển thị ban đầu
+                foreach (var item in _allMaHVs)
+                {
+                    DanhSachMaHocVien.Add(item);
+                }
+                foreach (var item in _allMaGois)
+                {
+                    DanhSachMaGoiTap.Add(item);
+                }
+                foreach (var item in _allMaNVs)
+                {
+                    DanhSachMaNhanVien.Add(item);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu từ Database: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Thêm dữ liệu mẫu nếu không thể kết nối database
-                AddSampleData();
             }
-        }
-
-        private void AddSampleData()
-        {
-            // Thêm dữ liệu mẫu nếu không thể kết nối database
-            _allMaHVs.Add(new ComboBoxItemData { ID = "HV001", Name = "HV001 - Nguyễn Văn A" });
-            _allMaHVs.Add(new ComboBoxItemData { ID = "HV002", Name = "HV002 - Trần Thị B" });
-            _allMaHVs.Add(new ComboBoxItemData { ID = "HV003", Name = "HV003 - Lê Văn C" });
-
-            _allMaGois.Add(new ComboBoxItemData { ID = "GT01", Name = "GT01 - Gói 3 tháng" });
-            _allMaGois.Add(new ComboBoxItemData { ID = "GT02", Name = "GT02 - Gói 1 năm" });
-
-            _allMaNVs.Add(new ComboBoxItemData { ID = "TK01", Name = "TK01 - PT Minh" });
-            _allMaNVs.Add(new ComboBoxItemData { ID = "TK02", Name = "TK02 - NV Hằng" });
         }
 
         private void DongBoTrangThaiVoiUI(MoDonBoLoc boLoc)
@@ -174,27 +168,38 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void SetComboBoxSelection(ComboBox combo, List<ComboBoxItemData> allData, string maLoc)
+        private void SetComboBoxSelection(ComboBox combo, List<string> allData, string maLoc)
         {
             if (string.IsNullOrWhiteSpace(maLoc))
             {
-                combo.SelectedItem = _defaultItem;
-                combo.Text = _defaultItem.Name;
+                combo.Text = DEFAULT_ITEM;
+                combo.SelectedItem = DEFAULT_ITEM;
                 return;
             }
 
-            // Tìm item có ID khớp
-            var selectedItem = allData.FirstOrDefault(item => item.ID.Equals(maLoc, StringComparison.OrdinalIgnoreCase));
+            // Tìm item có ID khớp (tìm trong phần mã - trước dấu '-')
+            var selectedItem = allData.FirstOrDefault(item =>
+            {
+                if (item == DEFAULT_ITEM) return false;
+                // Tách mã từ chuỗi "Mã - Tên"
+                int dashIndex = item.IndexOf('-');
+                if (dashIndex > 0)
+                {
+                    string ma = item.Substring(0, dashIndex).Trim();
+                    return ma.Equals(maLoc, StringComparison.OrdinalIgnoreCase);
+                }
+                return false;
+            });
+
             if (selectedItem != null)
             {
+                combo.Text = selectedItem;
                 combo.SelectedItem = selectedItem;
-                combo.Text = selectedItem.Name;
             }
             else
             {
-                // Nếu không khớp, để trống
-                combo.SelectedItem = null;
-                combo.Text = "";
+                combo.Text = DEFAULT_ITEM;
+                combo.SelectedItem = DEFAULT_ITEM;
             }
         }
 
@@ -256,34 +261,31 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private string GetComboBoxSelectedIDOrText(ComboBox combo, List<ComboBoxItemData> allData)
+        private string GetComboBoxSelectedIDOrText(ComboBox combo, List<string> allData)
         {
-            if (combo.SelectedItem is ComboBoxItemData selectedData)
-            {
-                return selectedData.ID;
-            }
-
             string typedText = combo.Text.Trim();
-            if (string.IsNullOrWhiteSpace(typedText) || typedText == _defaultItem.Name)
+            
+            if (string.IsNullOrWhiteSpace(typedText) || typedText == DEFAULT_ITEM)
             {
                 return string.Empty;
             }
 
-            // Tìm ID khớp theo Name
-            var matchedItem = allData.FirstOrDefault(item => item.Name.Equals(typedText, StringComparison.OrdinalIgnoreCase));
-            if (matchedItem != null)
+            // Tìm trong danh sách xem có item khớp không
+            var matchedItem = allData.FirstOrDefault(item => 
+                item.Equals(typedText, StringComparison.OrdinalIgnoreCase));
+
+            if (matchedItem != null && matchedItem != DEFAULT_ITEM)
             {
-                return matchedItem.ID;
+                // Tách mã từ chuỗi "Mã - Tên"
+                int dashIndex = matchedItem.IndexOf('-');
+                if (dashIndex > 0)
+                {
+                    return matchedItem.Substring(0, dashIndex).Trim();
+                }
+                return matchedItem;
             }
 
-            // Tìm ID khớp theo ID
-            matchedItem = allData.FirstOrDefault(item => item.ID.Equals(typedText, StringComparison.OrdinalIgnoreCase));
-            if (matchedItem != null)
-            {
-                return matchedItem.ID;
-            }
-
-            // Trả về text gõ vào
+            // Nếu không tìm thấy, trả về text gõ vào
             return typedText;
         }
 
@@ -293,85 +295,290 @@ namespace TFitnessApp.Windows
             this.Close();
         }
 
-        // Các sự kiện ComboBox giữ nguyên
-        private void ComboBox_KeyUp(object sender, KeyEventArgs e)
+        // --- Logic Mới: Xử lý GotFocus để mở Dropdown ---
+        private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            var combo = sender as ComboBox;
-            if (combo == null || e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Enter) return;
-
-            string searchText = combo.Text.ToLower().Trim();
-            List<ComboBoxItemData> sourceList;
-
-            if (combo == cboMaHocVien) sourceList = _allMaHVs;
-            else if (combo == cboMaGoiTap) sourceList = _allMaGois;
-            else if (combo == cboMaNhanVien) sourceList = _allMaNVs;
-            else return;
-
-            var filtered = sourceList
-                .Where(item => item.ID.Equals(string.Empty) ||
-                               item.Name.ToLower().Contains(searchText) ||
-                               item.ID.ToLower().Contains(searchText))
-                .ToList();
-
-            combo.ItemsSource = filtered;
-            combo.IsDropDownOpen = true;
-
-            if (combo.IsEditable)
+            var comboBox = sender as ComboBox;
+            // Chỉ mở dropdown nếu nó chưa mở
+            if (comboBox != null && !comboBox.IsDropDownOpen)
             {
-                TextBox textBox = combo.Template.FindName("PART_EditableTextBox", combo) as TextBox;
-                if (textBox != null)
-                {
-                    textBox.CaretIndex = textBox.Text.Length;
-                }
+                comboBox.IsDropDownOpen = true;
             }
         }
 
-        private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
+        // Hàm hỗ trợ tìm TextBox nội bộ của ComboBox (để đặt CaretIndex)
+        private TextBox FindEditableTextBox(ComboBox comboBox)
         {
-            var combo = sender as ComboBox;
-            if (combo == null) return;
+            if (comboBox.Template == null) return null;
 
-            if (combo == cboMaHocVien) combo.ItemsSource = _allMaHVs;
-            else if (combo == cboMaGoiTap) combo.ItemsSource = _allMaGois;
-            else if (combo == cboMaNhanVien) combo.ItemsSource = _allMaNVs;
+            // Duyệt cây trực quan để tìm TextBox nội bộ (PART_EditableTextBox)
+            DependencyObject child = null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(comboBox); i++)
+            {
+                child = VisualTreeHelper.GetChild(comboBox, i);
+                if (child is ContentPresenter)
+                {
+                    // Đôi khi TextBox nằm sâu hơn ContentPresenter
+                    if (VisualTreeHelper.GetChildrenCount(child) > 0)
+                    {
+                        child = VisualTreeHelper.GetChild(child, 0);
+                    }
+                }
+                // Tìm kiếm sâu hơn trong Template
+                if (child is Decorator decorator)
+                {
+                    child = decorator.Child;
+                }
 
-            combo.IsDropDownOpen = true;
+                if (child is TextBox textBox) return textBox;
+            }
+            // Thử tìm bằng cách sử dụng GetTemplateChild nếu ComboBox đã được áp dụng Template
+            var editor = comboBox.Template.FindName("PART_EditableTextBox", comboBox) as TextBox;
+            if (editor != null) return editor;
+
+            return null;
         }
 
+        // Hàm chung để lọc dữ liệu và cập nhật ComboBox
+        private void FilterComboBox(ComboBox comboBox, List<string> masterList, ObservableCollection<string> displayList)
+        {
+            // Lấy văn bản nhập từ ComboBox
+            string filterText = comboBox.Text;
+
+            // KIỂM TRA NULL ĐỂ TRÁNH LỖI CRASH: Đảm bảo filterText không null
+            if (filterText == null)
+            {
+                filterText = string.Empty;
+            }
+
+            // Lấy vị trí con trỏ hiện tại (từ TextBox nội bộ) trước khi cập nhật ItemSource
+            int caretIndex = filterText.Length;
+            var editableTextBox = FindEditableTextBox(comboBox);
+            if (editableTextBox != null)
+            {
+                // Sử dụng try-catch để an toàn hơn khi truy cập CaretIndex trên UI Thread
+                try
+                {
+                    caretIndex = editableTextBox.CaretIndex;
+                }
+                catch (Exception)
+                {
+                    // Bỏ qua lỗi truy cập CaretIndex trong quá trình lọc nhanh
+                    caretIndex = filterText.Length;
+                }
+            }
+
+            // Lọc danh sách - luôn bao gồm mục mặc định
+            var filteredList = new List<string>();
+            
+            // Thêm mục mặc định nếu text trống hoặc text là mục mặc định
+            if (string.IsNullOrWhiteSpace(filterText) || filterText == DEFAULT_ITEM)
+            {
+                filteredList.Add(DEFAULT_ITEM);
+                // Thêm các item khác không lọc
+                filteredList.AddRange(masterList.Where(ma => ma != DEFAULT_ITEM));
+            }
+            else
+            {
+                // Thêm mục mặc định vào đầu danh sách
+                filteredList.Add(DEFAULT_ITEM);
+                // Lọc các item khác
+                var otherItems = masterList
+                    .Where(ma => ma != DEFAULT_ITEM && 
+                           ma.ToLower().Contains(filterText.ToLower()))
+                    .ToList();
+                filteredList.AddRange(otherItems);
+            }
+
+            // Cập nhật ObservableCollection (Display List)
+            displayList.Clear();
+            foreach (var ma in filteredList)
+            {
+                displayList.Add(ma);
+            }
+
+            // Đặt lại Text (thường là cần thiết sau khi thao tác với ItemSource)
+            comboBox.Text = filterText;
+
+            // Đặt lại vị trí con trỏ (CaretIndex) để khắc phục lỗi nhảy con trỏ
+            if (editableTextBox != null)
+            {
+                // Sử dụng try-catch khi đặt CaretIndex
+                try
+                {
+                    // Đảm bảo chỉ đặt CaretIndex nếu nó hợp lệ
+                    if (caretIndex >= 0 && caretIndex <= comboBox.Text.Length)
+                    {
+                        editableTextBox.CaretIndex = caretIndex;
+                    }
+                    else
+                    {
+                        editableTextBox.CaretIndex = comboBox.Text.Length;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Bỏ qua lỗi nếu không thể đặt CaretIndex
+                }
+            }
+
+            // Giữ cho dropdown mở khi gõ
+            comboBox.IsDropDownOpen = true;
+        }
+
+        // Hàm xử lý sự kiện KeyUp chung cho cả 3 ComboBox
+        private void ComboBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox == null || comboBox.IsReadOnly) return;
+
+            // Bỏ qua các phím điều khiển (như Shift, Ctrl, Alt, Enter, mũi tên)
+            // Enter/Tab sẽ được xử lý qua LostFocus
+            if (e.Key == Key.Left || e.Key == Key.Right ||
+                e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Tab)
+            {
+                return;
+            }
+
+            // Dùng KeyUp để lọc
+            if (comboBox == cboMaHocVien)
+            {
+                FilterComboBox(comboBox, _allMaHVs, DanhSachMaHocVien);
+            }
+            else if (comboBox == cboMaGoiTap)
+            {
+                FilterComboBox(comboBox, _allMaGois, DanhSachMaGoiTap);
+            }
+            else if (comboBox == cboMaNhanVien)
+            {
+                FilterComboBox(comboBox, _allMaNVs, DanhSachMaNhanVien);
+            }
+        }
+
+        // --- Logic LostFocus để xử lý khi gõ xong ---
         private void cboMaHocVien_LostFocus(object sender, RoutedEventArgs e)
         {
-            HandleLostFocus(cboMaHocVien, _allMaHVs);
+            var comboBox = sender as ComboBox;
+            if (comboBox == null) return;
+
+            string currentText = comboBox.Text.Trim();
+            
+            // Nếu text rỗng hoặc bằng mặc định
+            if (string.IsNullOrWhiteSpace(currentText) || currentText == DEFAULT_ITEM)
+            {
+                comboBox.Text = DEFAULT_ITEM;
+                comboBox.SelectedItem = DEFAULT_ITEM;
+                return;
+            }
+
+            // Tìm item khớp trong danh sách
+            var match = _allMaHVs.FirstOrDefault(item => 
+                item.Equals(currentText, StringComparison.OrdinalIgnoreCase));
+
+            if (match != null)
+            {
+                comboBox.SelectedItem = match;
+                comboBox.Text = match;
+            }
+            else
+            {
+                // Nếu không tìm thấy, GIỮ NGUYÊN TEXT người dùng đã gõ
+                // Không đặt SelectedItem (giữ null)
+            }
         }
 
         private void cboMaGoiTap_LostFocus(object sender, RoutedEventArgs e)
         {
-            HandleLostFocus(cboMaGoiTap, _allMaGois);
+            var comboBox = sender as ComboBox;
+            if (comboBox == null) return;
+
+            string currentText = comboBox.Text.Trim();
+            
+            if (string.IsNullOrWhiteSpace(currentText) || currentText == DEFAULT_ITEM)
+            {
+                comboBox.Text = DEFAULT_ITEM;
+                comboBox.SelectedItem = DEFAULT_ITEM;
+                return;
+            }
+
+            var match = _allMaGois.FirstOrDefault(item => 
+                item.Equals(currentText, StringComparison.OrdinalIgnoreCase));
+
+            if (match != null)
+            {
+                comboBox.SelectedItem = match;
+                comboBox.Text = match;
+            }
         }
 
         private void cboMaNhanVien_LostFocus(object sender, RoutedEventArgs e)
         {
-            HandleLostFocus(cboMaNhanVien, _allMaNVs);
-        }
+            var comboBox = sender as ComboBox;
+            if (comboBox == null) return;
 
-        private void HandleLostFocus(ComboBox combo, List<ComboBoxItemData> allData)
-        {
-            string typedText = combo.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(typedText) || typedText == _defaultItem.Name)
+            string currentText = comboBox.Text.Trim();
+            
+            if (string.IsNullOrWhiteSpace(currentText) || currentText == DEFAULT_ITEM)
             {
-                combo.Text = _defaultItem.Name;
-                combo.SelectedItem = _defaultItem;
+                comboBox.Text = DEFAULT_ITEM;
+                comboBox.SelectedItem = DEFAULT_ITEM;
                 return;
             }
 
-            var match = allData.FirstOrDefault(item =>
-                item.Name.Equals(typedText, StringComparison.OrdinalIgnoreCase) ||
-                item.ID.Equals(typedText, StringComparison.OrdinalIgnoreCase));
+            var match = _allMaNVs.FirstOrDefault(item => 
+                item.Equals(currentText, StringComparison.OrdinalIgnoreCase));
 
             if (match != null)
             {
-                combo.SelectedItem = match;
-                combo.Text = match.Name;
+                comboBox.SelectedItem = match;
+                comboBox.Text = match;
+            }
+        }
+
+        // Sự kiện khi chọn item từ dropdown
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox == null || comboBox.SelectedItem == null) return;
+
+            comboBox.Text = comboBox.SelectedItem.ToString();
+        }
+
+        // Sự kiện khi nhấn nút Hủy Bộ Lọc
+        private void ResetFilters_Click(object sender, RoutedEventArgs e)
+        {
+            // Reset tất cả các bộ lọc về mặc định
+            dpTuNgay.SelectedDate = DateTime.Today.AddMonths(-1);
+            dpDenNgay.SelectedDate = DateTime.Today;
+
+            // Đặt về mặc định
+            cboMaHocVien.Text = DEFAULT_ITEM;
+            cboMaHocVien.SelectedItem = DEFAULT_ITEM;
+
+            cboMaGoiTap.Text = DEFAULT_ITEM;
+            cboMaGoiTap.SelectedItem = DEFAULT_ITEM;
+
+            cboMaNhanVien.Text = DEFAULT_ITEM;
+            cboMaNhanVien.SelectedItem = DEFAULT_ITEM;
+
+            cboLocTongTien.SelectedIndex = 0; // Chọn "Không Áp Dụng"
+
+            // Reset danh sách hiển thị
+            DanhSachMaHocVien.Clear();
+            DanhSachMaGoiTap.Clear();
+            DanhSachMaNhanVien.Clear();
+
+            foreach (var item in _allMaHVs)
+            {
+                DanhSachMaHocVien.Add(item);
+            }
+            foreach (var item in _allMaGois)
+            {
+                DanhSachMaGoiTap.Add(item);
+            }
+            foreach (var item in _allMaNVs)
+            {
+                DanhSachMaNhanVien.Add(item);
             }
         }
     }

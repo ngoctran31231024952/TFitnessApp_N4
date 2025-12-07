@@ -78,6 +78,8 @@
                         <!-- cboMaHocVien -->
                         <ComboBox x:Name="cboMaHocVien" 
                                      IsEditable="True"
+                                  Text="{Binding MaHocVien, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaHocVien}"
                                      Height="30" Padding="5,0" 
                                      BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
                                      IsTextSearchEnabled="False"
@@ -92,6 +94,8 @@
                         <!-- cboMaGoiTap -->
                         <ComboBox x:Name="cboMaGoiTap" 
                                      IsEditable="True" 
+                                  Text="{Binding MaGoi, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaGoiTap}"
                                      Height="30" Padding="5,0" 
                                      BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
                                      IsTextSearchEnabled="False"
@@ -106,6 +110,8 @@
                         <!-- cboMaNhanVien -->
                         <ComboBox x:Name="cboMaNhanVien" 
                                      IsEditable="True" 
+                                  Text="{Binding MaNhanVien, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding DanhSachMaNhanVien}"
                                      Height="30" Padding="5,0" 
                                      BorderThickness="1" BorderBrush="#CCCCCC" VerticalContentAlignment="Center"
                                      IsTextSearchEnabled="False"
@@ -162,10 +168,10 @@
                     Style="{StaticResource RoundButtonStyle}" 
                     Background="#666666" 
                     Margin="0,0,10,0" 
-                    Click="Cancel_Click"/>
+                    Click="Cancel_Click" Height="28" Width="85"/>
             <Button Content="Áp Dụng Lọc" 
                     Style="{StaticResource RoundButtonStyle}" 
-                    Click="Apply_Click"/>
+                    Click="Apply_Click" Width="85"/>
         </StackPanel>
     </Grid>
 </Window>
