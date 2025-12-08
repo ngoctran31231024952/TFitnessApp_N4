@@ -23,7 +23,7 @@ namespace TFitnessApp
         // --- 2. CÁC BIẾN BỘ LỌC ---
         private string _filterChiNhanh = "Tất cả";
         private int _filterLoaiBieuDo = 1; // 1: Đường (Line), 0: Cột (Column)
-        private DateTime _filterTuNgay = DateTime.Today.AddDays(-60);
+        private DateTime _filterTuNgay = DateTime.Today.AddDays(-30);
         private DateTime _filterDenNgay = DateTime.Today;
 
         public string FilterChiNhanh
@@ -131,13 +131,20 @@ namespace TFitnessApp
             get => _doanhSoMoiPercent;
             set { _doanhSoMoiPercent = value; OnPropertyChanged(nameof(DoanhSoMoiPercent)); }
         }
+        public class GoiTapDetail
+        {
+            public string TenGoi { get; set; }
+            public double DoanhThu { get; set; }
+            public double PhanTram { get; set; }
+        }
+        
         public DashboardViewModel()
         {
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             _dbPath = Path.Combine(folder, "Database", "TFitness.db");
             if (!File.Exists(_dbPath)) _dbPath = Path.Combine(folder, "TFitness.db");
-
-            FormatterTien = val => val >= 1000000 ? $"{val / 1000000:N1}M" : $"{val:N0}";
+            
+        FormatterTien = val => val >= 1000000 ? $"{val / 1000000:N1}M" : $"{val:N0}";
 
             // Init Collections
             ListTenChiNhanh = new ObservableCollection<string>();
@@ -366,7 +373,9 @@ namespace TFitnessApp
             });
         }
 
-        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
+
+        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP ---
+
         private void LoadTyLeGoiTap(DateTime tu, DateTime den, string cn)
         {
             var goiTapMap = new Dictionary<string, double>();
@@ -374,14 +383,13 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
-                // XÓA ĐIỀU KIỆN TrangThai
                 string sql = @"
-                    SELECT GT.TenGoi, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
-                    FROM GiaoDich GD
-                    LEFT JOIN GoiTap GT ON GD.MaGoi = GT.MaGoi
-                    LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-                    WHERE 1=1";
+            SELECT GT.TenGoi, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
+            FROM GiaoDich GD
+            LEFT JOIN GoiTap GT ON GD.MaGoi = GT.MaGoi
+            LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+            LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+            WHERE 1=1";
 
                 if (cn != "Tất cả") sql += " AND CN.TenCN = @tenCN";
 
@@ -398,10 +406,12 @@ namespace TFitnessApp
                                 if (string.IsNullOrEmpty(tenGoi)) tenGoi = "Khác";
 
                                 tenGoi = FormatLabel(tenGoi);
-
                                 double tien = Convert.ToDouble(reader["TongTien"]);
-                                if (goiTapMap.ContainsKey(tenGoi)) goiTapMap[tenGoi] += tien;
-                                else goiTapMap.Add(tenGoi, tien);
+
+                                if (goiTapMap.ContainsKey(tenGoi))
+                                    goiTapMap[tenGoi] += tien;
+                                else
+                                    goiTapMap.Add(tenGoi, tien);
                             }
                         }
                     }
@@ -411,19 +421,75 @@ namespace TFitnessApp
             Application.Current.Dispatcher.Invoke(() =>
             {
                 DSTronDoanhThu.Clear();
-                var colors = new[] { "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#9b59b6", "#e74c3c" };
-                int i = 0;
-                foreach (var item in goiTapMap.Where(x => x.Value > 0).OrderByDescending(x => x.Value))
+
+                // Sắp xếp tất cả gói tập theo doanh thu giảm dần
+                var allSorted = goiTapMap
+                    .Where(x => x.Value > 0)
+                    .OrderByDescending(x => x.Value)
+                    .ToList();
+
+                double tongTatCa = allSorted.Sum(x => x.Value);
+                if (tongTatCa == 0) return; // Không có dữ liệu
+
+                // Lấy top 5
+                var top5GoiTap = allSorted.Take(5).ToList();
+
+                // Phần còn lại
+                var otherGoiTap = allSorted.Skip(5).ToList();
+                double doanhThuKhac = otherGoiTap.Sum(x => x.Value);
+
+                // Màu sắc
+                var colors = new[] {
+            "#F8B648", "#02973A", "#FF8080", "#C71A1B", "#fdcb6e",
+            "#D0D0D0"
+        };
+
+                // Thêm top 5
+                for (int i = 0; i < top5GoiTap.Count; i++)
                 {
+                    var item = top5GoiTap[i];
+                    double phanTram = (item.Value / tongTatCa) * 100;
+                    var dinhDangTien = DinhDangTien(item.Value);
+
                     DSTronDoanhThu.Add(new PieSeries
                     {
-                        Title = item.Key,
+                        Title = item.Key, // Chỉ hiển thị tên
                         Values = new ChartValues<double> { item.Value },
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[i % colors.Length]),
-                        DataLabels = false
+                        DataLabels = false,
+                        // Tooltip khi hover
+                        ToolTip = $"{item.Key}\n{dinhDangTien.GiaTri} {dinhDangTien.DonVi}\n{phanTram:0.0}%"
                     });
-                    i++;
                 }
+
+                // Thêm phần "Khác" nếu có
+                if (doanhThuKhac > 0)
+                {
+                    double phanTramKhac = (doanhThuKhac / tongTatCa) * 100;
+                    var dinhDangKhac = DinhDangTien(doanhThuKhac);
+
+                    // Tạo tooltip chi tiết cho phần "Khác"
+                    string tooltip = $"Khác\n{dinhDangKhac.GiaTri} {dinhDangKhac.DonVi}\n{phanTramKhac:0.0}%\n\nCác gói tập khác:\n";
+                    foreach (var item in otherGoiTap)
+                    {
+                        double phanTramItem = (item.Value / tongTatCa) * 100;
+                        var dinhDangItem = DinhDangTien(item.Value);
+                        tooltip += $"- {item.Key}: {dinhDangItem.GiaTri} {dinhDangItem.DonVi} ({phanTramItem:0.0}%)\n";
+                    }
+
+                    var otherSeries = new PieSeries
+                    {
+                        Title = "Khác", // Chỉ hiển thị "Khác"
+                        Values = new ChartValues<double> { doanhThuKhac },
+                        Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[colors.Length - 1]),
+                        DataLabels = false,
+                        ToolTip = tooltip
+                    };
+
+                    DSTronDoanhThu.Add(otherSeries);
+                }
+
+                OnPropertyChanged(nameof(DSTronDoanhThu));
             });
         }
 
@@ -465,7 +531,7 @@ namespace TFitnessApp
             Application.Current.Dispatcher.Invoke(() =>
             {
                 DSTronCN.Clear();
-                var colors = new[] { "#ff7675", "#55efc4", "#ffeaa7", "#74b9ff", "#fdcb6e" };
+                var colors = new[] { "#F8B648", "#02973A", "#FF8080", "#C71A1B", "#fdcb6e" };
                 int i = 0;
                 foreach (var item in cnMap.Where(x => x.Value > 0))
                 {
