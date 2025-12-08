@@ -336,6 +336,52 @@
                     </lvc:CartesianChart>
                 </local:ChartCard>
             </WrapPanel>
+            
+
+            <Border Margin="10,20,10,20" Background="White" CornerRadius="10" Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.1" BlurRadius="5"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <fa:IconImage Icon="Robot" Foreground="#C71A1B" Width="24" Height="24" Margin="0,0,10,0"/>
+                            <TextBlock Text="Dự báo doanh thu tương lai (AI Powered)" FontSize="20" FontWeight="Bold" Foreground="#333"/>
+                        </StackPanel>
+
+                        <TextBlock x:Name="txtKetQuaDuDoan" 
+                                   Text="Nhấn nút dự báo để xem kết quả phân tích từ dữ liệu lịch sử..." 
+                                   FontSize="16" 
+                                   Foreground="#555" 
+                                   TextWrapping="Wrap" 
+                                   LineHeight="24"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                            Content="Chạy Dự Báo"
+                            FontSize="16" FontWeight="SemiBold"
+                            Background="#C71A1B" Foreground="White"
+                            Padding="20,10"
+                            Height="50"
+                            VerticalAlignment="Center"
+                            Click="BtnDuDoan_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="25"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>
