@@ -14,7 +14,7 @@ namespace TFitnessApp.Windows
     {
         #region Khai báo biến 
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private MoDonDuLieuTaiKhoan _taiKhoan;
         private string _maTK;
         private string _hoTen;
@@ -112,7 +112,7 @@ namespace TFitnessApp.Windows
         {
             InitializeComponent();
 
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
@@ -147,7 +147,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -168,9 +168,6 @@ namespace TFitnessApp.Windows
                                 // Cập nhật Email và SDT (xử lý trường hợp DBNull)
                                 Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "";
                                 SDT = reader["SDT"] != DBNull.Value ? reader["SDT"].ToString() : "";
-
-                                // Debug: Hiển thị giá trị đã lấy được
-                                DebugDuLieu();
                             }
                             else
                             {
@@ -188,17 +185,6 @@ namespace TFitnessApp.Windows
         #endregion
 
         #region Xử lý UI và Chế độ Chỉnh sửa
-        // Phương thức debug để in dữ liệu tài khoản ra Console
-        private void DebugDuLieu()
-        {
-            Console.WriteLine($"=== DEBUG DỮ LIỆU TÀI KHOẢN {MaTK} ===");
-            Console.WriteLine($"Số điện thoại: '{SDT}'");
-            Console.WriteLine($"Phân quyền: '{PhanQuyen}'");
-            Console.WriteLine($"Trạng thái: '{TrangThai}'");
-            Console.WriteLine($"Email: '{Email}'");
-            Console.WriteLine($"Ngày tạo: '{NgayTao}'");
-            Console.WriteLine("=====================================");
-        }
 
         // Đặt chế độ hiển thị cho các control nhập liệu (chỉ đọc/chỉnh sửa)
         private void SetEditMode(bool isEdit)
@@ -359,7 +345,7 @@ namespace TFitnessApp.Windows
                     }
 
                     // Cập nhật giá trị vào Database
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
                         string query = @"
@@ -427,7 +413,7 @@ namespace TFitnessApp.Windows
                 // Thực hiện xóa tài khoản khỏi Database
                 try
                 {
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
                         string query = "DELETE FROM TaiKhoan WHERE MaTK = @MaTK";
@@ -483,7 +469,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";

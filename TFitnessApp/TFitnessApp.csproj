@@ -182,7 +182,7 @@
     <Compile Include="Controls\DateRangeFilter.xaml.cs">
       <DependentUpon>DateRangeFilter.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Database\DbAccess.cs" />
+    <Compile Include="Database\TruyCapDB.cs" />
     <Compile Include="Pages\BaoCaoDoanhThuPage.xaml.cs">
       <DependentUpon>BaoCaoDoanhThuPage.xaml</DependentUpon>
     </Compile>

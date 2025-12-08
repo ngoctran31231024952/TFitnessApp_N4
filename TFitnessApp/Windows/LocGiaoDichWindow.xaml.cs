@@ -79,7 +79,7 @@ namespace TFitnessApp.Windows
                 _allMaNVs.Add(DEFAULT_ITEM);
 
                 // Load dữ liệu từ Database
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -236,7 +236,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void Apply_Click(object sender, RoutedEventArgs e)
+        private void ApDung_Click (object sender, RoutedEventArgs e)
         {
             try
             {
@@ -288,12 +288,6 @@ namespace TFitnessApp.Windows
 
             // Nếu không tìm thấy, trả về text gõ vào
             return typedText;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
-            this.Close();
         }
 
         // --- Logic Mới: Xử lý GotFocus để mở Dropdown ---
@@ -536,17 +530,8 @@ namespace TFitnessApp.Windows
             }
         }
 
-        // Sự kiện khi chọn item từ dropdown
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var comboBox = sender as ComboBox;
-            if (comboBox == null || comboBox.SelectedItem == null) return;
-
-            comboBox.Text = comboBox.SelectedItem.ToString();
-        }
-
         // Sự kiện khi nhấn nút Hủy Bộ Lọc
-        private void ResetFilters_Click(object sender, RoutedEventArgs e)
+        private void HuyLoc_Click (object sender, RoutedEventArgs e)
         {
             // Reset tất cả các bộ lọc về mặc định
             dpTuNgay.SelectedDate = DateTime.Today.AddMonths(-1);

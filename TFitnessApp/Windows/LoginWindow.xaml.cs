@@ -13,7 +13,7 @@ namespace TFitnessApp.Windows
     public partial class LoginWindow : Window
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private string CalculateSHA256(string rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -32,7 +32,7 @@ namespace TFitnessApp.Windows
         {
             InitializeComponent();
             try { SQLitePCL.Batteries_V2.Init(); } catch { }
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             txtUsername.Focus();
@@ -75,7 +75,7 @@ namespace TFitnessApp.Windows
 
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
-            using (SqliteConnection connection = DbAccess.CreateConnection())
+            using (SqliteConnection connection = TruyCapDB.TaoKetNoi())
             {
                 connection.Open();
 

@@ -15,7 +15,7 @@ namespace TFitnessApp.Windows
     {
         #region Trường Dữ liệu Nội bộ
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private string _maGD;
         private string _maHV;
         private string _hoTenHocVien;
@@ -135,7 +135,7 @@ namespace TFitnessApp.Windows
             InitializeComponent();
 
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -172,7 +172,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -316,7 +316,7 @@ namespace TFitnessApp.Windows
                     // 3. Cập nhật Ngày giao dịch là thời điểm lưu
                     NgayGD = DateTime.Now;
 
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
                         string query = @"
@@ -365,7 +365,7 @@ namespace TFitnessApp.Windows
                 // Thực hiện xóa giao dịch khỏi Database
                 try
                 {
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
                         string query = "DELETE FROM GiaoDich WHERE MaGD = @MaGD";

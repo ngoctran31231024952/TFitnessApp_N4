@@ -22,7 +22,7 @@ namespace TFitnessApp
     {
         #region Khai báo biến
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         private List<MoDonDuLieuTaiKhoan> tatCaTaiKhoan = new List<MoDonDuLieuTaiKhoan>();
         private List<MoDonDuLieuTaiKhoan> danhSachGoc = new List<MoDonDuLieuTaiKhoan>();
@@ -45,7 +45,7 @@ namespace TFitnessApp
         {
             InitializeComponent();
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -163,7 +163,7 @@ namespace TFitnessApp
                 taiKhoanHienThi.Clear();
                 danhSachGoc.Clear();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -524,7 +524,7 @@ namespace TFitnessApp
             {
                 try
                 {
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
 

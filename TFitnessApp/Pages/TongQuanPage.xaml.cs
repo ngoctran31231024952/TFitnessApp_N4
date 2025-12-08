@@ -158,7 +158,7 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     var cmd = new SqliteCommand("SELECT MaCN, TenCN FROM ChiNhanh", connection);
                     using (var reader = cmd.ExecuteReader())
@@ -193,7 +193,7 @@ namespace TFitnessApp.Pages
                 var data = new DashboardKpi();
                 string todayStr = currentToday.ToString("dd/MM/yyyy");
 
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     // 1. Doanh thu
                     string sqlRevenue = "SELECT SUM(CAST(DaThanhToan AS REAL)) FROM GiaoDich WHERE NgayGD = @today";
@@ -283,7 +283,7 @@ namespace TFitnessApp.Pages
 
             var rawData = new List<ChartDataPoint>();
 
-            using (var connection = DbAccess.CreateConnection())
+            using (var connection = TruyCapDB.TaoKetNoi())
             {
                 string sql = string.IsNullOrEmpty(maCN)
                     ? @"SELECT NgayGD, CAST(DaThanhToan AS REAL) as Tien FROM GiaoDich"
@@ -372,7 +372,7 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     string sql = @"SELECT CN.TenCN, CAST(GD.DaThanhToan AS REAL) as Tien, GD.NgayGD
                                    FROM GiaoDich GD
@@ -447,7 +447,7 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     string filterCN = string.IsNullOrEmpty(maCN) ? "" : " AND HD.MaCN = @maCN ";
                     string sql = $@"SELECT DD.ThoiGianVao FROM DiemDanh DD
@@ -525,7 +525,7 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     string filterCN = string.IsNullOrEmpty(maCN) ? "" : " AND HD.MaCN = @maCN ";
                     string sql = $@"SELECT DD.MaHV, HV.HoTen, GT.TenGoi, DD.ThoiGianVao, DD.ThoiGianRa, DD.NgayDD
@@ -586,7 +586,7 @@ namespace TFitnessApp.Pages
             {
                 var rawDataList = new List<string>();
 
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     string sqlTop = @"SELECT GT.TenGoi, HD.NgayBatDau FROM HopDong HD JOIN GoiTap GT ON HD.MaGoi = GT.MaGoi";
 
@@ -641,7 +641,7 @@ namespace TFitnessApp.Pages
 
             try
             {
-                using (var connection = DbAccess.CreateConnection())
+                using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     string sql = @"
                         SELECT T.HoTen, T.MaTK, 'vừa đăng nhập hệ thống' AS NoiDung, L.ThoiGian

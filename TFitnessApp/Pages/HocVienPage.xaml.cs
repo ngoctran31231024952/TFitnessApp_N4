@@ -180,12 +180,12 @@ namespace TFitnessApp
     public class HocVienRepository
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         public HocVienRepository()
         {
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
         }
@@ -195,7 +195,7 @@ namespace TFitnessApp
             var list = new List<ComboBoxItemData>();
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand($"SELECT {idCol}, {nameCol} FROM {tableName}", conn))
@@ -236,7 +236,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand(sql, conn))
@@ -298,7 +298,7 @@ namespace TFitnessApp
             string newMa = "HV0001";
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "SELECT MaHV FROM HocVien ORDER BY length(MaHV) DESC, MaHV DESC LIMIT 1";
@@ -320,7 +320,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"INSERT INTO HocVien (MaHV, HoTen, NgaySinh, GioiTinh, Email, SDT) VALUES (@MaHV, @HoTen, @NgaySinh, @GioiTinh, @Email, @SDT)";
@@ -342,7 +342,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"UPDATE HocVien SET HoTen=@HoTen, NgaySinh=@NgaySinh, GioiTinh=@GioiTinh, Email=@Email, SDT=@SDT WHERE MaHV=@MaHV";
@@ -364,7 +364,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "DELETE FROM HocVien WHERE MaHV = @MaHV";
@@ -379,7 +379,7 @@ namespace TFitnessApp
         }
         public bool CheckMaHVExists(string maHV)
         {
-            using (SqliteConnection conn = DbAccess.CreateConnection())
+            using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
             {
                 conn.Open();
                 string sql = "SELECT COUNT(*) FROM HocVien WHERE MaHV = @MaHV";

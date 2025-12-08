@@ -15,7 +15,7 @@ namespace TFitnessApp
     public partial class CSSKPage : UserControl
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         private List<MoDonDuLieuChiSoSucKhoe> tatCaChiSo = new List<MoDonDuLieuChiSoSucKhoe>();
         private List<MoDonDuLieuChiSoSucKhoe> danhSachHienThi = new List<MoDonDuLieuChiSoSucKhoe>();
@@ -42,7 +42,7 @@ namespace TFitnessApp
         {
             InitializeComponent();
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -73,7 +73,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "SELECT NgaySinh FROM HocVien WHERE MaHV = @MaHV";
@@ -104,7 +104,7 @@ namespace TFitnessApp
             List<StudentModel> studentList = new List<StudentModel>();
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "SELECT MaHV, HoTen, GioiTinh, NgaySinh FROM HocVien ORDER BY HoTen ASC";
@@ -139,7 +139,7 @@ namespace TFitnessApp
             {
                 tatCaChiSo.Clear();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -688,7 +688,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"
@@ -723,7 +723,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"
@@ -837,7 +837,7 @@ namespace TFitnessApp
             if (maPhieuList == null || maPhieuList.Count == 0) return true;
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 

@@ -13,7 +13,7 @@ namespace TFitnessApp.Windows
     {
         #region Trường Dữ liệu Nội bộ
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private string _hoTen;
         private string _tenDangNhap;
         private string _email;
@@ -66,7 +66,7 @@ namespace TFitnessApp.Windows
         {
             InitializeComponent();
 
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             this.DataContext = this;
@@ -174,7 +174,7 @@ namespace TFitnessApp.Windows
                 string maTaiKhoan = TaoMaTaiKhoan();
                 string matKhau = TaoMatKhau();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = @"
@@ -222,7 +222,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT COUNT(*) FROM TaiKhoan";
@@ -262,7 +262,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT COUNT(1) FROM TaiKhoan WHERE MatKhau = @MatKhau";
@@ -313,7 +313,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";

@@ -14,7 +14,7 @@
         ShowInTaskbar="False">
 
     <Window.Resources>
-        <!-- Style cơ bản cho nút hành động (RoundButtonStyle) -->
+        <!-- Style cơ bản cho nút hành động -->
         <Style x:Key="RoundButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#C71A1B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -37,7 +37,7 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style cho các nút chức năng trong Filter Panel (FilterActionButtonStyle) -->
+        <!-- Style cho các nút chức năng trong Filter Panel -->
         <Style x:Key="FilterActionButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
             <Setter Property="Padding" Value="10,5"/>
             <Setter Property="Width" Value="120"/>
@@ -64,7 +64,7 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,0,10,0">
 
-                <!-- Khu vực lọc theo ID (Sử dụng ComboBox) -->
+                <!-- Khu vực lọc theo ID -->
                 <TextBlock Text="Lọc theo Mã Định Danh" Margin="0,0,0,10" FontWeight="Bold"/>
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
@@ -144,7 +144,7 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Khu vực lọc theo Tổng Tiền (Sử dụng ComboBox) -->
+                <!-- Khu vực lọc theo Tổng Tiền -->
                 <TextBlock Text="Lọc theo Tổng Tiền (VNĐ)" Margin="0,0,0,10" FontWeight="Bold"/>
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
@@ -153,7 +153,7 @@
 
                     <StackPanel Grid.Column="0" Margin="0,0,0,0">
                         <TextBlock Text="Chọn Khoảng Giá:" Margin="0,0,0,5"/>
-                        <!-- Đảm bảo x:Name là cboLocTongTien và không có IsEditable -->
+                        <!-- cboLocTongTien -->
                         <ComboBox x:Name="cboLocTongTien" 
                                      Height="30" Padding="5" BorderBrush="#E0E0E0"
                                      ToolTip="Chọn khoảng tổng tiền giao dịch"/>
@@ -168,10 +168,10 @@
                     Style="{StaticResource RoundButtonStyle}" 
                     Background="#666666" 
                     Margin="0,0,10,0" 
-                    Click="Cancel_Click" Height="28" Width="85"/>
+                    Click="HuyLoc_Click" Height="28" Width="85"/>
             <Button Content="Áp Dụng Lọc" 
                     Style="{StaticResource RoundButtonStyle}" 
-                    Click="Apply_Click" Width="85"/>
+                    Click="ApDung_Click" Width="85"/>
         </StackPanel>
     </Grid>
 </Window>

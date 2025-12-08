@@ -16,7 +16,7 @@ namespace TFitnessApp.Windows
     public partial class Window1 : Window, INotifyPropertyChanged
     {
         #region Trường Dữ liệu Nội bộ
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private string _maHocVien;
         private string _hoTenHocVien;
         private string _maGoi;
@@ -145,8 +145,7 @@ namespace TFitnessApp.Windows
             InitializeComponent();
 
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
-
+            _dbAccess = new TruyCapDB();
             this.DataContext = this;
 
             // Tải danh sách mã vào cả master list và ObservableCollection để hiển thị ban đầu
@@ -168,7 +167,7 @@ namespace TFitnessApp.Windows
             displayList.Clear();
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = $"SELECT {columnName} FROM {tableName}";
@@ -198,7 +197,7 @@ namespace TFitnessApp.Windows
             this.Close();
         }
 
-        // --- Logic Mới: Xử lý GotFocus để mở Dropdown (Xổ xuống khi nhấn vào) ---
+        // Xử lý GotFocus để mở Dropdown (Xổ xuống khi nhấn vào) ---
         private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
         {
             var comboBox = sender as ComboBox;
@@ -274,9 +273,6 @@ namespace TFitnessApp.Windows
                 }
             }
 
-            // LƯU Ý QUAN TRỌNG: Đã BỎ KHỎI: comboBox.DataContext = null; và comboBox.DataContext = this;
-            // Việc ngắt và khôi phục DataContext làm hỏng/trì hoãn Binding
-
             // Lọc danh sách
             var filteredList = masterList.Where(ma => ma.ToLower().Contains(filterText.ToLower())).ToList();
 
@@ -311,12 +307,8 @@ namespace TFitnessApp.Windows
                     // Bỏ qua lỗi nếu không thể đặt CaretIndex
                 }
             }
-
-
             // Giữ cho dropdown mở khi gõ
             comboBox.IsDropDownOpen = true;
-
-            // KHÔNG CẦN: Khôi phục Data Context
         }
 
         // Hàm xử lý sự kiện KeyUp chung cho cả 3 ComboBox
@@ -348,8 +340,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        // --- Logic LostFocus để kích hoạt tải dữ liệu khi gõ xong ---
-        // LostFocus là sự kiện thích hợp nhất để xử lý Binding khi người dùng gõ xong (Enter hoặc Tab ra ngoài)
+        // Logic LostFocus để kích hoạt tải dữ liệu khi gõ xong (Enter hoặc Tab ra ngoài) 
         private void cboMaHocVien_LostFocus(object sender, RoutedEventArgs e)
         {
             var comboBox = sender as ComboBox;
@@ -358,11 +349,6 @@ namespace TFitnessApp.Windows
                 // 1. Cập nhật thuộc tính MaHocVien bằng giá trị Text hiện tại. 
                 // Điều này sẽ kích hoạt setter MaHocVien và gọi TaiThongTinHocVien().
                 MaHocVien = comboBox.Text;
-
-                // 2. Đảm bảo Binding được cập nhật (trong trường hợp XAML không có UpdateSourceTrigger=PropertyChanged)
-                // Cập nhật thủ công:
-                var bindingExpression = comboBox.GetBindingExpression(ComboBox.TextProperty);
-                bindingExpression?.UpdateSource();
             }
         }
 
@@ -424,7 +410,7 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT HoTen FROM HocVien WHERE MaHV = @MaHV";
@@ -487,7 +473,7 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT TenGoi, GiaNiemYet FROM GoiTap WHERE MaGoi = @MaGoi";
@@ -549,7 +535,7 @@ namespace TFitnessApp.Windows
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT HoTen FROM TaiKhoan WHERE MaTK = @MaTK";
@@ -675,7 +661,7 @@ namespace TFitnessApp.Windows
             // Tạo giao dịch mới (INSERT INTO GiaoDich)
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = @"
@@ -720,7 +706,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = $"SELECT COUNT(1) FROM {tableName} WHERE {columnName} = @Value";
@@ -745,7 +731,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = "SELECT MaGD FROM GiaoDich ORDER BY MaGD DESC LIMIT 1";

@@ -290,12 +290,12 @@ namespace TFitnessApp
     public class GoiTapRepository
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         public GoiTapRepository()
         {
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
         }
@@ -333,7 +333,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     using (var cmd = new SqliteCommand(sql, conn))
@@ -381,7 +381,7 @@ namespace TFitnessApp
             string newMa = "GT001";
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "SELECT MaGoi FROM GoiTap ORDER BY length(MaGoi) DESC, MaGoi DESC LIMIT 1";
@@ -397,7 +397,7 @@ namespace TFitnessApp
 
         public bool CheckMaGoiExists(string maGoi)
         {
-            using (SqliteConnection conn = DbAccess.CreateConnection())
+            using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
             {
                 conn.Open();
                 string sql = "SELECT COUNT(*) FROM GoiTap WHERE MaGoi = @id";
@@ -413,7 +413,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"INSERT INTO GoiTap (MaGoi, TenGoi, ThoiHan, GiaNiemYet, SoBuoiPT, DichVuDacBiet, TrangThai) 
@@ -438,7 +438,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"UPDATE GoiTap SET TenGoi=@TenGoi, ThoiHan=@ThoiHan, GiaNiemYet=@Gia, SoBuoiPT=@SoBuoi, DichVuDacBiet=@DV, TrangThai=@TrangThai 
@@ -463,7 +463,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "DELETE FROM GoiTap WHERE MaGoi = @id";

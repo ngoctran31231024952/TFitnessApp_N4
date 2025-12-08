@@ -11,14 +11,14 @@ namespace TFitnessApp.Windows
     public partial class XemThongTinHocVienWindow : Window
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         public XemThongTinHocVienWindow(HocVien hv)
         {
             InitializeComponent();
 
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -41,7 +41,7 @@ namespace TFitnessApp.Windows
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
 
                 {
                     conn.Open();
