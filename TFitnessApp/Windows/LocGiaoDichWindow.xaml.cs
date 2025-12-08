@@ -302,7 +302,7 @@ namespace TFitnessApp.Windows
         }
 
         // Hàm hỗ trợ tìm TextBox nội bộ của ComboBox (để đặt CaretIndex)
-        private TextBox FindEditableTextBox(ComboBox comboBox)
+        private TextBox TimKiemTextBoxChinhSua (ComboBox comboBox)
         {
             if (comboBox.Template == null) return null;
 
@@ -348,7 +348,7 @@ namespace TFitnessApp.Windows
 
             // Lấy vị trí con trỏ hiện tại (từ TextBox nội bộ) trước khi cập nhật ItemSource
             int caretIndex = filterText.Length;
-            var editableTextBox = FindEditableTextBox(comboBox);
+            var editableTextBox = TimKiemTextBoxChinhSua (comboBox);
             if (editableTextBox != null)
             {
                 // Sử dụng try-catch để an toàn hơn khi truy cập CaretIndex trên UI Thread
