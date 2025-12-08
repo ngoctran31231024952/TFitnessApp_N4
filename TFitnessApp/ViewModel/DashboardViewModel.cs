@@ -143,8 +143,8 @@ namespace TFitnessApp
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             _dbPath = Path.Combine(folder, "Database", "TFitness.db");
             if (!File.Exists(_dbPath)) _dbPath = Path.Combine(folder, "TFitness.db");
-            
-        FormatterTien = val => val >= 1000000 ? $"{val / 1000000:N1}M" : $"{val:N0}";
+
+            FormatterTien = val => val.ToString("N0");
 
             // Init Collections
             ListTenChiNhanh = new ObservableCollection<string>();
