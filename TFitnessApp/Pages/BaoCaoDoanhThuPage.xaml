@@ -28,23 +28,20 @@
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <local:ChartCard Width="350" Height="360" TieuDe=" " HienChonLoaiBD="False">
                     <StackPanel VerticalAlignment="Center" Margin="10">
-                        <TextBlock Text="{Binding TongDoanhThuFormatted}" 
-                                   FontSize="36" 
-                                   FontWeight="Bold" 
-                                   Foreground="#2ecc71" 
-                                   HorizontalAlignment="Center"/>
-
                         <TextBlock Text="Tổng doanh thu" 
-                                   FontSize="14" 
-                                   Foreground="#888" 
-                                   HorizontalAlignment="Center" 
-                                   Margin="0,5,0,30"/>
+                           FontSize="25" 
+                           Foreground="#888" Height="71" 
+                           />
+                        <TextBlock TextAlignment="Center" Height="66"><Run Text="{Binding TongDoanhThuFormatted}" 
+                                 FontSize="38" FontWeight="Bold" Foreground="#2ecc71"/><LineBreak/><Run Text="{Binding TongDoanhThuUnit}" 
+                                 FontSize="14" Foreground="#888"/></TextBlock>
+
 
                         <Grid Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="135*"/>
+                                <ColumnDefinition Width="31*"/>
+                                <ColumnDefinition Width="135*"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" HorizontalAlignment="Center">
