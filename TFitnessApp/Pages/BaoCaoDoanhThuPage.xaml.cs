@@ -32,7 +32,7 @@ namespace TFitnessApp
             string csvPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "datahuanluyen.csv");
             string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
-            txtKetQuaDuDoan.Text = "⏳ Đang huấn luyện và so sánh 4 mô hình AI...";
+            txtKetQuaDuDoan.Text = "⏳ Đang huấn luyện và so sánh 3 mô hình AI...";
             txtKetQuaDuDoan.Foreground = Brushes.Gray;
             ChartDuBao.Visibility = Visibility.Collapsed;
 
