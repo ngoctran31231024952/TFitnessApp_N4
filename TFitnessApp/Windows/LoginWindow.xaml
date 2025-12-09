@@ -153,7 +153,7 @@
 
             <Button Style="{StaticResource TopRightCloseButtonStyle}"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Click="BtnExit_Click"/>
+                    Click="btnThoat_Click"/>
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="420">
 
@@ -174,29 +174,29 @@
                            FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,5,0,20"/>
 
                 <TextBlock Text="Tên đăng nhập" FontWeight="SemiBold" Foreground="{StaticResource BrushTextDark}" Margin="23,17,0,5" FontSize="15"/>
-                <TextBox x:Name="txtUsername" Style="{StaticResource PillTextBox}" Height="50" Tag="Nhập tên đăng nhập"
-                         TextChanged="txtUsername_TextChanged"/>
+                <TextBox x:Name="txtTenDangNhap" Style="{StaticResource PillTextBox}" Height="50" Tag="Nhập tên đăng nhập"
+                         TextChanged="txtTaiKhoan_TextChanged"/>
 
-                <StackPanel x:Name="errUserContainer" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
+                <StackPanel x:Name="errTenDangNhap" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
                     <fa:IconImage Icon="ExclamationCircle" Foreground="{StaticResource BrushError}" Width="14" Margin="0,0,5,0"/>
                     <TextBlock Text="Vui lòng nhập tên đăng nhập" Foreground="{StaticResource BrushError}" FontSize="12"/>
                 </StackPanel>
 
                 <TextBlock Text="Mật khẩu" FontWeight="SemiBold" Foreground="{StaticResource BrushTextDark}" Margin="23,20,0,5" FontSize="15"/>
                 <Grid>
-                    <PasswordBox x:Name="txtPassword" Style="{StaticResource PillPasswordBox}" Height="50" 
+                    <PasswordBox x:Name="txtMatKhau" Style="{StaticResource PillPasswordBox}" Height="50" 
                                  Tag="Nhập mật khẩu" Padding="20,13,50,13"
-                                 PasswordChanged="txtPassword_PasswordChanged"/>
+                                 PasswordChanged="txtMatKhau_PasswordChanged"/>
 
-                    <TextBox x:Name="txtVisiblePassword" Style="{StaticResource PillTextBox}" Height="50" 
+                    <TextBox x:Name="txtHienMatKhau" Style="{StaticResource PillTextBox}" Height="50" 
                              Padding="20,13,50,13" Visibility="Collapsed" IsReadOnly="True"/>
 
                     <Button Background="Transparent" BorderThickness="0"
                             HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0"
                             Cursor="Hand"
-                            PreviewMouseLeftButtonDown="BtnEye_MouseDown"
-                            PreviewMouseLeftButtonUp="BtnEye_MouseUp"
-                            MouseLeave="BtnEye_MouseUp">
+                            PreviewMouseLeftButtonDown="BtnMat_MouseDown"
+                            PreviewMouseLeftButtonUp="BtnMat_MouseUp"
+                            MouseLeave="BtnMat_MouseUp">
                         <fa:IconImage Icon="Eye" Foreground="#888" Width="18"/>
                         <Button.Style>
                             <Style TargetType="Button">
@@ -212,16 +212,16 @@
                     </Button>
                 </Grid>
 
-                <StackPanel x:Name="errPassContainer" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
+                <StackPanel x:Name="errMatKhau" Orientation="Horizontal" Margin="25,5,0,0" Visibility="Collapsed">
                     <fa:IconImage Icon="ExclamationCircle" Foreground="{StaticResource BrushError}" Width="14" Margin="0,0,5,0"/>
                     <TextBlock Text="Vui lòng nhập mật khẩu" Foreground="{StaticResource BrushError}" FontSize="12"/>
                 </StackPanel>
 
                 <TextBlock x:Name="lblHuongDan" Text="Xem hướng dẫn" Background="Transparent" Foreground="#777" 
                            HorizontalAlignment="Right" Margin="0,12,10,0" Cursor="Hand" FontSize="13"
-                           MouseLeftButtonDown="txtHelp_Click"/>
+                           MouseLeftButtonDown="lblHuongDan_Click"/>
 
-                <Popup x:Name="HelpPopup" PlacementTarget="{Binding ElementName=lblHuongDan}" Placement="Bottom"
+                <Popup x:Name="popupHuongDan" PlacementTarget="{Binding ElementName=lblHuongDan}" Placement="Bottom"
                        VerticalOffset="-20" HorizontalOffset="10" AllowsTransparency="True" StaysOpen="True" PopupAnimation="Fade">
                     <Grid Margin="0,0,0,10">
                         <Grid.RowDefinitions>
@@ -237,7 +237,7 @@
                                 <Grid Margin="15,15,15,10">
                                     <TextBlock Text="Hướng dẫn đăng nhập" FontWeight="Bold" FontSize="16" Foreground="{StaticResource BrushRedMain}"/>
                                     <fa:IconImage Icon="Times" Width="12" Foreground="#999" HorizontalAlignment="Right" Cursor="Hand"
-                                                  MouseLeftButtonDown="BtnClosePopup_Click"/>
+                                                  MouseLeftButtonDown="BtnDongPopup_Click"/>
                                 </Grid>
                                 <Separator Background="#EEE" Margin="0"/>
                                 <StackPanel Margin="15,10,15,15">
@@ -253,11 +253,11 @@
 
                 <Button Content="ĐĂNG NHẬP" Style="{StaticResource RedPillButton}"
                         Height="48" Width="180" Margin="0,40,0,0" 
-                        Click="BtnLogin_Click" IsDefault="True" FontSize="18" FontWeight="ExtraBold"/>
+                        Click="btnDangNhap_Click" IsDefault="True" FontSize="18" FontWeight="ExtraBold"/>
 
             </StackPanel>
 
-            <Grid x:Name="OverlayMask" Background="#33000000" Visibility="Collapsed"/> 
+            <Grid x:Name="LopPhu" Background="#33000000" Visibility="Collapsed"/> 
         </Grid>
     </Border>
 </Window>
