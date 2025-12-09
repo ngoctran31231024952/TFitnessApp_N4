@@ -23,7 +23,7 @@ namespace TFitnessApp
         // --- 2. CÁC BIẾN BỘ LỌC ---
         private string _filterChiNhanh = "Tất cả";
         private int _filterLoaiBieuDo = 1; // 1: Đường (Line), 0: Cột (Column)
-        private DateTime _filterTuNgay = DateTime.Today.AddDays(-60);
+        private DateTime _filterTuNgay = DateTime.Today.AddDays(-30);
         private DateTime _filterDenNgay = DateTime.Today;
 
         public string FilterChiNhanh
@@ -94,6 +94,10 @@ namespace TFitnessApp
             set { _doanhSoMoiValue = value; OnPropertyChanged(nameof(DoanhSoMoiValue)); }
         }
 
+        public string TongDoanhThuUnit { get; set; }
+        public string DoanhSoGiaHanCuUnit { get; set; }
+        public string DoanhSoMoiUnit { get; set; }
+
         // --- 4. DỮ LIỆU BIỂU ĐỒ ---
         public SeriesCollection DSDuongTangTruong { get; set; }
         public string[] NhanNgayThang { get; set; }
@@ -127,13 +131,20 @@ namespace TFitnessApp
             get => _doanhSoMoiPercent;
             set { _doanhSoMoiPercent = value; OnPropertyChanged(nameof(DoanhSoMoiPercent)); }
         }
+        public class GoiTapDetail
+        {
+            public string TenGoi { get; set; }
+            public double DoanhThu { get; set; }
+            public double PhanTram { get; set; }
+        }
+        
         public DashboardViewModel()
         {
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             _dbPath = Path.Combine(folder, "Database", "TFitness.db");
             if (!File.Exists(_dbPath)) _dbPath = Path.Combine(folder, "TFitness.db");
 
-            FormatterTien = val => val >= 1000000 ? $"{val / 1000000:N1}M" : $"{val:N0}";
+            FormatterTien = val => val.ToString("N0");
 
             // Init Collections
             ListTenChiNhanh = new ObservableCollection<string>();
@@ -190,6 +201,17 @@ namespace TFitnessApp
                 }
             });
         }
+        private (string GiaTri, string DonVi) DinhDangTien(double soTien)
+        {
+            if (soTien >= 1000000000) // Ngưỡng Tỷ
+                return ((soTien / 1000000000).ToString("0.###"), "tỷ VNĐ");
+
+            if (soTien >= 1000000) // Ngưỡng Triệu
+                return ((soTien / 1000000).ToString("0.###"), "triệu VNĐ");
+
+            // Ngưỡng VNĐ (dưới 1 triệu)
+            return (soTien.ToString("N0"), "VNĐ");
+        }
 
         // --- THÊM: LOAD THÔNG TIN KINH DOANH (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
         private void LoadThongTinKinhDoanh(DateTime tu, DateTime den, string cn)
@@ -201,108 +223,78 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
+                // Lấy dữ liệu phẳng để C# tự tính toán, đảm bảo không sót dòng nào (LEFT JOIN)
+                string sql = @"
+            SELECT 
+                GD.NgayGD, 
+                GD.DaThanhToan, 
+                HD.LoaiHopDong,
+                GD.TrangThai
+            FROM GiaoDich GD
+            LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+            LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+            WHERE 1=1";
 
-                // Query cho tổng doanh thu 
-                string sqlTongDoanhThu = @"
-    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as TongTien
-    FROM GiaoDich GD
-    LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay
-    AND (GD.TrangThai = 'Đã thanh toán' OR GD.TrangThai = 'Trả một phần')";
+                if (cn != "Tất cả") sql += " AND CN.TenCN = @tenCN";
 
-
-                if (cn != "Tất cả") sqlTongDoanhThu += " AND CN.TenCN = @tenCN";
-
-                // Query cho doanh số từ học viên gia hạn gói cũ - XÓA ĐIỀU KIỆN TrangThai
-                string sqlGiaHanCu = @"
-                    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as DoanhSo
-                    FROM GiaoDich GD
-                    INNER JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-                    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay 
-                    AND HD.LoaiHopDong = 'Gia hạn'";
-
-                if (cn != "Tất cả") sqlGiaHanCu += " AND CN.TenCN = @tenCN";
-
-                // Query cho doanh số từ học viên mua gói mới - XÓA ĐIỀU KIỆN TrangThai
-                string sqlMoi = @"
-                    SELECT SUM(CAST(GD.DaThanhToan AS REAL)) as DoanhSo
-                    FROM GiaoDich GD
-                    INNER JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-                    WHERE GD.NgayGD BETWEEN @tuNgay AND @denNgay 
-                    AND HD.LoaiHopDong = 'Mới'";
-
-                if (cn != "Tất cả") sqlMoi += " AND CN.TenCN = @tenCN";
-
-                using (var cmd = new SqliteCommand(sqlTongDoanhThu, conn))
+                using (var cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
-                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
                     if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
 
-                    var result = cmd.ExecuteScalar();
-                    if (result != DBNull.Value && result != null)
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        tongDoanhThu = Convert.ToDouble(result);
-                    }
-                }
+                        while (reader.Read())
+                        {
+                            // Kiểm tra ngày tháng
+                            if (TryGetDate(reader["NgayGD"].ToString(), out DateTime date)
+                                && date.Date >= tu.Date && date.Date <= den.Date)
+                            {
+                                double soTien = Convert.ToDouble(reader["DaThanhToan"]);
+                                string loaiHD = reader["LoaiHopDong"]?.ToString();
 
-                using (var cmd = new SqliteCommand(sqlGiaHanCu, conn))
-                {
-                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
-                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
-                    if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
+                                // Cộng vào tổng doanh thu (Không sót dòng nào)
+                                tongDoanhThu += soTien;
 
-                    var result = cmd.ExecuteScalar();
-                    if (result != DBNull.Value && result != null)
-                    {
-                        doanhSoGiaHanCu = Convert.ToDouble(result);
-                    }
-                }
-
-                using (var cmd = new SqliteCommand(sqlMoi, conn))
-                {
-                    cmd.Parameters.AddWithValue("@tuNgay", tu.ToString("yyyy-MM-dd"));
-                    cmd.Parameters.AddWithValue("@denNgay", den.ToString("yyyy-MM-dd"));
-                    if (cn != "Tất cả") cmd.Parameters.AddWithValue("@tenCN", cn);
-
-                    var result = cmd.ExecuteScalar();
-                    if (result != DBNull.Value && result != null)
-                    {
-                        doanhSoMoi = Convert.ToDouble(result);
+                                // Phân loại doanh số (Dựa trên logic của bạn)
+                                if (loaiHD == "Gia Hạn")
+                                    doanhSoGiaHanCu += soTien;
+                                else if (loaiHD == "Mới")
+                                    doanhSoMoi += soTien;
+                            }
+                        }
                     }
                 }
             }
 
+
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TongDoanhThuValue = tongDoanhThu;
-                DoanhSoGiaHanCuValue = doanhSoGiaHanCu;
-                DoanhSoMoiValue = doanhSoMoi;
+                // 1. Định dạng Tổng doanh thu
+                var kqTong = DinhDangTien(tongDoanhThu);
+                TongDoanhThuFormatted = kqTong.GiaTri;
+                TongDoanhThuUnit = kqTong.DonVi;
 
-                TongDoanhThuFormatted = tongDoanhThu >= 1000000 ?
-                    $"{tongDoanhThu / 1000000:N1}M VNĐ" :
-                    $"{tongDoanhThu:N0} VNĐ";
+                // 2. Định dạng Gia hạn gói cũ
+                var kqGiaHan = DinhDangTien(doanhSoGiaHanCu);
+                DoanhSoGiaHanCuFormatted = kqGiaHan.GiaTri;
+                DoanhSoGiaHanCuUnit = kqGiaHan.DonVi;
 
-                DoanhSoGiaHanCuFormatted = doanhSoGiaHanCu >= 1000000 ?
-                    $"{doanhSoGiaHanCu / 1000000:N1}M VNĐ" :
-                    $"{doanhSoGiaHanCu:N0} VNĐ";
+                // 3. Định dạng Mua gói mới
+                var kqMoi = DinhDangTien(doanhSoMoi);
+                DoanhSoMoiFormatted = kqMoi.GiaTri;
+                DoanhSoMoiUnit = kqMoi.DonVi;
 
-                DoanhSoMoiFormatted = doanhSoMoi >= 1000000 ?
-                    $"{doanhSoMoi / 1000000:N1}M VNĐ" :
-                    $"{doanhSoMoi:N0} VNĐ";
-
-                OnPropertyChanged(nameof(TongDoanhThuValue));
-                OnPropertyChanged(nameof(DoanhSoGiaHanCuValue));
-                OnPropertyChanged(nameof(DoanhSoMoiValue));
+                // 4. Thông báo cập nhật giao diện
                 OnPropertyChanged(nameof(TongDoanhThuFormatted));
+                OnPropertyChanged(nameof(TongDoanhThuUnit));
                 OnPropertyChanged(nameof(DoanhSoGiaHanCuFormatted));
+                OnPropertyChanged(nameof(DoanhSoGiaHanCuUnit));
                 OnPropertyChanged(nameof(DoanhSoMoiFormatted));
+                OnPropertyChanged(nameof(DoanhSoMoiUnit));
             });
         }
-
+        
         // --- 1. BIỂU ĐỒ TĂNG TRƯỞNG ---
         private void LoadDoanhThuTangTruong(DateTime tu, DateTime den, string cn, int loaiBD)
         {
@@ -381,7 +373,9 @@ namespace TFitnessApp
             });
         }
 
-        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP (ĐÃ SỬA - XÓA ĐIỀU KIỆN TrangThai) ---
+
+        // --- 2. BIỂU ĐỒ TRÒN GÓI TẬP ---
+
         private void LoadTyLeGoiTap(DateTime tu, DateTime den, string cn)
         {
             var goiTapMap = new Dictionary<string, double>();
@@ -389,14 +383,13 @@ namespace TFitnessApp
             using (var conn = new SqliteConnection($"Data Source={_dbPath}"))
             {
                 conn.Open();
-                // XÓA ĐIỀU KIỆN TrangThai
                 string sql = @"
-                    SELECT GT.TenGoi, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
-                    FROM GiaoDich GD
-                    LEFT JOIN GoiTap GT ON GD.MaGoi = GT.MaGoi
-                    LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-                    LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
-                    WHERE 1=1";
+            SELECT GT.TenGoi, CAST(GD.DaThanhToan AS REAL) as TongTien, GD.NgayGD
+            FROM GiaoDich GD
+            LEFT JOIN GoiTap GT ON GD.MaGoi = GT.MaGoi
+            LEFT JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+            LEFT JOIN ChiNhanh CN ON HD.MaCN = CN.MaCN
+            WHERE 1=1";
 
                 if (cn != "Tất cả") sql += " AND CN.TenCN = @tenCN";
 
@@ -413,10 +406,12 @@ namespace TFitnessApp
                                 if (string.IsNullOrEmpty(tenGoi)) tenGoi = "Khác";
 
                                 tenGoi = FormatLabel(tenGoi);
-
                                 double tien = Convert.ToDouble(reader["TongTien"]);
-                                if (goiTapMap.ContainsKey(tenGoi)) goiTapMap[tenGoi] += tien;
-                                else goiTapMap.Add(tenGoi, tien);
+
+                                if (goiTapMap.ContainsKey(tenGoi))
+                                    goiTapMap[tenGoi] += tien;
+                                else
+                                    goiTapMap.Add(tenGoi, tien);
                             }
                         }
                     }
@@ -426,19 +421,75 @@ namespace TFitnessApp
             Application.Current.Dispatcher.Invoke(() =>
             {
                 DSTronDoanhThu.Clear();
-                var colors = new[] { "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#9b59b6", "#e74c3c" };
-                int i = 0;
-                foreach (var item in goiTapMap.Where(x => x.Value > 0).OrderByDescending(x => x.Value))
+
+                // Sắp xếp tất cả gói tập theo doanh thu giảm dần
+                var allSorted = goiTapMap
+                    .Where(x => x.Value > 0)
+                    .OrderByDescending(x => x.Value)
+                    .ToList();
+
+                double tongTatCa = allSorted.Sum(x => x.Value);
+                if (tongTatCa == 0) return; // Không có dữ liệu
+
+                // Lấy top 5
+                var top5GoiTap = allSorted.Take(5).ToList();
+
+                // Phần còn lại
+                var otherGoiTap = allSorted.Skip(5).ToList();
+                double doanhThuKhac = otherGoiTap.Sum(x => x.Value);
+
+                // Màu sắc
+                var colors = new[] {
+            "#F8B648", "#02973A", "#FF8080", "#C71A1B", "#fdcb6e",
+            "#D0D0D0"
+        };
+
+                // Thêm top 5
+                for (int i = 0; i < top5GoiTap.Count; i++)
                 {
+                    var item = top5GoiTap[i];
+                    double phanTram = (item.Value / tongTatCa) * 100;
+                    var dinhDangTien = DinhDangTien(item.Value);
+
                     DSTronDoanhThu.Add(new PieSeries
                     {
-                        Title = item.Key,
+                        Title = item.Key, // Chỉ hiển thị tên
                         Values = new ChartValues<double> { item.Value },
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[i % colors.Length]),
-                        DataLabels = false
+                        DataLabels = false,
+                        // Tooltip khi hover
+                        ToolTip = $"{item.Key}\n{dinhDangTien.GiaTri} {dinhDangTien.DonVi}\n{phanTram:0.0}%"
                     });
-                    i++;
                 }
+
+                // Thêm phần "Khác" nếu có
+                if (doanhThuKhac > 0)
+                {
+                    double phanTramKhac = (doanhThuKhac / tongTatCa) * 100;
+                    var dinhDangKhac = DinhDangTien(doanhThuKhac);
+
+                    // Tạo tooltip chi tiết cho phần "Khác"
+                    string tooltip = $"Khác\n{dinhDangKhac.GiaTri} {dinhDangKhac.DonVi}\n{phanTramKhac:0.0}%\n\nCác gói tập khác:\n";
+                    foreach (var item in otherGoiTap)
+                    {
+                        double phanTramItem = (item.Value / tongTatCa) * 100;
+                        var dinhDangItem = DinhDangTien(item.Value);
+                        tooltip += $"- {item.Key}: {dinhDangItem.GiaTri} {dinhDangItem.DonVi} ({phanTramItem:0.0}%)\n";
+                    }
+
+                    var otherSeries = new PieSeries
+                    {
+                        Title = "Khác", // Chỉ hiển thị "Khác"
+                        Values = new ChartValues<double> { doanhThuKhac },
+                        Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(colors[colors.Length - 1]),
+                        DataLabels = false,
+                        ToolTip = tooltip
+                    };
+
+                    DSTronDoanhThu.Add(otherSeries);
+                }
+
+                OnPropertyChanged(nameof(DSTronDoanhThu));
             });
         }
 
@@ -480,7 +531,7 @@ namespace TFitnessApp
             Application.Current.Dispatcher.Invoke(() =>
             {
                 DSTronCN.Clear();
-                var colors = new[] { "#ff7675", "#55efc4", "#ffeaa7", "#74b9ff", "#fdcb6e" };
+                var colors = new[] { "#F8B648", "#02973A", "#FF8080", "#C71A1B", "#fdcb6e" };
                 int i = 0;
                 foreach (var item in cnMap.Where(x => x.Value > 0))
                 {
@@ -575,9 +626,25 @@ namespace TFitnessApp
 
         private bool TryGetDate(string dateStr, out DateTime date)
         {
-            string[] formats = { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "MM/dd/yyyy", "M/d/yyyy" };
-            return DateTime.TryParseExact(dateStr, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date);
-        }
+            string[] formats = {
+        "dd/MM/yyyy",
+        "d/M/yyyy",
+        "yyyy-MM-dd",
+        "MM/dd/yyyy",
+        "M/d/yyyy",
+        // THÊM CÁC ĐỊNH DẠNG CÓ GIỜ
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd HH:mm",
+        "dd/MM/yyyy HH:mm:ss",
+        "dd/MM/yyyy HH:mm",
+        "MM/dd/yyyy HH:mm:ss",
+        "MM/dd/yyyy HH:mm"
+    };
+
+            return DateTime.TryParseExact(dateStr, formats,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out date);
+        }        
 
         private string FormatLabel(string input)
         {

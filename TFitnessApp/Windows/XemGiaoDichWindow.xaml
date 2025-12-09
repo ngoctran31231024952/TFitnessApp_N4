@@ -190,7 +190,7 @@
                                 BorderBrush="#CCCCCC" VerticalContentAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- DÒNG 6: Số tiền nợ / Phương thức thanh toán (Đã sửa Margin để tránh overlap) -->
+                    <!-- DÒNG 6: Số tiền nợ / Phương thức thanh toán -->
                     <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,15,30">
                         <TextBlock Text="Số tiền nợ:" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <TextBox x:Name="txtSoTienNo" Text="{Binding SoTienNo}" 
@@ -218,7 +218,7 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- FOOTER với các nút chức năng (Đã đồng bộ màu đỏ) -->
+            <!-- FOOTER với các nút chức năng -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,548,0,20" Width="285">
                 <Button x:Name="btnSua" Click="btnSua_Click" 
                     Style="{DynamicResource RoundButtonControlTemplate}" 

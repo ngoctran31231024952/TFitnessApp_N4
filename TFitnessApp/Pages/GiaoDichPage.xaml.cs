@@ -21,12 +21,11 @@ using static TFitnessApp.GiaoDichPage;
 
 namespace TFitnessApp
 {
-    // Trang quản lý danh sách giao dịch
     public partial class GiaoDichPage : Page
     {
         #region Trường Dữ liệu Nội bộ
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private List<MoDonDuLieuGiaoDich> tatCaGiaoDich = new List<MoDonDuLieuGiaoDich>();
         private List<MoDonDuLieuGiaoDich> danhSachGoc = new List<MoDonDuLieuGiaoDich>();
         private ObservableCollection<MoDonDuLieuGiaoDich> giaoDichHienThi = new ObservableCollection<MoDonDuLieuGiaoDich>();
@@ -34,8 +33,7 @@ namespace TFitnessApp
         // Khai báo hằng số
         private const string VAN_BAN_TIM_KIEM_MAC_DINH = "Tìm kiếm học viên, mã giao dịch, gói tập...";
 
-        // Danh sách định dạng ngày giờ đầy đủ và tin cậy để Parse
-
+        // Định dạng ngày giờ để Parse
         private static readonly string[] RobustDateFormats = new string[]
         {
             "dd/MM/yyyy HH:mm",  
@@ -54,7 +52,7 @@ namespace TFitnessApp
         // Biến cờ để kiểm soát việc load data lần đầu
         private bool _isInitialLoadComplete = false;
 
-        // Biến lưu trạng thái Bộ lọc tùy chỉnh:
+        // Biến lưu trạng thái Bộ lọc tùy chỉnh
         private MoDonBoLoc _boLocTuyChinh = new MoDonBoLoc();
 
         public enum KhoangTongTien
@@ -67,13 +65,12 @@ namespace TFitnessApp
         #endregion
 
         #region Khởi tạo
-        // Constructor của GiaoDichPage
         public GiaoDichPage()
         {
             InitializeComponent();
 
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -211,17 +208,12 @@ namespace TFitnessApp
         {
             try
             {
-                Debug.WriteLine("=== BẮT ĐẦU TẢI DỮ LIỆU ===");
-
-                // Hiển thị loading
-                LoadingIndicator.Visibility = Visibility.Visible;
-
                 // Reset danh sách
                 tatCaGiaoDich.Clear();
                 giaoDichHienThi.Clear();
                 danhSachGoc.Clear();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -255,7 +247,7 @@ namespace TFitnessApp
                             DateTime ngayGD = DateTime.MinValue;
                             string ngayGDString = reader["NgayGD"].ToString();
 
-                            // BẮT ĐẦU SỬA LỖI PARSE NGÀY: Dùng TryParseExact thay cho TryParse
+                            // Dùng TryParseExact thay cho TryParse
                             if (!string.IsNullOrEmpty(ngayGDString) &&
                             DateTime.TryParseExact(ngayGDString, RobustDateFormats,
                             CultureInfo.InvariantCulture, DateTimeStyles.None, out ngayGD))
@@ -268,7 +260,6 @@ namespace TFitnessApp
                                 ngayGD = DateTime.MinValue;
                                 Debug.WriteLine($"KHÔNG THỂ PARSE NGÀY GIỜ: {ngayGDString}");
                             }
-                            // KẾT THÚC SỬA LỖI PARSE NGÀY
 
                             // Tạo đối tượng dữ liệu
                             var item = new MoDonDuLieuGiaoDich
@@ -286,17 +277,10 @@ namespace TFitnessApp
                                 TrangThai = reader["TrangThai"]?.ToString() ?? "Không xác định",
                                 IsSelected = false
                             };
-
-                            Debug.WriteLine($"Giao dịch {count}: MaGD={item.MaGD}, NgayGD={item.NgayGD:dd/MM/yyyy HH:mm}, TrangThai={item.TrangThai}");
-
                             danhSachGoc.Add(item);
                         }
-
-                        Debug.WriteLine($"Tổng số bản ghi đọc được: {count}");
                     }
                 }
-
-                Debug.WriteLine($"Tổng số giao dịch trong danhSachGoc: {danhSachGoc.Count}");
 
                 // Gán danh sách gốc cho danh sách tổng hiện tại
                 tatCaGiaoDich = new List<MoDonDuLieuGiaoDich>(danhSachGoc);
@@ -314,16 +298,10 @@ namespace TFitnessApp
                 MessageBox.Show($"Lỗi khi tải danh sách giao dịch:\n{ex.Message}",
                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally
-            {
-                // Ẩn loading
-                LoadingIndicator.Visibility = Visibility.Collapsed;
-                Debug.WriteLine("=== KẾT THÚC TẢI DỮ LIỆU ===");
-            }
         }
         #endregion
 
-        #region Search và Filter Functions
+        #region Xử lý sự kiện tìm kiếm trên thanh tìm kiếm 
         // Xử lý khi TextBox tìm kiếm nhận focus
         private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -399,11 +377,6 @@ namespace TFitnessApp
         // Phương thức áp dụng bộ lọc trạng thái và từ khóa tìm kiếm
         private void ApDungBoLocVaTimKiem()
         {
-            Debug.WriteLine("=== ÁP DỤNG BỘ LỌC VÀ TÌM KIẾM ===");
-            Debug.WriteLine($"Trạng thái hiện tại: {_trangThaiHienTai}");
-            Debug.WriteLine($"Từ khóa tìm kiếm: {_tuKhoaTimKiem}");
-            Debug.WriteLine($"Số bản ghi trong danhSachGoc: {danhSachGoc.Count}");
-
             // Bắt đầu từ danh sách gốc
             var ketQua = danhSachGoc.AsEnumerable();
 
@@ -429,8 +402,6 @@ namespace TFitnessApp
                         break;
                 }
 
-                Debug.WriteLine($"Trạng thái cần lọc: {trangThaiCanLoc}");
-
                 if (!string.IsNullOrEmpty(trangThaiCanLoc))
                 {
                     var truocKhiLoc = ketQua.Count();
@@ -439,7 +410,6 @@ namespace TFitnessApp
       gd.TrangThai.Equals(trangThaiCanLoc, StringComparison.OrdinalIgnoreCase));
                     var sauKhiLoc = ketQua.Count();
 
-                    Debug.WriteLine($"Số bản ghi trước/sau khi lọc: {truocKhiLoc} -> {sauKhiLoc}");
                 }
             }
 
@@ -464,14 +434,6 @@ namespace TFitnessApp
             // === Áp dụng bộ lọc tùy chỉnh từ Window5 ===
             if (_boLocTuyChinh != null && _boLocTuyChinh.IsActive())
             {
-                Debug.WriteLine("=== ÁP DỤNG BỘ LỌC TÙY CHỈNH ===");
-                Debug.WriteLine($"Mã HV: {_boLocTuyChinh.LocMaHV}");
-                Debug.WriteLine($"Mã Gói: {_boLocTuyChinh.LocMaGoi}");
-                Debug.WriteLine($"Mã NV: {_boLocTuyChinh.LocMaNV}");
-                Debug.WriteLine($"Từ ngày: {_boLocTuyChinh.TuNgay}");
-                Debug.WriteLine($"Đến ngày: {_boLocTuyChinh.DenNgay}");
-                Debug.WriteLine($"Khoảng tiền: {_boLocTuyChinh.KhoangTongTienDuocChon}");
-
                 // Lọc theo Mã Học Viên 
                 if (!string.IsNullOrWhiteSpace(_boLocTuyChinh.LocMaHV))
                 {
@@ -553,7 +515,7 @@ namespace TFitnessApp
 
         #endregion
 
-        #region Filter Functions - Radio Buttons
+        #region Xử lý sự kiện chuyển tab trạng thái 
         // Sự kiện khi một RadioButton trạng thái thanh toán được chọn
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -653,7 +615,7 @@ namespace TFitnessApp
 
         #region Button Commands
         // Xử lý sự kiện nhấn nút Làm mới / Menu Item Làm mới
-        private void RefreshCommand_Click(object sender, RoutedEventArgs e)
+        private void LamMoiGiaoDich_Click (object sender, RoutedEventArgs e)
         {
             try
             {
@@ -679,7 +641,7 @@ namespace TFitnessApp
         }
 
         // Xử lý sự kiện nhấn nút Tạo giao dịch mới / Menu Item Tạo giao dịch mới
-        private void AddTransactionCommand_Click(object sender, RoutedEventArgs e)
+        private void YeuCauTaoGiaoDich_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -700,8 +662,8 @@ namespace TFitnessApp
             }
         }
 
-        #region Button FilterCommand
-        private void FilterCommand_Click(object sender, RoutedEventArgs e)
+        #region Button YeuCauLocGiaoDich 
+        private void YeuCauLocGiaoDich_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -718,14 +680,6 @@ namespace TFitnessApp
                 {
                     // Cập nhật trạng thái bộ lọc TỪ cửa sổ
                     _boLocTuyChinh = filterWindow.KetQuaLoc;
-
-                    Debug.WriteLine("Bộ lọc đã được cập nhật:");
-                    Debug.WriteLine($"- Mã HV: {_boLocTuyChinh.LocMaHV}");
-                    Debug.WriteLine($"- Mã Gói: {_boLocTuyChinh.LocMaGoi}");
-                    Debug.WriteLine($"- Mã NV: {_boLocTuyChinh.LocMaNV}");
-                    Debug.WriteLine($"- Từ ngày: {_boLocTuyChinh.TuNgay}");
-                    Debug.WriteLine($"- Đến ngày: {_boLocTuyChinh.DenNgay}");
-                    Debug.WriteLine($"- Khoảng tiền: {_boLocTuyChinh.KhoangTongTienDuocChon}");
 
                     // Áp dụng bộ lọc mới lên danh sách dữ liệu
                     ApDungBoLocVaTimKiem();
@@ -745,7 +699,7 @@ namespace TFitnessApp
         #endregion
 
         // Xử lý sự kiện nhấn nút Xóa giao dịch đã chọn
-        private void DeleteTransactionCommand_Click(object sender, RoutedEventArgs e)
+        private void YeuCauXoaGiaoDich_Click(object sender, RoutedEventArgs e)
         {
             var giaoDichDaChon = giaoDichHienThi.Where(gd => gd.IsSelected).ToList();
 
@@ -763,7 +717,7 @@ namespace TFitnessApp
             {
                 try
                 {
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
 
@@ -794,7 +748,7 @@ namespace TFitnessApp
         }
 
         // Xử lý sự kiện nhấn nút Xuất Excel
-        private void ExportTransactionCommand_Click(object sender, RoutedEventArgs e)
+        private void YeuCauXuatGiaoDich_Click (object sender, RoutedEventArgs e)
         {
             try
             {
@@ -881,7 +835,7 @@ namespace TFitnessApp
         }
 
         // Xử lý sự kiện nhấn nút Xem chi tiết giao dịch
-        private void ViewTransactionCommand_Click(object sender, RoutedEventArgs e)
+        private void XemChiTietGiaoDich_Click (object sender, RoutedEventArgs e)
         {
             try
             {
@@ -915,9 +869,9 @@ namespace TFitnessApp
             if (dgGiaoDich == null) return;
 
             // Tìm CheckBox "Chọn tất cả" trong Header của DataGrid
-            var selectAllCheckBox = FindVisualChild<CheckBox>(dgGiaoDich, "chkSelectAll");
+            var ChonHetCheckBox = FindVisualChild<CheckBox>(dgGiaoDich, "chkSelectAll");
 
-            if (selectAllCheckBox != null)
+            if (ChonHetCheckBox != null)
             {
                 // Tính toán trạng thái
                 int totalItems = giaoDichHienThi.Count;
@@ -926,17 +880,17 @@ namespace TFitnessApp
                 if (totalItems > 0 && selectedItems == totalItems)
                 {
                     // Chọn tất cả
-                    selectAllCheckBox.IsChecked = true;
+                    ChonHetCheckBox.IsChecked = true;
                 }
                 else if (selectedItems > 0)
                 {
                     // Chọn một phần (Indeterminate)
-                    selectAllCheckBox.IsChecked = null;
+                    ChonHetCheckBox.IsChecked = null;
                 }
                 else
                 {
                     // Không chọn gì
-                    selectAllCheckBox.IsChecked = false;
+                    ChonHetCheckBox.IsChecked = false;
                 }
             }
         }
@@ -981,7 +935,7 @@ namespace TFitnessApp
                     dgGiaoDich.SelectedItem = giaoDich;
                 }
             }
-            CapNhatTrangThaiSelectAll(); // GỌI HÀM CẬP NHẬT TRẠNG THÁI SELECT ALL
+            CapNhatTrangThaiSelectAll(); 
             CapNhatThongTinSoLuong();
         }
 
@@ -999,12 +953,12 @@ namespace TFitnessApp
                     dgGiaoDich.SelectedItem = null;
                 }
             }
-            CapNhatTrangThaiSelectAll(); // GỌI HÀM CẬP NHẬT TRẠNG THÁI SELECT ALL
+            CapNhatTrangThaiSelectAll(); 
             CapNhatThongTinSoLuong();
         }
 
         // Xử lý khi CheckBox "Chọn tất cả" được nhấn
-        private void SelectAllCheckBox_Checked(object sender, RoutedEventArgs e)
+        private void ChonHetCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
             // Xác định trạng thái mới (True cho Checked, False cho Unchecked)
@@ -1040,15 +994,15 @@ namespace TFitnessApp
 
         #region Context Menu
         // Xử lý sự kiện nhấn Menu Item "Làm mới"
-        private void MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_LamMoi_Click(object sender, RoutedEventArgs e)
         {
-            RefreshCommand_Click(sender, e);
+            LamMoiGiaoDich_Click(sender, e);
         }
 
         // Xử lý sự kiện nhấn Menu Item "Tạo giao dịch mới"
-        private void MenuItem_AddTransaction_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_TaoMoi_Click(object sender, RoutedEventArgs e)
         {
-            AddTransactionCommand_Click(sender, e);
+            YeuCauTaoGiaoDich_Click(sender, e);
         }
         #endregion
     }
@@ -1093,7 +1047,7 @@ namespace TFitnessApp
         // Lọc theo Mã Định Danh
         public string LocMaHV { get; set; } = string.Empty;
         public string LocMaGoi { get; set; } = string.Empty;
-        public string LocMaNV { get; set; } = string.Empty; // Mã Nhân Viên
+        public string LocMaNV { get; set; } = string.Empty; 
 
         // Lọc theo Ngày Giao Dịch
         public DateTime? TuNgay { get; set; }
@@ -1103,23 +1057,8 @@ namespace TFitnessApp
         public KhoangTongTien KhoangTongTienDuocChon { get; set; } = KhoangTongTien.KhongChon;
 
         // Lưu giá trị Min/Max đã được tính toán từ KhoangTongTienDuocChon 
-        // để sử dụng trong truy vấn cơ sở dữ liệu (Database Query)
         public decimal? TuTongTien { get; set; }
         public decimal? DenTongTien { get; set; }
-
-
-        // Phương thức Reset để Cập nhật tất cả các thuộc tính về trạng thái mặc định (null/rỗng)
-        public void Reset()
-        {
-            LocMaHV = string.Empty;
-            LocMaGoi = string.Empty;
-            LocMaNV = string.Empty;
-            TuNgay = null;
-            DenNgay = null;
-            KhoangTongTienDuocChon = KhoangTongTien.KhongChon;
-            TuTongTien = null;
-            DenTongTien = null;
-        }
 
         // Kiểm tra xem có bất kỳ điều kiện lọc nào được áp dụng không
         public bool IsActive()

@@ -16,7 +16,7 @@ namespace TFitnessApp
     public partial class DiemDanhPage : Page
     {
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private List<MoDonDuLieuDiemDanh> tatCaDiemDanh = new List<MoDonDuLieuDiemDanh>();
         private List<string> danhSachChiNhanh = new List<string>();
         private string _maDiemDanhDangChinhSua = null;
@@ -44,7 +44,7 @@ namespace TFitnessApp
             if (string.IsNullOrWhiteSpace(maHV)) return null;
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"SELECT HoTen FROM HocVien WHERE MaHV = @maHV";
@@ -67,7 +67,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"SELECT MAX(MaDD) FROM DiemDanh WHERE MaDD LIKE 'DD%'";
@@ -96,7 +96,7 @@ namespace TFitnessApp
             if (string.IsNullOrWhiteSpace(maHV)) return ketQua;
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string ngayHienTai = DateTime.Today.ToString("yyyy-MM-dd");
@@ -149,7 +149,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"
@@ -193,7 +193,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"UPDATE LichTap SET TrangThai = @trangThaiMoi WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap AND date(ThoiGianBatDau) = date('now', 'localtime')";
@@ -221,7 +221,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"UPDATE LichTap SET TrangThai = @trangThaiMoi WHERE MaHV = @maHV AND TenBuoiTap = @tenBuoiTap AND date(ThoiGianBatDau) = date(@ngayDD_DB)";
@@ -248,7 +248,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string ngayDiemDanh = thoiGianDiemDanh.ToString("yyyy-MM-dd");
@@ -301,7 +301,7 @@ namespace TFitnessApp
 
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = @"
@@ -341,7 +341,7 @@ namespace TFitnessApp
             danhSachChiNhanh.Clear();
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sql = "SELECT DISTINCT MaCN FROM ChiNhanh ORDER BY MaCN ASC";
@@ -361,7 +361,7 @@ namespace TFitnessApp
         public DiemDanhPage()
         {
             InitializeComponent();
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
             if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db")))
@@ -444,7 +444,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string homNay = DateTime.Today.ToString("yyyy-MM-dd");
@@ -500,7 +500,7 @@ namespace TFitnessApp
             {
                 tatCaDiemDanh.Clear();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -596,7 +596,7 @@ namespace TFitnessApp
         {
             try
             {
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string sqlUpdate = @"
@@ -689,7 +689,7 @@ namespace TFitnessApp
                 string thoiGianVao = (trangThaiDiemDanh == "Check-in") ? tgDiemDanhGioPhut : null;
                 string thoiGianRa = (trangThaiDiemDanh == "Check-out") ? tgDiemDanhGioPhut : null;
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 

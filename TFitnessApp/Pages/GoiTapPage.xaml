@@ -10,9 +10,11 @@
       d:DesignHeight="700" d:DesignWidth="1100"
       Title="GoiTapPage"
       FontFamily="Lato"
-      Loaded="Page_Loaded">
+      Loaded="SuKienTaiTrang">
 
+    <!-- KHỐI ĐỊNH NGHĨA TÀI NGUYÊN (RESOURCES) -->
     <Page.Resources>
+        <!-- Style chung cho các nút tròn (RoundButtonStyle) -->
         <SolidColorBrush x:Key="PrimaryRed" Color="#C71A1B"/>
         <SolidColorBrush x:Key="LightRed" Color="#FFF0F0"/>
         <SolidColorBrush x:Key="LightGray" Color="#F5F7FA"/>
@@ -29,6 +31,7 @@
             <Setter Property="Width" Value="350"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Background" Value="White"/>
+            <!-- Trigger hiệu ứng khi di chuột qua -->
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ElementName=txtSearch, Path=IsKeyboardFocusWithin}" Value="True">
                     <Setter Property="BorderBrush" Value="{StaticResource PrimaryRed}"/>
@@ -124,13 +127,13 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style Căn giữa nội dung -->
+        <!-- Style Căn giữa nội dung trong các cột -->
         <Style x:Key="CenterTextStyle" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-        <!-- Style Cell -->
+        <!-- Style cho các cột trong dataGridView -->
         <Style x:Key="DataGridContentCellStyle" TargetType="{x:Type DataGridCell}">
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="Template">
@@ -247,8 +250,8 @@
                             <DataTemplate>
                                 <!-- CHECKBOX CHỌN TẤT CẢ -->
                                 <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Checked="SelectAll_Checked" 
-                                          Unchecked="SelectAll_Unchecked"
+                                          Checked="ChonTatCa_Checked" 
+                                          Unchecked="ChonTatCa_Unchecked"
                                           ToolTip="Chọn tất cả trong trang này"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.HeaderTemplate>

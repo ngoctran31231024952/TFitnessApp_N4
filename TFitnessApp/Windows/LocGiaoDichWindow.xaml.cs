@@ -60,7 +60,7 @@ namespace TFitnessApp.Windows
             }
 
             // 1. Tải dữ liệu ID từ Database
-            LoadComboBoxDataFromDatabase();
+            TaiDLcboTuDB();
 
             // 2. Thiết lập ItemsSource
             cboLocTongTien.ItemsSource = CacKhoangTongTien.Keys.ToList();
@@ -69,7 +69,7 @@ namespace TFitnessApp.Windows
             DongBoTrangThaiVoiUI(KetQuaLoc);
         }
 
-        private void LoadComboBoxDataFromDatabase()
+        private void TaiDLcboTuDB()
         {
             try
             {
@@ -79,7 +79,7 @@ namespace TFitnessApp.Windows
                 _allMaNVs.Add(DEFAULT_ITEM);
 
                 // Load dữ liệu từ Database
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -153,9 +153,9 @@ namespace TFitnessApp.Windows
             dpDenNgay.SelectedDate = boLoc.DenNgay;
 
             // Lọc theo Mã ID
-            SetComboBoxSelection(cboMaHocVien, _allMaHVs, boLoc.LocMaHV);
-            SetComboBoxSelection(cboMaGoiTap, _allMaGois, boLoc.LocMaGoi);
-            SetComboBoxSelection(cboMaNhanVien, _allMaNVs, boLoc.LocMaNV);
+            ThietLapCacLuaChonCbo(cboMaHocVien, _allMaHVs, boLoc.LocMaHV);
+            ThietLapCacLuaChonCbo(cboMaGoiTap, _allMaGois, boLoc.LocMaGoi);
+            ThietLapCacLuaChonCbo(cboMaNhanVien, _allMaNVs, boLoc.LocMaNV);
 
             // Lọc theo Tổng Tiền
             var currentKey = CacKhoangTongTien.FirstOrDefault(x => x.Value == boLoc.KhoangTongTienDuocChon).Key;
@@ -169,7 +169,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void SetComboBoxSelection(ComboBox combo, List<string> allData, string maLoc)
+        private void ThietLapCacLuaChonCbo (ComboBox combo, List<string> allData, string maLoc)
         {
             if (string.IsNullOrWhiteSpace(maLoc))
             {
@@ -236,7 +236,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void Apply_Click(object sender, RoutedEventArgs e)
+        private void ApDung_Click (object sender, RoutedEventArgs e)
         {
             try
             {
@@ -245,9 +245,9 @@ namespace TFitnessApp.Windows
                 KetQuaLoc.DenNgay = dpDenNgay.SelectedDate;
 
                 // Cập nhật Mã ID
-                KetQuaLoc.LocMaHV = GetComboBoxSelectedIDOrText(cboMaHocVien, _allMaHVs);
-                KetQuaLoc.LocMaGoi = GetComboBoxSelectedIDOrText(cboMaGoiTap, _allMaGois);
-                KetQuaLoc.LocMaNV = GetComboBoxSelectedIDOrText(cboMaNhanVien, _allMaNVs);
+                KetQuaLoc.LocMaHV = ChonDScbohaytxt(cboMaHocVien, _allMaHVs);
+                KetQuaLoc.LocMaGoi = ChonDScbohaytxt(cboMaGoiTap, _allMaGois);
+                KetQuaLoc.LocMaNV = ChonDScbohaytxt(cboMaNhanVien, _allMaNVs);
 
                 // Cập nhật khoảng Tổng Tiền
                 XacDinhKhoangTien();
@@ -262,7 +262,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private string GetComboBoxSelectedIDOrText(ComboBox combo, List<string> allData)
+        private string ChonDScbohaytxt(ComboBox combo, List<string> allData)
         {
             string typedText = combo.Text.Trim();
             
@@ -290,12 +290,6 @@ namespace TFitnessApp.Windows
             return typedText;
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
-            this.Close();
-        }
-
         // --- Logic Mới: Xử lý GotFocus để mở Dropdown ---
         private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -308,7 +302,7 @@ namespace TFitnessApp.Windows
         }
 
         // Hàm hỗ trợ tìm TextBox nội bộ của ComboBox (để đặt CaretIndex)
-        private TextBox FindEditableTextBox(ComboBox comboBox)
+        private TextBox TimKiemTextBoxChinhSua (ComboBox comboBox)
         {
             if (comboBox.Template == null) return null;
 
@@ -354,7 +348,7 @@ namespace TFitnessApp.Windows
 
             // Lấy vị trí con trỏ hiện tại (từ TextBox nội bộ) trước khi cập nhật ItemSource
             int caretIndex = filterText.Length;
-            var editableTextBox = FindEditableTextBox(comboBox);
+            var editableTextBox = TimKiemTextBoxChinhSua (comboBox);
             if (editableTextBox != null)
             {
                 // Sử dụng try-catch để an toàn hơn khi truy cập CaretIndex trên UI Thread
@@ -536,17 +530,8 @@ namespace TFitnessApp.Windows
             }
         }
 
-        // Sự kiện khi chọn item từ dropdown
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var comboBox = sender as ComboBox;
-            if (comboBox == null || comboBox.SelectedItem == null) return;
-
-            comboBox.Text = comboBox.SelectedItem.ToString();
-        }
-
         // Sự kiện khi nhấn nút Hủy Bộ Lọc
-        private void ResetFilters_Click(object sender, RoutedEventArgs e)
+        private void HuyLoc_Click (object sender, RoutedEventArgs e)
         {
             // Reset tất cả các bộ lọc về mặc định
             dpTuNgay.SelectedDate = DateTime.Today.AddMonths(-1);

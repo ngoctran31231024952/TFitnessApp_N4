@@ -14,7 +14,7 @@ namespace TFitnessApp.Windows
     {
         // KHAI BÁO BIẾN & HÀM HỖ TRỢ
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
         private string MaHoaSHA256(string rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -34,7 +34,7 @@ namespace TFitnessApp.Windows
             // KHỞI TẠO WINDOW & CẤU HÌNH DB
             InitializeComponent();
             try { SQLitePCL.Batteries_V2.Init(); } catch { }
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
             TuDongCapNhatMatKhau();
             txtTenDangNhap.Focus();
@@ -132,7 +132,7 @@ namespace TFitnessApp.Windows
 
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
-            using (SqliteConnection connection = DbAccess.CreateConnection())
+            using (SqliteConnection connection = TruyCapDB.TaoKetNoi())
             {
                 connection.Open();
 

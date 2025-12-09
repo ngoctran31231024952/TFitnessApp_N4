@@ -22,7 +22,7 @@ namespace TFitnessApp
     {
         #region Khai báo biến
         private string _ChuoiKetNoi;
-        private readonly DbAccess _dbAccess;
+        private readonly TruyCapDB _dbAccess;
 
         private List<MoDonDuLieuTaiKhoan> tatCaTaiKhoan = new List<MoDonDuLieuTaiKhoan>();
         private List<MoDonDuLieuTaiKhoan> danhSachGoc = new List<MoDonDuLieuTaiKhoan>();
@@ -45,7 +45,7 @@ namespace TFitnessApp
         {
             InitializeComponent();
             // Khởi tạo đối tượng DbAccess
-            _dbAccess = new DbAccess();
+            _dbAccess = new TruyCapDB();
             // Lấy chuỗi kết nối
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
 
@@ -156,14 +156,11 @@ namespace TFitnessApp
         {
             try
             {
-                Debug.WriteLine("=== BẮT ĐẦU TẢI DỮ LIỆU TÀI KHOẢN ===");
-                LoadingIndicator.Visibility = Visibility.Visible;
-
                 tatCaTaiKhoan.Clear();
                 taiKhoanHienThi.Clear();
                 danhSachGoc.Clear();
 
-                using (SqliteConnection conn = DbAccess.CreateConnection())
+                using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
 
@@ -256,11 +253,6 @@ namespace TFitnessApp
                 Debug.WriteLine($"LỖI: {ex.Message}");
                 MessageBox.Show($"Lỗi khi tải danh sách tài khoản:\n{ex.Message}",
                     "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                LoadingIndicator.Visibility = Visibility.Collapsed;
-                Debug.WriteLine("=== KẾT THÚC TẢI DỮ LIỆU TÀI KHOẢN ===");
             }
         }
         #endregion
@@ -463,7 +455,7 @@ namespace TFitnessApp
 
         #region Xử lý Nút lệnh và Menu Context
         // Thực hiện làm mới dữ liệu
-        private void RefreshCommand_Click(object sender, RoutedEventArgs e)
+        private void NutLamMoi_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -486,7 +478,7 @@ namespace TFitnessApp
         }
 
         // Mở cửa sổ tạo tài khoản mới
-        private void AddAccountCommand_Click(object sender, RoutedEventArgs e)
+        private void NutThemMoi_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -506,7 +498,7 @@ namespace TFitnessApp
         }
 
         // Xóa các tài khoản đã chọn
-        private void DeleteAccountCommand_Click(object sender, RoutedEventArgs e)
+        private void NutXoa_Click(object sender, RoutedEventArgs e)
         {
             var taiKhoanDaChon = taiKhoanHienThi.Where(tk => tk.IsSelected).ToList();
 
@@ -524,7 +516,7 @@ namespace TFitnessApp
             {
                 try
                 {
-                    using (SqliteConnection conn = DbAccess.CreateConnection())
+                    using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
 
@@ -554,7 +546,7 @@ namespace TFitnessApp
         }
 
         // Mở cửa sổ xem chi tiết tài khoản
-        private void ViewAccountCommand_Click(object sender, RoutedEventArgs e)
+        private void NutXem_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -583,15 +575,15 @@ namespace TFitnessApp
         }
 
         // Xử lý khi chọn Refresh từ context menu
-        private void MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_LamMoi_Click(object sender, RoutedEventArgs e)
         {
-            RefreshCommand_Click(sender, e);
+            NutLamMoi_Click(sender, e);
         }
 
         // Xử lý khi chọn Add Account từ context menu
-        private void MenuItem_AddAccount_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_ThemMoi_Click(object sender, RoutedEventArgs e)
         {
-            AddAccountCommand_Click(sender, e);
+            NutThemMoi_Click(sender, e);
         }
         #endregion
 

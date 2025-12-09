@@ -211,7 +211,7 @@
                         VerticalAlignment="Center"
                         ToolTip="Tạo tài khoản mới"
                         Style="{StaticResource RoundButtonStyle}"
-                        Click="AddAccountCommand_Click">
+                        Click="NutThemMoi_Click">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="CirclePlus" Width="16" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
                         <TextBlock Text="Tạo" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
@@ -231,7 +231,7 @@
                         VerticalAlignment="Center"
                         ToolTip="Làm mới dữ liệu"
                         Style="{StaticResource RoundButtonStyle}"
-                        Click="RefreshCommand_Click">
+                        Click="NutLamMoi_Click">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="ArrowsRotate" Width="16" Height="16" Margin="10,0,1,0" VerticalAlignment="Center" Foreground="White"/>
                         <TextBlock Text="Làm mới" VerticalAlignment="Center" Margin="1,0,10,0" FontSize="13"/>
@@ -284,7 +284,7 @@
                                     <Button Background="Transparent" 
                                             BorderThickness="0" 
                                             Padding="4" 
-                                            Click="ViewAccountCommand_Click"
+                                            Click="NutXem_Click"
                                             ToolTip="Xem chi tiết tài khoản">
                                         <Viewbox Width="14" Height="14">
                                             <fa:IconImage Icon="Eye" Foreground="#666" VerticalAlignment="Center"/>
@@ -379,9 +379,9 @@
                 <!-- Context Menu cho DataGrid (click chuột phải) -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Làm mới" Click="MenuItem_Refresh_Click"/>
+                        <MenuItem Header="Làm mới" Click="MenuItem_LamMoi_Click"/>
                         <Separator/>
-                        <MenuItem Header="Tạo tài khoản mới" Click="MenuItem_AddAccount_Click"/>
+                        <MenuItem Header="Tạo tài khoản mới" Click="MenuItem_ThemMoi_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
@@ -485,7 +485,7 @@
                         Width="90"
                         Margin="0,0,0,0"
                         ToolTip="Xóa tài khoản đã chọn"
-                        Click="DeleteAccountCommand_Click">
+                        Click="NutXoa_Click">
                     <StackPanel Orientation="Horizontal">
                         <Viewbox Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center">
                             <fa:IconImage Icon="Trash" Foreground="White"/>
@@ -495,38 +495,5 @@
                 </Button>
             </StackPanel>
         </Grid>
-
-        <!-- Chỉ báo Đang tải dữ liệu (Loading Indicator) -->
-        <Border Grid.Row="0" Grid.RowSpan="5" 
-                Background="#80000000" 
-                x:Name="LoadingIndicator"
-                Visibility="Collapsed"
-                Panel.ZIndex="1000">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border Background="White" CornerRadius="8" Padding="20" Width="200" Height="100">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <fa:IconImage Icon="Refresh" Width="24" Height="24" Foreground="#C71A1B" 
-                                      HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <fa:IconImage.RenderTransform>
-                                <RotateTransform CenterX="12" CenterY="12"/>
-                            </fa:IconImage.RenderTransform>
-                            <fa:IconImage.Triggers>
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <!-- Animation xoay loading -->
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Angle"
-                                                             From="0" To="360" Duration="0:0:1" 
-                                                             RepeatBehavior="Forever"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </fa:IconImage.Triggers>
-                        </fa:IconImage>
-                        <TextBlock Text="Đang tải dữ liệu..." HorizontalAlignment="Center" Foreground="#333" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Border>
     </Grid>
 </Page>
