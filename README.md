@@ -1,4 +1,4 @@
-MÔ TẢ DỰ ÁN 
+#MÔ TẢ DỰ ÁN# 
 TFitnessApp là một ứng dụng desktop được xây dựng bằng WPF (.NET) và ngôn ngữ C# nhằm cung cấp một giải pháp quản lý cho các trung tâm gym quy mô vừa và nhỏ. Ứng dụng tập trung vào việc số hóa quy trình vận hành, loại bỏ sự phụ thuộc vào sổ sách hay Excel , từ đó nâng cao hiệu quả quản lý hội viên, hợp đồng, giao dịch và chất lượng dịch vụ.
 
 MỤC TIÊU ĐẠT ĐƯỢC 
