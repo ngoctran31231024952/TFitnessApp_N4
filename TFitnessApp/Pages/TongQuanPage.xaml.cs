@@ -199,20 +199,36 @@ namespace TFitnessApp.Pages
                 using (var connection = TruyCapDB.TaoKetNoi())
                 {
                     // 1. Doanh thu
-                    string sqlRevenue = "SELECT SUM(CAST(DaThanhToan AS REAL)) FROM GiaoDich WHERE NgayGD = @today";
+                    string sqlRevenue = "SELECT DaThanhToan FROM GiaoDich WHERE NgayGD LIKE @todayLike";
                     if (!string.IsNullOrEmpty(maCN))
                     {
-                        sqlRevenue = @"SELECT SUM(CAST(GD.DaThanhToan AS REAL)) 
-                                       FROM GiaoDich GD 
-                                       JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
-                                       WHERE GD.NgayGD = @today AND HD.MaCN = @maCN";
+                        sqlRevenue = @"SELECT GD.DaThanhToan 
+                                   FROM GiaoDich GD 
+                                   JOIN HopDong HD ON GD.MaGoi = HD.MaGoi AND GD.MaHV = HD.MaHV
+                                   WHERE GD.NgayGD LIKE @todayLike AND HD.MaCN = @maCN";
                     }
+
                     using (var cmd = new SqliteCommand(sqlRevenue, connection))
                     {
-                        cmd.Parameters.AddWithValue("@today", todayStr);
+                        cmd.Parameters.AddWithValue("@todayLike", todayStr + "%");
+
                         if (!string.IsNullOrEmpty(maCN)) cmd.Parameters.AddWithValue("@maCN", maCN);
-                        var res = cmd.ExecuteScalar();
-                        data.DoanhThu = (res != DBNull.Value && res != null) ? Convert.ToDecimal(res) : 0;
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            decimal totalRevenue = 0;
+                            while (reader.Read())
+                            {
+                                string rawMoney = reader["DaThanhToan"].ToString();
+                                string cleanMoney = new string(rawMoney.Where(char.IsDigit).ToArray());
+
+                                if (decimal.TryParse(cleanMoney, out decimal val))
+                                {
+                                    totalRevenue += val;
+                                }
+                            }
+                            data.DoanhThu = totalRevenue;
+                        }
                     }
 
                     // 2. Học viên mới
@@ -911,9 +927,5 @@ namespace TFitnessApp.Pages
             if (CheckInTooltip != null) CheckInTooltip.Visibility = Visibility.Collapsed;
         }
 
-        private void ChartDoanhThu_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
