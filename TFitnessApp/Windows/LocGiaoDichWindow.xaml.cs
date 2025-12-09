@@ -60,7 +60,7 @@ namespace TFitnessApp.Windows
             }
 
             // 1. Tải dữ liệu ID từ Database
-            LoadComboBoxDataFromDatabase();
+            TaiDLcboTuDB();
 
             // 2. Thiết lập ItemsSource
             cboLocTongTien.ItemsSource = CacKhoangTongTien.Keys.ToList();
@@ -69,7 +69,7 @@ namespace TFitnessApp.Windows
             DongBoTrangThaiVoiUI(KetQuaLoc);
         }
 
-        private void LoadComboBoxDataFromDatabase()
+        private void TaiDLcboTuDB()
         {
             try
             {
@@ -153,9 +153,9 @@ namespace TFitnessApp.Windows
             dpDenNgay.SelectedDate = boLoc.DenNgay;
 
             // Lọc theo Mã ID
-            SetComboBoxSelection(cboMaHocVien, _allMaHVs, boLoc.LocMaHV);
-            SetComboBoxSelection(cboMaGoiTap, _allMaGois, boLoc.LocMaGoi);
-            SetComboBoxSelection(cboMaNhanVien, _allMaNVs, boLoc.LocMaNV);
+            ThietLapCacLuaChonCbo(cboMaHocVien, _allMaHVs, boLoc.LocMaHV);
+            ThietLapCacLuaChonCbo(cboMaGoiTap, _allMaGois, boLoc.LocMaGoi);
+            ThietLapCacLuaChonCbo(cboMaNhanVien, _allMaNVs, boLoc.LocMaNV);
 
             // Lọc theo Tổng Tiền
             var currentKey = CacKhoangTongTien.FirstOrDefault(x => x.Value == boLoc.KhoangTongTienDuocChon).Key;
@@ -169,7 +169,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void SetComboBoxSelection(ComboBox combo, List<string> allData, string maLoc)
+        private void ThietLapCacLuaChonCbo (ComboBox combo, List<string> allData, string maLoc)
         {
             if (string.IsNullOrWhiteSpace(maLoc))
             {
@@ -245,9 +245,9 @@ namespace TFitnessApp.Windows
                 KetQuaLoc.DenNgay = dpDenNgay.SelectedDate;
 
                 // Cập nhật Mã ID
-                KetQuaLoc.LocMaHV = GetComboBoxSelectedIDOrText(cboMaHocVien, _allMaHVs);
-                KetQuaLoc.LocMaGoi = GetComboBoxSelectedIDOrText(cboMaGoiTap, _allMaGois);
-                KetQuaLoc.LocMaNV = GetComboBoxSelectedIDOrText(cboMaNhanVien, _allMaNVs);
+                KetQuaLoc.LocMaHV = ChonDScbohaytxt(cboMaHocVien, _allMaHVs);
+                KetQuaLoc.LocMaGoi = ChonDScbohaytxt(cboMaGoiTap, _allMaGois);
+                KetQuaLoc.LocMaNV = ChonDScbohaytxt(cboMaNhanVien, _allMaNVs);
 
                 // Cập nhật khoảng Tổng Tiền
                 XacDinhKhoangTien();
@@ -262,7 +262,7 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private string GetComboBoxSelectedIDOrText(ComboBox combo, List<string> allData)
+        private string ChonDScbohaytxt(ComboBox combo, List<string> allData)
         {
             string typedText = combo.Text.Trim();
             
