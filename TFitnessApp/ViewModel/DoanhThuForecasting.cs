@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace TFitnessApp
 {
-    // --- CÁC CLASS DATA ---
+    // --- CÁC CLASS DỮ LIỆU ---
     public class DoanhThuInput
     {
         [LoadColumn(0)] public string Month { get; set; }
@@ -32,18 +32,23 @@ namespace TFitnessApp
     {
         public string ModelName { get; set; }
         public double Accuracy { get; set; }
-        public float ForecastT1 { get; set; }
-        public float ForecastT2 { get; set; }
+        public float ForecastT1 { get; set; } // Tháng 1/2026
+        public float ForecastT2 { get; set; } // Tháng 2/2026
         public string Note { get; set; }
     }
 
-    // --- CLASS KẾT QUẢ TRẢ VỀ (MỚI) ---
     public class ForecastReport
     {
-        public string LogText { get; set; }                 // Nội dung chữ hiển thị
-        public List<double> HistoryData { get; set; }       // Dữ liệu 12 tháng năm 2025
-        public List<double> ForecastData { get; set; }      // Dữ liệu nối tiếp (T12/25 -> T1/26 -> T2/26)
-        public string[] Labels { get; set; }                // Nhãn trục hoành
+        public string LogText { get; set; } // Dùng báo lỗi chung
+        public string BestModelName { get; set; }
+        public float ForecastT1 { get; set; }
+        public float ForecastT2 { get; set; }
+        public List<double> HistoryData { get; set; }
+        public List<double> ForecastData { get; set; }
+        public string[] Labels { get; set; }
+
+        // QUAN TRỌNG: Trả về danh sách kết quả để giao diện tô màu
+        public List<ModelResult> ModelResults { get; set; }
     }
 
     public class DoanhThuPredictor
@@ -52,41 +57,37 @@ namespace TFitnessApp
 
         public static ForecastReport TrainAndPredict(string csvPath)
         {
-            var report = new ForecastReport { HistoryData = new List<double>(), ForecastData = new List<double>() };
+            var report = new ForecastReport
+            {
+                HistoryData = new List<double>(),
+                ForecastData = new List<double>(),
+                ModelResults = new List<ModelResult>()
+            };
 
             try
             {
-                if (!File.Exists(csvPath))
-                {
-                    report.LogText = "Lỗi: Không tìm thấy file dữ liệu.";
-                    return report;
-                }
+                if (!File.Exists(csvPath)) { report.LogText = "Lỗi: Không tìm thấy file datahuanluyen.csv"; return report; }
 
-                // Load dữ liệu
+                // 1. Load dữ liệu
                 List<DoanhThuInput> dataList = File.ReadAllLines(csvPath)
                                                    .Skip(1)
                                                    .Select(LineToObj)
                                                    .Where(x => x != null)
                                                    .ToList();
 
-                if (dataList.Count < 24)
-                {
-                    report.LogText = "Dữ liệu quá ít để chạy mô hình.";
-                    return report;
-                }
+                if (dataList.Count < 24) { report.LogText = "Dữ liệu quá ít để chạy mô hình."; return report; }
 
-                // 1. Lấy dữ liệu lịch sử (12 tháng cuối cùng trong file - Năm 2025)
+                // Lấy lịch sử vẽ biểu đồ (12 tháng cuối)
                 var history2025 = dataList.Skip(dataList.Count - 12).Take(12).ToList();
                 report.HistoryData = history2025.Select(x => (double)x.Revenue).ToList();
 
-                // Tạo nhãn thời gian (12 tháng cũ + 2 tháng mới)
                 var labels = new List<string>();
-                foreach (var item in history2025) labels.Add(item.Month); // Ví dụ: 2025-01...
-                labels.Add("Dự báo T1");
-                labels.Add("Dự báo T2");
+                foreach (var item in history2025) labels.Add(item.Month);
+                labels.Add("T1/2026");
+                labels.Add("T2/2026");
                 report.Labels = labels.ToArray();
 
-                // 2. Chạy huấn luyện các mô hình
+                // 2. Chia Train/Test
                 int totalRows = dataList.Count;
                 int testSize = 12;
                 int trainSize = totalRows - testSize;
@@ -95,7 +96,8 @@ namespace TFitnessApp
                 var testDataView = mlContext.Data.LoadFromEnumerable(dataList.Skip(trainSize));
                 var fullDataView = mlContext.Data.LoadFromEnumerable(dataList);
 
-                List<ModelResult> results = new List<ModelResult>();
+                // 3. Huấn luyện 4 mô hình
+                var results = new List<ModelResult>();
 
                 results.Add(EvaluateSSA(trainDataView, testDataView, fullDataView, totalRows, trainSize));
 
@@ -106,118 +108,45 @@ namespace TFitnessApp
                 results.Add(EvaluateRegression("LightGBM", featurePipeline.Append(mlContext.Regression.Trainers.LightGbm()), trainDataView, testDataView, fullDataView, dataList));
                 results.Add(EvaluateRegression("SDCA", featurePipeline.Append(mlContext.Regression.Trainers.Sdca()), trainDataView, testDataView, fullDataView, dataList));
 
-                // 3. Chọn mô hình tốt nhất
+                report.ModelResults = results;
+
+                // 4. Chọn model tốt nhất
                 var validResults = results.Where(r => r.ForecastT1 > 0).ToList();
                 if (validResults.Count > 0)
                 {
                     var bestModel = validResults.OrderByDescending(r => r.Accuracy).First();
-                    report.LogText = FormatOutput(results, bestModel);
+                    report.BestModelName = bestModel.ModelName;
+                    report.ForecastT1 = bestModel.ForecastT1;
+                    report.ForecastT2 = bestModel.ForecastT2;
 
-                    // Chuẩn bị dữ liệu vẽ biểu đồ dự báo (Nối từ điểm cuối cùng của lịch sử)
-                    // Logic: [null, ..., null, GiáTrịT12_2025, DuBaoT1, DuBaoT2]
-                    // Để vẽ nối liền mạch, ta cần điểm bắt đầu là tháng 12/2025
+                    // Dữ liệu vẽ biểu đồ nối tiếp
                     double lastRealValue = report.HistoryData.Last();
-
-                    report.ForecastData.Add(lastRealValue);      // Điểm neo (T12/2025)
-                    report.ForecastData.Add(bestModel.ForecastT1); // T1/2026
-                    report.ForecastData.Add(bestModel.ForecastT2); // T2/2026
+                    report.ForecastData.Add(lastRealValue);
+                    report.ForecastData.Add(bestModel.ForecastT1);
+                    report.ForecastData.Add(bestModel.ForecastT2);
                 }
                 else
                 {
-                    report.LogText = FormatOutput(results, null);
+                    report.LogText = "Không có mô hình nào chạy thành công.";
                 }
 
                 return report;
             }
             catch (Exception ex)
             {
-                report.LogText = $"Lỗi xử lý AI: {ex.Message}";
+                report.LogText = $"Lỗi hệ thống AI: {ex.Message}";
                 return report;
             }
         }
 
-        // --- CÁC HÀM PHỤ TRỢ (GIỮ NGUYÊN LOGIC CŨ, CHỈ RÚT GỌN CHO GỌN) ---
-        private static DoanhThuInput LineToObj(string line)
-        {
-            if (string.IsNullOrWhiteSpace(line)) return null;
-            var cols = line.Split(',');
-            if (cols.Length < 8) return null;
-            try
-            {
-                return new DoanhThuInput
-                {
-                    Month = cols[0],
-                    Revenue = float.Parse(cols[1], CultureInfo.InvariantCulture),
-                    Revenue_Lag1 = float.Parse(cols[5], CultureInfo.InvariantCulture),
-                    Revenue_Lag12 = float.Parse(cols[6], CultureInfo.InvariantCulture),
-                    Month_Num = float.Parse(cols[7], CultureInfo.InvariantCulture)
-                };
-            }
-            catch { return null; }
-        }
+        // --- CÁC HÀM PHỤ TRỢ ---
+        private static DoanhThuInput LineToObj(string line) { if (string.IsNullOrWhiteSpace(line)) return null; var cols = line.Split(','); if (cols.Length < 8) return null; try { return new DoanhThuInput { Month = cols[0], Revenue = float.Parse(cols[1], CultureInfo.InvariantCulture), Revenue_Lag1 = float.Parse(cols[5], CultureInfo.InvariantCulture), Revenue_Lag12 = float.Parse(cols[6], CultureInfo.InvariantCulture), Month_Num = float.Parse(cols[7], CultureInfo.InvariantCulture) }; } catch { return null; } }
 
-        private static ModelResult EvaluateSSA(IDataView trainSet, IDataView testSet, IDataView fullSet, int totalRows, int trainRows)
-        {
-            try
-            {
-                var pipeline = mlContext.Forecasting.ForecastBySsa(nameof(SsaForecast.ForecastedRevenue), nameof(DoanhThuInput.Revenue),
-                    windowSize: 12, seriesLength: trainRows, trainSize: trainRows, horizon: 12,
-                    confidenceLevel: 0.95f, confidenceLowerBoundColumn: nameof(SsaForecast.LowerBoundRevenue), confidenceUpperBoundColumn: nameof(SsaForecast.UpperBoundRevenue));
+        private static ModelResult EvaluateSSA(IDataView trainSet, IDataView testSet, IDataView fullSet, int totalRows, int trainRows) { try { var pipeline = mlContext.Forecasting.ForecastBySsa(nameof(SsaForecast.ForecastedRevenue), nameof(DoanhThuInput.Revenue), windowSize: 12, seriesLength: trainRows, trainSize: trainRows, horizon: 12, confidenceLevel: 0.95f, confidenceLowerBoundColumn: nameof(SsaForecast.LowerBoundRevenue), confidenceUpperBoundColumn: nameof(SsaForecast.UpperBoundRevenue)); var model = pipeline.Fit(trainSet); var forecast = model.CreateTimeSeriesEngine<DoanhThuInput, SsaForecast>(mlContext).Predict(); var actuals = testSet.GetColumn<float>("Revenue").ToArray(); double totalError = 0; for (int i = 0; i < 12; i++) totalError += Math.Abs((actuals[i] - forecast.ForecastedRevenue[i]) / actuals[i]); var finalPipeline = mlContext.Forecasting.ForecastBySsa(nameof(SsaForecast.ForecastedRevenue), nameof(DoanhThuInput.Revenue), windowSize: 12, seriesLength: totalRows, trainSize: totalRows, horizon: 2, confidenceLevel: 0.95f, confidenceLowerBoundColumn: nameof(SsaForecast.LowerBoundRevenue), confidenceUpperBoundColumn: nameof(SsaForecast.UpperBoundRevenue)); var futureForecast = finalPipeline.Fit(fullSet).CreateTimeSeriesEngine<DoanhThuInput, SsaForecast>(mlContext).Predict(); return new ModelResult { ModelName = "SSA (Time Series)", Accuracy = Math.Max(0, 100 * (1 - (totalError / 12))), ForecastT1 = futureForecast.ForecastedRevenue[0], ForecastT2 = futureForecast.ForecastedRevenue[1] }; } catch (Exception ex) { return new ModelResult { ModelName = "SSA", Note = ex.Message }; } }
 
-                var model = pipeline.Fit(trainSet);
-                var forecast = model.CreateTimeSeriesEngine<DoanhThuInput, SsaForecast>(mlContext).Predict();
+        private static ModelResult EvaluateRegression(string name, IEstimator<ITransformer> pipeline, IDataView trainSet, IDataView testSet, IDataView fullSet, List<DoanhThuInput> allData) { try { var model = pipeline.Fit(trainSet); var preds = model.Transform(testSet).GetColumn<float>("Score").ToArray(); var actuals = testSet.GetColumn<float>("Revenue").ToArray(); double totalError = 0; for (int i = 0; i < actuals.Length; i++) { float act = actuals[i] == 0 ? 1 : actuals[i]; totalError += Math.Abs((act - preds[i]) / act); } var predEngine = mlContext.Model.CreatePredictionEngine<DoanhThuInput, DoanhThuPrediction>(pipeline.Fit(fullSet)); var lastRow = allData.Last(); var lastYearRow = allData[allData.Count - 12]; var lastYearNextRow = allData[allData.Count - 11]; float t1 = predEngine.Predict(new DoanhThuInput { Revenue_Lag1 = lastRow.Revenue, Revenue_Lag12 = lastYearRow.Revenue, Month_Num = 1 }).ForecastedRevenue; float t2 = predEngine.Predict(new DoanhThuInput { Revenue_Lag1 = t1, Revenue_Lag12 = lastYearNextRow.Revenue, Month_Num = 2 }).ForecastedRevenue; return new ModelResult { ModelName = name, Accuracy = Math.Max(0, 100 * (1 - (totalError / actuals.Length))), ForecastT1 = t1, ForecastT2 = t2 }; } catch (Exception ex) { return new ModelResult { ModelName = name, Note = ex.Message }; } }
 
-                var actuals = testSet.GetColumn<float>("Revenue").ToArray();
-                double totalError = 0;
-                for (int i = 0; i < 12; i++) totalError += Math.Abs((actuals[i] - forecast.ForecastedRevenue[i]) / actuals[i]);
-
-                // Retrain
-                var finalPipeline = mlContext.Forecasting.ForecastBySsa(nameof(SsaForecast.ForecastedRevenue), nameof(DoanhThuInput.Revenue),
-                    windowSize: 12, seriesLength: totalRows, trainSize: totalRows, horizon: 2,
-                    confidenceLevel: 0.95f, confidenceLowerBoundColumn: nameof(SsaForecast.LowerBoundRevenue), confidenceUpperBoundColumn: nameof(SsaForecast.UpperBoundRevenue));
-                var futureForecast = finalPipeline.Fit(fullSet).CreateTimeSeriesEngine<DoanhThuInput, SsaForecast>(mlContext).Predict();
-
-                return new ModelResult { ModelName = "SSA (Time Series)", Accuracy = Math.Max(0, 100 * (1 - (totalError / 12))), ForecastT1 = futureForecast.ForecastedRevenue[0], ForecastT2 = futureForecast.ForecastedRevenue[1] };
-            }
-            catch (Exception ex) { return new ModelResult { ModelName = "SSA", Note = ex.Message }; }
-        }
-
-        private static ModelResult EvaluateRegression(string name, IEstimator<ITransformer> pipeline, IDataView trainSet, IDataView testSet, IDataView fullSet, List<DoanhThuInput> allData)
-        {
-            try
-            {
-                var model = pipeline.Fit(trainSet);
-                var preds = model.Transform(testSet).GetColumn<float>("Score").ToArray();
-                var actuals = testSet.GetColumn<float>("Revenue").ToArray();
-
-                double totalError = 0;
-                for (int i = 0; i < actuals.Length; i++) totalError += Math.Abs(((actuals[i] == 0 ? 1 : actuals[i]) - preds[i]) / (actuals[i] == 0 ? 1 : actuals[i]));
-
-                var predEngine = mlContext.Model.CreatePredictionEngine<DoanhThuInput, DoanhThuPrediction>(pipeline.Fit(fullSet));
-                var lastRow = allData.Last();
-                var lastYearRow = allData[allData.Count - 12];
-                var lastYearNextRow = allData[allData.Count - 11];
-
-                float predT1 = predEngine.Predict(new DoanhThuInput { Revenue_Lag1 = lastRow.Revenue, Revenue_Lag12 = lastYearRow.Revenue, Month_Num = 1 }).ForecastedRevenue;
-                float predT2 = predEngine.Predict(new DoanhThuInput { Revenue_Lag1 = predT1, Revenue_Lag12 = lastYearNextRow.Revenue, Month_Num = 2 }).ForecastedRevenue;
-
-                return new ModelResult { ModelName = name, Accuracy = Math.Max(0, 100 * (1 - (totalError / actuals.Length))), ForecastT1 = predT1, ForecastT2 = predT2 };
-            }
-            catch (Exception ex) { return new ModelResult { ModelName = name, Note = ex.Message }; }
-        }
-
-        private static string FormatOutput(List<ModelResult> results, ModelResult bestModel)
-        {
-            if (bestModel == null) return "Không có mô hình nào chạy thành công.";
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("📊 KẾT QUẢ SO SÁNH:");
-            foreach (var r in results)
-            {
-                if (!string.IsNullOrEmpty(r.Note)) { sb.AppendLine($"❌ {r.ModelName}: {r.Note}"); continue; }
-                string marker = (r == bestModel) ? "🏆" : "  ";
-                sb.AppendLine($"{marker} {r.ModelName}: {r.Accuracy:F2}% (T1: {r.ForecastT1 / 1000000:F1}M, T2: {r.ForecastT2 / 1000000:F1}M)");
-            }
-            return sb.ToString();
-        }
+        // Hàm này không dùng nữa vì giao diện sẽ tự format
+        private static string FormatOutput(List<ModelResult> results, ModelResult bestModel) { return ""; }
     }
 }
