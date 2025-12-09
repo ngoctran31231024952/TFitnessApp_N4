@@ -73,7 +73,6 @@ namespace TFitnessApp
                 string keyword = txtSearch.Text.Trim();
 
                 // 2. Gọi Repository để lấy dữ liệu theo từ khóa và các bộ lọc (Giới tính, Chi nhánh)
-                // SỬA LỖI: FindPT -> TimKiemPT
                 _danhSachGoc = _ptRepository.TimKiemPT(keyword, _filterGioiTinh, _filterChiNhanh);
 
                 // 3. Reset về trang đầu tiên mỗi khi tìm kiếm mới
@@ -212,7 +211,6 @@ namespace TFitnessApp
 
             if (MessageBox.Show($"Xóa {itemsToDelete.Count} PT đã chọn?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                // SỬA LỖI: DeletePT -> XoaPT
                 foreach (var item in itemsToDelete) _ptRepository.XoaPT(item.MaPT);
                 TaiDuLieu();
                 MessageBox.Show("Đã xóa thành công!", "Thông báo");
@@ -301,7 +299,6 @@ namespace TFitnessApp
         {
             if (sender is Button btn && btn.Tag is PT pt && MessageBox.Show($"Xóa PT {pt.HoTen}?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                // SỬA LỖI: DeletePT -> XoaPT
                 _ptRepository.XoaPT(pt.MaPT);
                 TaiDuLieu();
             }
@@ -413,7 +410,6 @@ namespace TFitnessApp
             return list;
         }
 
-        // GenerateNewMaPT -> TaoMaPTMoi: Sinh mã tự động tăng (VD: PT001, PT002)
         public string TaoMaPTMoi()
         {
             string newMa = "PT001";
@@ -439,7 +435,6 @@ namespace TFitnessApp
             return newMa;
         }
 
-        // GetAllChiNhanh -> LayTatCaChiNhanh: Lấy danh sách chi nhánh để hiển thị lọc
         public List<ChiNhanhSimple> LayTatCaChiNhanh()
         {
             List<ChiNhanhSimple> list = new List<ChiNhanhSimple>();
@@ -460,7 +455,6 @@ namespace TFitnessApp
             return list;
         }
 
-        // CheckMaPTExists -> KiemTraMaPTTonTai
         public bool KiemTraMaPTTonTai(string maPT)
         {
             using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
