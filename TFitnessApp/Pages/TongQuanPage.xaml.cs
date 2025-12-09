@@ -14,6 +14,7 @@ using TFitnessApp.Database;
 
 namespace TFitnessApp.Pages
 {
+    // CÁC LỚP DỮ LIỆU
     public class DashboardKpi
     {
         public decimal DoanhThu { get; set; }
@@ -60,11 +61,11 @@ namespace TFitnessApp.Pages
         public string HanhDong { get; set; }
         public string ThoiGian { get; set; }
     }
-
+    // KHỞI TẠO
     public partial class TongQuanPage : Page, System.ComponentModel.INotifyPropertyChanged
     {
-        private readonly DateTime currentToday = new DateTime(2025, 11, 14); // Giữ nguyên ngày giả lập của bạn
-        private readonly string[] dateFormats = { "d/M/yyyy", "dd/MM/yyyy", "d/MM/yyyy", "dd/M/yyyy", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd" };
+        private readonly DateTime currentToday = new DateTime(2025, 11, 14); // GIẢ LẬP NGÀY HIỆN TẠI LÀ 14/11/2025
+        private readonly string[] dateFormats = { "d/M/yyyy", "dd/MM/yyyy", "d/MM/yyyy", "dd/M/yyyy", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy HH:mm" };
 
         public SeriesCollection ChartSeries { get; set; }
         public string[] ChartLabels { get; set; }
@@ -92,22 +93,22 @@ namespace TFitnessApp.Pages
             public string Title { get; set; }
             public Brush Color { get; set; }
         }
-
+    // CÁC HÀM XỬ LÝ LOGIC CHUNG
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
-                LoadComboBoxChiNhanh();
+                TaiDuLieuTheoChiNhanh();
                 if (cboCheckInChiNhanh != null && cboChiNhanh.ItemsSource != null)
                 {
                     cboCheckInChiNhanh.ItemsSource = cboChiNhanh.ItemsSource;
                     cboCheckInChiNhanh.SelectedIndex = 0;
                 }
 
-                LoadCheckInChartData();
-                LoadKpiData("");
-                LoadChartData();
-                LoadBottomData();
+                TaiBieuDoCheckIn();
+                TaiDuLieuKPI("");
+                TaiBieuDoCot();
+                TaiDuLieuPhanCuoi();
             }
             catch (Exception ex)
             {
@@ -115,7 +116,7 @@ namespace TFitnessApp.Pages
             }
         }
 
-        private void GetDateRange(string timeMode, out DateTime start, out DateTime end, out bool isGroupByMonth)
+        private void LayKhoangThoiGian(string timeMode, out DateTime start, out DateTime end, out bool isGroupByMonth)
         {
             start = currentToday;
             end = currentToday;
@@ -150,8 +151,9 @@ namespace TFitnessApp.Pages
             }
         }
 
-        // Section 1
-        private void LoadComboBoxChiNhanh()
+    // XỬ LÝ DỮ LIỆU & DATABASE
+    // DỮ LIỆU KPI
+        private void TaiDuLieuTheoChiNhanh()
         {
             var listCN = new List<ChiNhanhOption>();
             listCN.Add(new ChiNhanhOption { MaCN = "", TenCN = "Tất cả chi nhánh" });
@@ -180,13 +182,14 @@ namespace TFitnessApp.Pages
             if (cboChartChiNhanh != null) { cboChartChiNhanh.ItemsSource = listCN; cboChartChiNhanh.SelectedIndex = 0; }
         }
 
+     // SỰ KIỆN GIAO DIỆN   
         private void cboChiNhanh_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string maCN = cboChiNhanh.SelectedValue?.ToString();
-            LoadKpiData(maCN);
+            TaiDuLieuKPI(maCN);
         }
-
-        private void LoadKpiData(string maCN)
+        // PHÍM TẮT
+        private void TaiDuLieuKPI(string maCN)
         {
             try
             {
@@ -273,13 +276,13 @@ namespace TFitnessApp.Pages
             catch (Exception ex) { MessageBox.Show("Lỗi tải KPI: " + ex.Message); }
         }
 
-        // Section 2
-        private void LoadChartData()
+        // DỮ LIỆU DOANH THU THEO BIỂU ĐỒ
+        private void TaiBieuDoCot()
         {
             string maCN = cboChartChiNhanh.SelectedValue?.ToString();
             string timeMode = (cboChartThoiGian.SelectedItem as ComboBoxItem)?.Tag.ToString();
 
-            GetDateRange(timeMode, out DateTime startDate, out DateTime endDate, out bool isGroupByMonth);
+            LayKhoangThoiGian(timeMode, out DateTime startDate, out DateTime endDate, out bool isGroupByMonth);
 
             var rawData = new List<ChartDataPoint>();
 
@@ -363,10 +366,10 @@ namespace TFitnessApp.Pages
             PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs("ChartLabels"));
         }
 
-        private void LoadPieChartData()
+        private void TaiBieuDoTron()
         {
             string timeMode = (cboChartThoiGian.SelectedItem as ComboBoxItem)?.Tag.ToString();
-            GetDateRange(timeMode, out DateTime startDate, out DateTime endDate, out bool _);
+            LayKhoangThoiGian(timeMode, out DateTime startDate, out DateTime endDate, out bool _);
 
             var pieData = new Dictionary<string, decimal>();
 
@@ -428,8 +431,8 @@ namespace TFitnessApp.Pages
             catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
         }
 
-        // Section 3
-        private void LoadCheckInChartData()
+        // DỮ LIỆU CHECK-IN
+        private void TaiBieuDoCheckIn()
         {
             string maCN = cboCheckInChiNhanh.SelectedValue?.ToString();
             string buoi = (cboCheckInBuoi.SelectedItem as ComboBoxItem)?.Tag.ToString();
@@ -507,7 +510,7 @@ namespace TFitnessApp.Pages
             catch (Exception ex) { MessageBox.Show("Lỗi tải biểu đồ Check-in: " + ex.Message); }
         }
 
-        private void LoadCheckInListData()
+        private void TaiDanhSachCheckIn()
         {
             string maCN = cboCheckInChiNhanh.SelectedValue?.ToString();
             string buoi = (cboCheckInBuoi.SelectedItem as ComboBoxItem)?.Tag.ToString();
@@ -572,12 +575,12 @@ namespace TFitnessApp.Pages
             catch (Exception ex) { MessageBox.Show("Lỗi tải danh sách: " + ex.Message); }
         }
 
-        // Section 4
-        private void LoadTopGoiTapData()
+        // DỮ LIỆU GÓI TẬP
+        private void TaiTopGoiTap()
         {
             if (cboTopGoiTapTime == null) return;
             string timeMode = (cboTopGoiTapTime.SelectedItem as ComboBoxItem)?.Tag.ToString() ?? "7days";
-            GetDateRange(timeMode, out DateTime startDate, out DateTime endDate, out bool _);
+            LayKhoangThoiGian(timeMode, out DateTime startDate, out DateTime endDate, out bool _);
 
             var listTop = new List<TopGoiTapInfo>();
             string[] colors = { "#FF7043", "#66BB6A", "#42A5F5", "#FFA726", "#EF5350" };
@@ -631,9 +634,9 @@ namespace TFitnessApp.Pages
             if (ListTopGoiTap != null) ListTopGoiTap.ItemsSource = listTop;
         }
 
-        private void LoadBottomData()
+        private void TaiDuLieuPhanCuoi()
         {
-            LoadTopGoiTapData();
+            TaiTopGoiTap();
 
             var displayList = new List<HoatDongInfo>();
 
@@ -714,7 +717,7 @@ namespace TFitnessApp.Pages
             if (ListHoatDong != null) ListHoatDong.ItemsSource = displayList;
         }
 
-        private void DashboardCard_Click(object sender, MouseButtonEventArgs e)
+        private void TheKPI_Click(object sender, MouseButtonEventArgs e)
         {
             var border = sender as Border;
             if (border == null || border.Tag == null) return;
@@ -722,10 +725,10 @@ namespace TFitnessApp.Pages
             var mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
             {
-                mainWindow.NavigateToTab(tag);
+                mainWindow.ChuyenTab(tag);
             }
         }
-        private void Chart_DataHover(object sender, ChartPoint chartPoint)
+        private void BieuDoCot_DataHover(object sender, ChartPoint chartPoint)
         {
             if (HoverSection != null)
             {
@@ -741,13 +744,13 @@ namespace TFitnessApp.Pages
             Canvas.SetTop(ColumnTooltip, pixelPoint.Y - ColumnTooltip.ActualHeight - 10);
         }
 
-        private void Chart_MouseLeave(object sender, MouseEventArgs e)
+        private void BieuDoCot_MouseLeave(object sender, MouseEventArgs e)
         {
             if (HoverSection != null) HoverSection.Visibility = Visibility.Hidden;
             if (ColumnTooltip != null) ColumnTooltip.Visibility = Visibility.Collapsed;
         }
 
-        private void ChartContainer_MouseMove(object sender, MouseEventArgs e)
+        private void KhungBieuDoTron_MouseMove(object sender, MouseEventArgs e)
         {
             var point = e.GetPosition(TooltipCanvas);
             double x = point.X + 15;
@@ -758,7 +761,7 @@ namespace TFitnessApp.Pages
             Canvas.SetTop(MouseTooltip, y);
         }
 
-        private void ChartTyTrong_DataHover(object sender, ChartPoint chartPoint)
+        private void BieuDoTron_DataHover(object sender, ChartPoint chartPoint)
         {
             var series = chartPoint.SeriesView as PieSeries;
             if (series == null) return;
@@ -769,81 +772,81 @@ namespace TFitnessApp.Pages
             MouseTooltip.Visibility = Visibility.Visible;
         }
 
-        private void ChartTyTrong_MouseLeave(object sender, MouseEventArgs e) => MouseTooltip.Visibility = Visibility.Collapsed;
+        private void BieuDoTron_MouseLeave(object sender, MouseEventArgs e) => MouseTooltip.Visibility = Visibility.Collapsed;
 
-        private void ChartFilter_Changed(object sender, SelectionChangedEventArgs e)
+        private void BoLocBieuDo_Changed(object sender, SelectionChangedEventArgs e)
         {
             if (cboChartChiNhanh == null || cboChartThoiGian == null || ChartDoanhThu == null) return;
-            if (ChartDoanhThu.Visibility == Visibility.Visible) LoadChartData(); else LoadPieChartData();
+            if (ChartDoanhThu.Visibility == Visibility.Visible) TaiBieuDoCot(); else TaiBieuDoTron();
         }
 
-        private void CheckInFilter_Changed(object sender, SelectionChangedEventArgs e)
+        private void BoLocCheckIn_Changed(object sender, SelectionChangedEventArgs e)
         {
             if (cboCheckInChiNhanh == null || cboCheckInBuoi == null || ChartCheckInLine == null) return;
-            if (currentCheckInTab == "Chart") LoadCheckInChartData(); else LoadCheckInListData();
+            if (currentCheckInTab == "Chart") TaiBieuDoCheckIn(); else TaiDanhSachCheckIn();
         }
 
-        private void TopGoiTap_FilterChanged(object sender, SelectionChangedEventArgs e) => LoadTopGoiTapData();
+        private void TopGoiTap_FilterChanged(object sender, SelectionChangedEventArgs e) => TaiTopGoiTap();
 
         private string currentTab = "DoanhThu";
-        private void SwitchChartType_Click(object sender, MouseButtonEventArgs e)
+        private void ChuyenBieuDo_Click(object sender, MouseButtonEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
             if (btn.Name == "btnTabDoanhThu")
             {
                 currentTab = "DoanhThu";
-                SetTabStyle(txtTabDoanhThu, indDoanhThu, true);
-                SetTabStyle(txtTabTyTrong, indTyTrong, false);
+                ThietLapTab(txtTabDoanhThu, indDoanhThu, true);
+                ThietLapTab(txtTabTyTrong, indTyTrong, false);
                 ChartDoanhThu.Visibility = Visibility.Visible;
                 pnlTotalBottom.Visibility = Visibility.Visible;
                 cboChartChiNhanh.Visibility = Visibility.Visible;
                 if (grpTyTrong != null) grpTyTrong.Visibility = Visibility.Collapsed;
-                LoadChartData();
+                TaiBieuDoCot();
             }
             else
             {
                 currentTab = "TyTrong";
-                SetTabStyle(txtTabTyTrong, indTyTrong, true);
-                SetTabStyle(txtTabDoanhThu, indDoanhThu, false);
+                ThietLapTab(txtTabTyTrong, indTyTrong, true);
+                ThietLapTab(txtTabDoanhThu, indDoanhThu, false);
                 ChartDoanhThu.Visibility = Visibility.Collapsed;
                 pnlTotalBottom.Visibility = Visibility.Collapsed;
                 cboChartChiNhanh.Visibility = Visibility.Collapsed;
                 if (grpTyTrong != null) grpTyTrong.Visibility = Visibility.Visible;
-                LoadPieChartData();
+                TaiBieuDoTron();
             }
         }
 
         private string currentCheckInTab = "Chart";
-        private void SwitchCheckInTab_Click(object sender, MouseButtonEventArgs e)
+        private void ChuyenTabCheckIn_Click(object sender, MouseButtonEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
             if (btn.Tag.ToString() == "Chart")
             {
                 currentCheckInTab = "Chart";
-                SetTabStyle(txtTabCheckInChart, indCheckInChart, true);
-                SetTabStyle(txtTabCheckInList, indCheckInList, false);
+                ThietLapTab(txtTabCheckInChart, indCheckInChart, true);
+                ThietLapTab(txtTabCheckInList, indCheckInList, false);
                 ChartCheckInLine.Visibility = Visibility.Visible;
                 GridCheckInList.Visibility = Visibility.Collapsed;
                 if (pnlTotalCheckInChart != null) pnlTotalCheckInChart.Visibility = Visibility.Visible;
                 if (txtTotalCheckInList != null) txtTotalCheckInList.Visibility = Visibility.Collapsed;
-                LoadCheckInChartData();
+                TaiBieuDoCheckIn();
             }
             else
             {
                 currentCheckInTab = "List";
-                SetTabStyle(txtTabCheckInList, indCheckInList, true);
-                SetTabStyle(txtTabCheckInChart, indCheckInChart, false);
+                ThietLapTab(txtTabCheckInList, indCheckInList, true);
+                ThietLapTab(txtTabCheckInChart, indCheckInChart, false);
                 ChartCheckInLine.Visibility = Visibility.Collapsed;
                 GridCheckInList.Visibility = Visibility.Visible;
                 if (pnlTotalCheckInChart != null) pnlTotalCheckInChart.Visibility = Visibility.Collapsed;
                 if (txtTotalCheckInList != null) txtTotalCheckInList.Visibility = Visibility.Visible;
-                LoadCheckInListData();
+                TaiDanhSachCheckIn();
             }
         }
 
-        private void BtnTab_MouseEnter(object sender, MouseEventArgs e)
+        private void TabBieuDo_MouseEnter(object sender, MouseEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
@@ -851,7 +854,7 @@ namespace TFitnessApp.Pages
             else if (btn.Name == "btnTabTyTrong" && currentTab != "TyTrong") { txtTabTyTrong.Foreground = Brushes.Gray; indTyTrong.Fill = Brushes.LightGray; indTyTrong.Visibility = Visibility.Visible; }
         }
 
-        private void BtnTab_MouseLeave(object sender, MouseEventArgs e)
+        private void TabBieuDo_MouseLeave(object sender, MouseEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
@@ -859,7 +862,7 @@ namespace TFitnessApp.Pages
             else if (btn.Name == "btnTabTyTrong" && currentTab != "TyTrong") { txtTabTyTrong.Foreground = Brushes.Black; indTyTrong.Visibility = Visibility.Hidden; }
         }
 
-        private void BtnCheckInTab_MouseEnter(object sender, MouseEventArgs e)
+        private void TabCheckIn_MouseEnter(object sender, MouseEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
@@ -867,7 +870,7 @@ namespace TFitnessApp.Pages
             else if (btn.Name == "btnTabCheckInList" && currentCheckInTab != "List") { txtTabCheckInList.Foreground = Brushes.Gray; indCheckInList.Fill = Brushes.LightGray; indCheckInList.Visibility = Visibility.Visible; }
         }
 
-        private void BtnCheckInTab_MouseLeave(object sender, MouseEventArgs e)
+        private void TabCheckIn_MouseLeave(object sender, MouseEventArgs e)
         {
             var btn = sender as Border;
             if (btn == null) return;
@@ -875,7 +878,7 @@ namespace TFitnessApp.Pages
             else if (btn.Name == "btnTabCheckInList" && currentCheckInTab != "List") { txtTabCheckInList.Foreground = Brushes.Black; indCheckInList.Visibility = Visibility.Hidden; }
         }
 
-        private void SetTabStyle(TextBlock txt, System.Windows.Shapes.Rectangle ind, bool isActive)
+        private void ThietLapTab(TextBlock txt, System.Windows.Shapes.Rectangle ind, bool isActive)
         {
             if (isActive)
             {
@@ -892,7 +895,7 @@ namespace TFitnessApp.Pages
             }
         }
 
-        private void ChartCheckIn_DataHover(object sender, ChartPoint chartPoint)
+        private void BieuDoCheckIn_DataHover(object sender, ChartPoint chartPoint)
         {
             var pixelPoint = ChartCheckInLine.ConvertToPixels(new Point(chartPoint.X, chartPoint.Y));
             txtCheckInTime.Text = $"Giờ: {(CheckInLabels.Length > (int)chartPoint.X ? CheckInLabels[(int)chartPoint.X] : "")}";
@@ -903,7 +906,7 @@ namespace TFitnessApp.Pages
             Canvas.SetTop(CheckInTooltip, pixelPoint.Y - CheckInTooltip.ActualHeight - 15);
         }
 
-        private void ChartCheckIn_MouseLeave(object sender, MouseEventArgs e)
+        private void BieuDoCheckIn_MouseLeave(object sender, MouseEventArgs e)
         {
             if (CheckInTooltip != null) CheckInTooltip.Visibility = Visibility.Collapsed;
         }

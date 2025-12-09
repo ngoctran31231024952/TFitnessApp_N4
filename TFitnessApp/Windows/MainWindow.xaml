@@ -87,7 +87,7 @@
             <Setter Property="ToolTipService.HorizontalOffset" Value="-10"/>
             <Setter Property="ToolTipService.InitialShowDelay" Value="10"/>
             <Setter Property="ToolTipService.ShowDuration" Value="5000"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="lstItem_PreviewMouseLeftButtonDown"/>
             <Setter Property="ToolTip" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -233,7 +233,7 @@
 
                     <ToggleButton x:Name="HamburgerButton" Grid.Column="1" Width="40" Height="40" 
                                   VerticalAlignment="Center" Foreground="White" FontSize="18"
-                                  Checked="HamburgerButton_Checked" Unchecked="HamburgerButton_Unchecked">
+                                  Checked="btnDanhSach_Checked" Unchecked="btnDanhSach_Unchecked">
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource NoHoverToggleButton}">
                                 <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -269,7 +269,7 @@
                         </ToggleButton.Triggers>
                     </ToggleButton>
 
-                    <Button x:Name="LogoButton" Click="LogoButton_Click" HorizontalAlignment="Left" 
+                    <Button x:Name="LogoButton" Click="btnLogo_Click" HorizontalAlignment="Left" 
                             VerticalAlignment="Center" Margin="15,0,0,0">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NoHoverButton}">
@@ -314,7 +314,7 @@
                          SelectedIndex="0" 
                          ScrollViewer.VerticalScrollBarVisibility="Hidden"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         SelectionChanged="MenuListBox_SelectionChanged">
+                         SelectionChanged="lstDanhSach_SelectionChanged">
 
                     <ListBoxItem x:Name="ItemTongQuan" Tag="Tổng quan">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -464,8 +464,8 @@
                                     </Separator.Template>
                                 </Separator>
 
-                                <MenuItem x:Name="MenuConDoanhThu" Header="Báo cáo doanh thu" IsCheckable="True" Click="MenuBaoCaoItem_Click"/>
-                                <MenuItem x:Name="MenuConHocVien" Header="Báo cáo học viên" IsCheckable="True" Click="MenuBaoCaoItem_Click"/>
+                                <MenuItem x:Name="MenuConDoanhThu" Header="Báo cáo doanh thu" IsCheckable="True" Click="ItemDanhSachBaoCao_Click"/>
+                                <MenuItem x:Name="MenuConHocVien" Header="Báo cáo học viên" IsCheckable="True" Click="ItemDanhSachBaoCao_Click"/>
                             </ContextMenu>
                         </ListBoxItem.ContextMenu>
 
@@ -546,14 +546,14 @@
                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="25,0"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0">
-                        <Button x:Name="BtnHelp" Style="{StaticResource TopBarButton}" Click="BtnHelp_Click">
+                        <Button x:Name="BtnHelp" Style="{StaticResource TopBarButton}" Click="btnTroGiup_Click">
                             <StackPanel Orientation="Horizontal">
                                 <fa:IconImage Icon="QuestionCircle" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
                                 <TextBlock Text="Trợ giúp" Margin="5,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="BtnVideoHelp" Style="{StaticResource TopBarButton}" Click="BtnVideoHelp_Click">
+                        <Button x:Name="BtnVideoHelp" Style="{StaticResource TopBarButton}" Click="btnVideoHuongDan_Click">
                             <StackPanel Orientation="Horizontal">
                                 <fa:IconImage Icon="Video" Foreground="Gray" Width="16" Height="16" VerticalAlignment="Center"/>
                                 <TextBlock Text="Hướng dẫn" Margin="5,0,0,0" VerticalAlignment="Center"/>
@@ -601,7 +601,7 @@
                             </Grid>
                         </Popup>
 
-                        <Button x:Name="AvatarButton" Style="{StaticResource TopBarButton}" Click="AvatarButton_Click">
+                        <Button x:Name="AvatarButton" Style="{StaticResource TopBarButton}" Click="btnAnhDaiDien_Click">
                             <StackPanel Orientation="Horizontal">
                                 <Grid Width="32" Height="32" VerticalAlignment="Center">
                                     <Ellipse Fill="#007ACC"/>
@@ -616,7 +616,7 @@
                             </StackPanel>
                             <Button.ContextMenu>
                                 <ContextMenu MinWidth="170">
-                                    <MenuItem Header="Đăng xuất" Padding="15,10" FontSize="14" Click="Logout_Click">
+                                    <MenuItem Header="Đăng xuất" Padding="15,10" FontSize="14" Click="btnDangXuat_Click">
                                         <MenuItem.Template>
                                             <ControlTemplate TargetType="MenuItem">
                                                 <Border x:Name="Border" Background="Transparent" Padding="{TemplateBinding Padding}">
@@ -684,7 +684,7 @@
                             <fa:IconImage Icon="Youtube" Foreground="White" Width="16" Height="16" Margin="0,0,8,0"/>
                             <TextBlock Text="Hướng dẫn sử dụng" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <Button Click="CloseSmallVideo_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        <Button Click="btnDongVideo_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Width="35" Height="35" Style="{StaticResource NoHoverButton}" Cursor="Hand">
                             <fa:IconImage Icon="Times" Foreground="White" Width="12"/>
                         </Button>

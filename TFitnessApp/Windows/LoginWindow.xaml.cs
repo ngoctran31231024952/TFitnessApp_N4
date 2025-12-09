@@ -12,9 +12,10 @@ namespace TFitnessApp.Windows
 {
     public partial class LoginWindow : Window
     {
+        // KHAI BÁO BIẾN & HÀM HỖ TRỢ
         private string _ChuoiKetNoi;
         private readonly DbAccess _dbAccess;
-        private string CalculateSHA256(string rawData)
+        private string MaHoaSHA256(string rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())
             {
@@ -30,48 +31,104 @@ namespace TFitnessApp.Windows
 
         public LoginWindow()
         {
+            // KHỞI TẠO WINDOW & CẤU HÌNH DB
             InitializeComponent();
             try { SQLitePCL.Batteries_V2.Init(); } catch { }
             _dbAccess = new DbAccess();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
-
-            txtUsername.Focus();
+            TuDongCapNhatMatKhau();
+            txtTenDangNhap.Focus();
         }
 
+        private void TuDongCapNhatMatKhau()
+        {
+            try
+            {
+                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
+                int countUpdated = 0;
+
+                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
+                {
+                    connection.Open();
+                    var users = new System.Collections.Generic.List<(string User, string Pass)>();
+                    using (var cmd = new SqliteCommand("SELECT TenDangNhap, MatKhau FROM TaiKhoan", connection))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            users.Add((reader.GetString(0), reader.GetString(1)));
+                        }
+                    }
+
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        foreach (var u in users)
+                        {
+                            if (u.Pass.Length < 64)
+                            {
+                                string newHash = MaHoaSHA256(u.Pass);
+
+                                var updateCmd = new SqliteCommand(
+                                    "UPDATE TaiKhoan SET MatKhau = @newPass WHERE TenDangNhap = @user",
+                                    connection, transaction);
+
+                                updateCmd.Parameters.AddWithValue("@newPass", newHash);
+                                updateCmd.Parameters.AddWithValue("@user", u.User);
+                                updateCmd.ExecuteNonQuery();
+
+                                countUpdated++;
+                            }
+                        }
+                        transaction.Commit();
+                    }
+                }
+
+                if (countUpdated > 0)
+                {
+                    MessageBox.Show($"Đã tự động mã hóa thành công {countUpdated} tài khoản!", "Thông báo hệ thống");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật DB: " + ex.Message);
+            }
+        }
+
+        // CÁC CHỨC NĂNG CHÍNH
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
         }
 
-        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        private void btnThoat_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
 
-        private void BtnLogin_Click(object sender, RoutedEventArgs e)
+        private void btnDangNhap_Click(object sender, RoutedEventArgs e)
         {
-            string username = txtUsername.Text.Trim();
-            string password = txtPassword.Password;
+            string username = txtTenDangNhap.Text.Trim();
+            string password = txtMatKhau.Password;
             bool hasError = false;
 
             if (string.IsNullOrWhiteSpace(username))
             {
-                errUserContainer.Visibility = Visibility.Visible;
+                errTenDangNhap.Visibility = Visibility.Visible;
                 hasError = true;
             }
-            else errUserContainer.Visibility = Visibility.Collapsed;
+            else errTenDangNhap.Visibility = Visibility.Collapsed;
 
             if (string.IsNullOrEmpty(password))
             {
-                errPassContainer.Visibility = Visibility.Visible;
+                errMatKhau.Visibility = Visibility.Visible;
                 hasError = true;
             }
-            else errPassContainer.Visibility = Visibility.Collapsed;
+            else errMatKhau.Visibility = Visibility.Collapsed;
 
             if (hasError) return;
 
 
-            string passwordHash = CalculateSHA256(password);
+            string passwordHash = MaHoaSHA256(password);
 
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
 
@@ -118,10 +175,11 @@ namespace TFitnessApp.Windows
             }
         }
 
-        private void txtUsername_TextChanged(object sender, TextChangedEventArgs e)
-            => errUserContainer.Visibility = Visibility.Collapsed;
+        // XỬ LÝ GIAO DIỆN NHẬP LIỆU
+        private void txtTaiKhoan_TextChanged(object sender, TextChangedEventArgs e)
+            => errTenDangNhap.Visibility = Visibility.Collapsed;
 
-        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        private void txtMatKhau_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (sender is PasswordBox passwordBox)
             {
@@ -132,38 +190,40 @@ namespace TFitnessApp.Windows
                                              ? Visibility.Visible : Visibility.Collapsed;
                 }
 
-                if (txtVisiblePassword != null)
-                    txtVisiblePassword.Text = passwordBox.Password;
+                if (txtHienMatKhau != null)
+                    txtHienMatKhau.Text = passwordBox.Password;
 
-                if (errPassContainer != null)
-                    errPassContainer.Visibility = Visibility.Collapsed;
+                if (errMatKhau != null)
+                    errMatKhau.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void BtnEye_MouseDown(object sender, MouseButtonEventArgs e)
+        private void BtnMat_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            txtPassword.Visibility = Visibility.Collapsed;
-            txtVisiblePassword.Visibility = Visibility.Visible;
+            txtMatKhau.Visibility = Visibility.Collapsed;
+            txtHienMatKhau.Visibility = Visibility.Visible;
         }
 
-        private void BtnEye_MouseUp(object sender, MouseEventArgs e)
+        private void BtnMat_MouseUp(object sender, MouseEventArgs e)
         {
-            txtVisiblePassword.Visibility = Visibility.Collapsed;
-            txtPassword.Visibility = Visibility.Visible;
-            txtPassword.Focus();
-        }
-        private void txtHelp_Click(object sender, MouseButtonEventArgs e)
-        {
-            HelpPopup.HorizontalOffset = 10;
-            HelpPopup.VerticalOffset = -20;
-            HelpPopup.IsOpen = true;
-            OverlayMask.Visibility = Visibility.Visible;
+            txtHienMatKhau.Visibility = Visibility.Collapsed;
+            txtMatKhau.Visibility = Visibility.Visible;
+            txtMatKhau.Focus();
         }
 
-        private void BtnClosePopup_Click(object sender, MouseButtonEventArgs e)
+        // CHỨC NĂNG POPUP HƯỚNG DẪN
+        private void lblHuongDan_Click(object sender, MouseButtonEventArgs e)
         {
-            HelpPopup.IsOpen = false;
-            OverlayMask.Visibility = Visibility.Collapsed;
+            popupHuongDan.HorizontalOffset = 10;
+            popupHuongDan.VerticalOffset = -20;
+            popupHuongDan.IsOpen = true;
+            LopPhu.Visibility = Visibility.Visible;
+        }
+
+        private void BtnDongPopup_Click(object sender, MouseButtonEventArgs e)
+        {
+            popupHuongDan.IsOpen = false;
+            LopPhu.Visibility = Visibility.Collapsed;
         }
 
         private bool isDragging = false;
@@ -176,8 +236,8 @@ namespace TFitnessApp.Windows
             {
                 isDragging = true;
                 startMousePos = border.PointToScreen(e.GetPosition(border));
-                startHOffset = HelpPopup.HorizontalOffset;
-                startVOffset = HelpPopup.VerticalOffset;
+                startHOffset = popupHuongDan.HorizontalOffset;
+                startVOffset = popupHuongDan.VerticalOffset;
                 border.CaptureMouse();
             }
         }
@@ -187,8 +247,8 @@ namespace TFitnessApp.Windows
             if (isDragging && sender is UIElement border)
             {
                 Point currentMousePos = border.PointToScreen(e.GetPosition(border));
-                HelpPopup.HorizontalOffset = startHOffset + (currentMousePos.X - startMousePos.X);
-                HelpPopup.VerticalOffset = startVOffset + (currentMousePos.Y - startMousePos.Y);
+                popupHuongDan.HorizontalOffset = startHOffset + (currentMousePos.X - startMousePos.X);
+                popupHuongDan.VerticalOffset = startVOffset + (currentMousePos.Y - startMousePos.Y);
             }
         }
 

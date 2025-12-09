@@ -130,7 +130,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Style="{StaticResource HoverItemStyle}" Tag="DoanhThu" MouseLeftButtonDown="DashboardCard_Click">
+                        <Border Grid.Column="0" Style="{StaticResource HoverItemStyle}" Tag="DoanhThu" MouseLeftButtonDown="TheKPI_Click">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -151,7 +151,7 @@
                         <Line Grid.Column="1" X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill" Stroke="#E0E0E0" 
                               StrokeThickness="0.8" StrokeDashArray="2 2" Margin="0,10"/>
 
-                        <Border Grid.Column="2" Style="{StaticResource HoverItemStyle}" Tag="HocVien" MouseLeftButtonDown="DashboardCard_Click">
+                        <Border Grid.Column="2" Style="{StaticResource HoverItemStyle}" Tag="HocVien" MouseLeftButtonDown="TheKPI_Click">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -170,7 +170,7 @@
                         <Line Grid.Column="3" X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill" Stroke="#E0E0E0" 
                               StrokeThickness="0.8" StrokeDashArray="2 2" Margin="0,10"/>
 
-                        <Border Grid.Column="4" Style="{StaticResource HoverItemStyle}" Tag="CheckIn" MouseLeftButtonDown="DashboardCard_Click">
+                        <Border Grid.Column="4" Style="{StaticResource HoverItemStyle}" Tag="CheckIn" MouseLeftButtonDown="TheKPI_Click">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -189,7 +189,7 @@
                         <Line Grid.Column="5" X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill" Stroke="#E0E0E0" 
                               StrokeThickness="0.8" StrokeDashArray="2 2" Margin="0,10"/>
 
-                        <Border Grid.Column="6" Style="{StaticResource HoverItemStyle}" Tag="HetHan" MouseLeftButtonDown="DashboardCard_Click">
+                        <Border Grid.Column="6" Style="{StaticResource HoverItemStyle}" Tag="HetHan" MouseLeftButtonDown="TheKPI_Click">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -234,13 +234,13 @@
                             </Grid.ColumnDefinitions>
 
                             <Border x:Name="btnTabDoanhThu" Grid.Column="0" Background="Transparent" Cursor="Hand" 
-                                    MouseLeftButtonDown="SwitchChartType_Click" MouseEnter="BtnTab_MouseEnter" MouseLeave="BtnTab_MouseLeave">
+                                    MouseLeftButtonDown="ChuyenBieuDo_Click" MouseEnter="TabBieuDo_MouseEnter" MouseLeave="TabBieuDo_MouseLeave">
                                 <TextBlock x:Name="txtTabDoanhThu" Text="DOANH THU" FontSize="16" FontWeight="ExtraBold" 
                                            Foreground="#D32F2F" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="25,0,0,0"/>
                             </Border>
 
                             <Border x:Name="btnTabTyTrong" Grid.Column="1" Background="Transparent" Cursor="Hand" 
-                                    MouseLeftButtonDown="SwitchChartType_Click" MouseEnter="BtnTab_MouseEnter" MouseLeave="BtnTab_MouseLeave">
+                                    MouseLeftButtonDown="ChuyenBieuDo_Click" MouseEnter="TabBieuDo_MouseEnter" MouseLeave="TabBieuDo_MouseLeave">
                                 <TextBlock x:Name="txtTabTyTrong" Text="TỶ TRỌNG" FontSize="16" FontWeight="SemiBold" 
                                            Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -248,11 +248,11 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <ComboBox x:Name="cboChartChiNhanh" Width="178" FontSize="14" Style="{StaticResource ModernComboBox}"
-                                      DisplayMemberPath="TenCN" SelectedValuePath="MaCN" SelectionChanged="ChartFilter_Changed"
+                                      DisplayMemberPath="TenCN" SelectedValuePath="MaCN" SelectionChanged="BoLocBieuDo_Changed"
                                       VerticalContentAlignment="Center" Margin="0,0,15,0"/>
 
                             <ComboBox x:Name="cboChartThoiGian" Width="150" FontSize="14" Style="{StaticResource ModernComboBox}"
-                                      SelectionChanged="ChartFilter_Changed" VerticalContentAlignment="Center" SelectedIndex="0">
+                                      SelectionChanged="BoLocBieuDo_Changed" VerticalContentAlignment="Center" SelectedIndex="0">
                                 <ComboBoxItem Content="7 ngày qua" Tag="7days"/>
                                 <ComboBoxItem Content="Tháng này" Tag="thisMonth"/>
                                 <ComboBoxItem Content="Tháng trước" Tag="lastMonth"/>
@@ -277,7 +277,7 @@
                     <Grid Grid.Row="2" Margin="25,10,25,0">
                         <Grid x:Name="ColumnChartContainer">
                             <lvc:CartesianChart x:Name="ChartDoanhThu" Series="{Binding ChartSeries}" LegendLocation="None"
-                                                DataHover="Chart_DataHover" Hoverable="True" MouseLeave="Chart_MouseLeave"
+                                                DataHover="BieuDoCot_DataHover" Hoverable="True" MouseLeave="BieuDoCot_MouseLeave"
                                                 DataTooltip="{x:Null}" Loaded="ChartDoanhThu_Loaded">
                                 <lvc:CartesianChart.AxisX>
                                     <lvc:Axis Labels="{Binding ChartLabels}" FontSize="15" Foreground="Black" FontWeight="Regular">
@@ -315,10 +315,10 @@
 
                         <Grid x:Name="grpTyTrong" Visibility="Collapsed">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-40,0,0">
-                                <Grid Width="280" Height="280" x:Name="ChartContainer" Background="Transparent" MouseMove="ChartContainer_MouseMove">
+                                <Grid Width="280" Height="280" x:Name="ChartContainer" Background="Transparent" MouseMove="KhungBieuDoTron_MouseMove">
                                     <lvc:PieChart x:Name="ChartTyTrong" Series="{Binding PieSeries}" LegendLocation="None"
                                                   InnerRadius="90" Hoverable="True" DataTooltip="{x:Null}"
-                                                  DataHover="ChartTyTrong_DataHover" MouseLeave="ChartTyTrong_MouseLeave"/>
+                                                  DataHover="BieuDoTron_DataHover" MouseLeave="BieuDoTron_MouseLeave"/>
 
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False">
                                         <TextBlock x:Name="txtCenterTotal" Text="0" FontSize="22" FontWeight="ExtraBold" 
@@ -388,15 +388,15 @@
                             </Grid.ColumnDefinitions>
 
                             <Border x:Name="btnTabCheckInChart" Grid.Column="0" Background="Transparent" Cursor="Hand" 
-                                    MouseLeftButtonDown="SwitchCheckInTab_Click" Tag="Chart"
-                                    MouseEnter="BtnCheckInTab_MouseEnter" MouseLeave="BtnCheckInTab_MouseLeave">
+                                    MouseLeftButtonDown="ChuyenTabCheckIn_Click" Tag="Chart"
+                                    MouseEnter="TabCheckIn_MouseEnter" MouseLeave="TabCheckIn_MouseLeave">
                                 <TextBlock x:Name="txtTabCheckInChart" Text="LƯỢT CHECK-IN THEO KHUNG GIỜ" FontSize="16" FontWeight="ExtraBold" 
                                            Foreground="#D32F2F" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="25,0,0,0"/>
                             </Border>
 
                             <Border x:Name="btnTabCheckInList" Grid.Column="1" Background="Transparent" Cursor="Hand" 
-                                    MouseLeftButtonDown="SwitchCheckInTab_Click" Tag="List"
-                                    MouseEnter="BtnCheckInTab_MouseEnter" MouseLeave="BtnCheckInTab_MouseLeave">
+                                    MouseLeftButtonDown="ChuyenTabCheckIn_Click" Tag="List"
+                                    MouseEnter="TabCheckIn_MouseEnter" MouseLeave="TabCheckIn_MouseLeave">
                                 <TextBlock x:Name="txtTabCheckInList" Text="DANH SÁCH CHECK-IN" FontSize="16" FontWeight="SemiBold" 
                                            Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -405,10 +405,10 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <ComboBox x:Name="cboCheckInChiNhanh" Width="178" FontSize="14" Style="{StaticResource ModernComboBox}"
                                       DisplayMemberPath="TenCN" SelectedValuePath="MaCN"
-                                      SelectionChanged="CheckInFilter_Changed" VerticalContentAlignment="Center" Margin="0,0,15,0"/>
+                                      SelectionChanged="BoLocCheckIn_Changed" VerticalContentAlignment="Center" Margin="0,0,15,0"/>
 
                             <ComboBox x:Name="cboCheckInBuoi" Width="120" FontSize="14" Style="{StaticResource ModernComboBox}"
-                                      SelectionChanged="CheckInFilter_Changed" VerticalContentAlignment="Center" SelectedIndex="0">
+                                      SelectionChanged="BoLocCheckIn_Changed" VerticalContentAlignment="Center" SelectedIndex="0">
                                 <ComboBoxItem Content="Cả ngày" Tag="CaNgay"/>
                                 <ComboBoxItem Content="Buổi sáng" Tag="Sang"/>
                                 <ComboBoxItem Content="Buổi chiều" Tag="Chieu"/>
@@ -431,7 +431,7 @@
 
                     <Grid Grid.Row="2" Margin="25,0,25,0">
                         <lvc:CartesianChart x:Name="ChartCheckInLine" Series="{Binding CheckInSeries}" LegendLocation="None"
-                                            DataHover="ChartCheckIn_DataHover" MouseLeave="ChartCheckIn_MouseLeave"
+                                            DataHover="BieuDoCheckIn_DataHover" MouseLeave="BieuDoCheckIn_MouseLeave"
                                             Hoverable="True" DataTooltip="{x:Null}">
                             <lvc:CartesianChart.AxisX>
                                 <lvc:Axis Labels="{Binding CheckInLabels}" FontSize="14" Foreground="Black">

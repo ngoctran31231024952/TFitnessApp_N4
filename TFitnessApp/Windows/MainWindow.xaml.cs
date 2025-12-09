@@ -12,6 +12,7 @@ using Microsoft.Web.WebView2.Core;
 
 namespace TFitnessApp
 {
+    // KHỞI TẠO
     public partial class MainWindow : Window
     {
         private bool isMenuProcessing = false;
@@ -19,15 +20,15 @@ namespace TFitnessApp
         public MainWindow(string hoTen = "Admin", string quyen = "Quản trị viên")
         {
             InitializeComponent();
-            DisplayUserInfo(hoTen, quyen);
+            HienThiThongTin(hoTen, quyen);
 
             MainFrame.Navigate(new TongQuanPage());
             MenuListBox.SelectedItem = ItemTongQuan;
             PageTitle.Text = "Tổng quan";
             this.Title = "TFitness - Tổng quan";
         }
-
-        public void NavigateToTab(string tabTag)
+    // ĐIỀU HƯỚNG & LOGIC CHUNG
+        public void ChuyenTab(string tabTag)
         {
             ListBoxItem itemToSelect = null;
 
@@ -54,7 +55,7 @@ namespace TFitnessApp
             }
         }
 
-        private void DisplayUserInfo(string hoTen, string quyen)
+        private void HienThiThongTin(string hoTen, string quyen)
         {
             txtUserRole.Text = quyen;
             if (!string.IsNullOrWhiteSpace(hoTen))
@@ -107,13 +108,13 @@ namespace TFitnessApp
                 }
             }
         }
-
-        private void LogoButton_Click(object sender, RoutedEventArgs e)
+        // THANH TIÊU ĐỀ
+        private void btnLogo_Click(object sender, RoutedEventArgs e)
         {
             MenuListBox.SelectedIndex = 0;
         }
 
-        private void AvatarButton_Click(object sender, RoutedEventArgs e)
+        private void btnAnhDaiDien_Click(object sender, RoutedEventArgs e)
         {
             ContextMenu contextMenu = AvatarButton.ContextMenu;
             contextMenu.PlacementTarget = AvatarButton;
@@ -122,7 +123,7 @@ namespace TFitnessApp
             contextMenu.HorizontalOffset = -20;
         }
 
-        private void Logout_Click(object sender, RoutedEventArgs e)
+        private void btnDangXuat_Click(object sender, RoutedEventArgs e)
         {
             SystemSounds.Asterisk.Play();
             var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận",
@@ -135,15 +136,15 @@ namespace TFitnessApp
                 this.Close();
             }
         }
-
-        private void MenuListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // SIDEBAR TRÁI
+        private void lstDanhSach_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selectedItem = MenuListBox.SelectedItem as ListBoxItem;
             if (selectedItem == null || PageTitle == null) return;
 
             if (selectedItem.Name != "ItemBaoCao")
             {
-                ResetBaoCaoMenuState();
+                DatLaiMenuBaoCao();
             }
 
             string pageTitle = "Tổng quan";
@@ -207,7 +208,7 @@ namespace TFitnessApp
             this.Title = "TFitness - " + windowTitle;
         }
 
-        private void HamburgerButton_Checked(object sender, RoutedEventArgs e)
+        private void btnDanhSach_Checked(object sender, RoutedEventArgs e)
         {
             ItemBaoCaoDoanhThu.Visibility = Visibility.Collapsed;
             ItemBaoCaoHocVien.Visibility = Visibility.Collapsed;
@@ -219,7 +220,7 @@ namespace TFitnessApp
             }
         }
 
-        private void HamburgerButton_Unchecked(object sender, RoutedEventArgs e)
+        private void btnDanhSach_Unchecked(object sender, RoutedEventArgs e)
         {
             if (PageTitle.Text.Contains("Báo cáo"))
             {
@@ -254,7 +255,7 @@ namespace TFitnessApp
                     contextMenu.VerticalOffset = 0;
                     contextMenu.Visibility = Visibility.Visible;
                     contextMenu.IsOpen = true;
-                    await MonitorContextMenuClose(contextMenu);
+                    await GiamSatDongMenu(contextMenu);
                 }
             }
             finally
@@ -263,14 +264,14 @@ namespace TFitnessApp
             }
         }
 
-        private async Task MonitorContextMenuClose(ContextMenu menu)
+        private async Task GiamSatDongMenu(ContextMenu menu)
         {
             await Task.Delay(200);
 
             while (menu.IsOpen)
             {
                 await Task.Delay(100);
-                if (!IsMouseOverUIElement(ItemBaoCao) && !IsMouseOverUIElement(menu))
+                if (!KiemTraChuot(ItemBaoCao) && !KiemTraChuot(menu))
                 {
                     menu.IsOpen = false;
                     break;
@@ -278,13 +279,14 @@ namespace TFitnessApp
             }
         }
 
-        private bool IsMouseOverUIElement(FrameworkElement element)
+        private bool KiemTraChuot(FrameworkElement element)
         {
             if (element == null || !element.IsVisible) return false;
             Point p = Mouse.GetPosition(element);
             return (p.X >= 0 && p.X <= element.ActualWidth && p.Y >= 0 && p.Y <= element.ActualHeight);
         }
-
+        
+        // XỬ LÝ MENU BÁO CÁO
         private void ItemBaoCao_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (HamburgerButton.IsChecked == true)
@@ -309,7 +311,7 @@ namespace TFitnessApp
             e.Handled = true;
         }
 
-        private void MenuBaoCaoItem_Click(object sender, RoutedEventArgs e)
+        private void ItemDanhSachBaoCao_Click(object sender, RoutedEventArgs e)
         {
             var clickedItem = sender as MenuItem;
             if (clickedItem == null) return;
@@ -350,7 +352,7 @@ namespace TFitnessApp
             }
         }
 
-        private void ResetBaoCaoMenuState()
+        private void DatLaiMenuBaoCao()
         {
             if (ItemBaoCao.ContextMenu != null)
             {
@@ -364,7 +366,7 @@ namespace TFitnessApp
             }
         }
 
-        private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void lstItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var item = sender as ListBoxItem;
             if (item != null)
@@ -374,19 +376,19 @@ namespace TFitnessApp
                 e.Handled = true;
             }
         }
-
-        private void BtnHelp_Click(object sender, RoutedEventArgs e)
+        // TRỢ GIÚP
+        private void btnTroGiup_Click(object sender, RoutedEventArgs e)
         {
             HelpPopup.HorizontalOffset = -100;
             HelpPopup.VerticalOffset = 18;
             HelpPopup.IsOpen = true;
         }
-
-        private async void BtnVideoHelp_Click(object sender, RoutedEventArgs e)
+        // VIDEO HƯỚNG DẪN
+        private async void btnVideoHuongDan_Click(object sender, RoutedEventArgs e)
         {
             if (SmallVideoContainer.Visibility == Visibility.Visible)
             {
-                CloseSmallVideo_Click(null, null);
+                btnDongVideo_Click(null, null);
                 return;
             }
 
@@ -447,7 +449,7 @@ namespace TFitnessApp
             }
         }
 
-        private void CloseSmallVideo_Click(object sender, RoutedEventArgs e)
+        private void btnDongVideo_Click(object sender, RoutedEventArgs e)
         {
             SmallVideoContainer.Visibility = Visibility.Collapsed;
             if (VideoWebView2?.CoreWebView2 != null)
