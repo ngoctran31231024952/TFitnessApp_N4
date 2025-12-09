@@ -247,7 +247,7 @@
 
                 <local:ChartCard Width="350"
                                  Height="360"
-                                 TieuDe="Tỷ lệ doanh thu theo Gói Tập"
+                                 TieuDe="Tỷ lệ doanh thu theo gói tập"
                                  HienNutIn="False"
                                  HienChonLoaiBD="False"
                                  HienBoLocNgay="False"
@@ -260,7 +260,7 @@
 
                 <local:ChartCard Width="350"
                                  Height="360"
-                                 TieuDe="Tỷ trọng doanh thu theo Chi Nhánh"
+                                 TieuDe="Tỷ trọng doanh thu theo chi nhánh"
                                  HienNutIn="False"
                                  HienChonLoaiBD="False"
                                  HienBoLocNgay="False"
@@ -382,6 +382,35 @@
                     </Button>
                 </Grid>
             </Border>
+            
+
+            <Border Margin="10,0,10,20" Background="White" CornerRadius="10" Padding="20" x:Name="BorderBieuDoDuBao" Visibility="Collapsed">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.1" BlurRadius="5"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="300"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Biểu đồ: Năm hiện tại vs Dự báo" FontSize="18" FontWeight="Bold" Foreground="#333" Margin="0,0,0,15"/>
+
+                    <lvc:CartesianChart Grid.Row="1" LegendLocation="Bottom" x:Name="ChartDuBao">
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis x:Name="AxisXDuBao" LabelsRotation="-45">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator Step="1"/>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis LabelFormatter="{Binding FormatterTien}"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>
+

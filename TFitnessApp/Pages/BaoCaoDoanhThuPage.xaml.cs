@@ -1,9 +1,15 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
+using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -12,10 +18,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.IO;
 
 namespace TFitnessApp
 {
@@ -56,26 +58,69 @@ namespace TFitnessApp
         // Hàm xử lý nút bấm (Code bên trong vẫn giữ nguyên)
         private void BtnDuDoan_Click(object sender, RoutedEventArgs e)
         {
-            // Đường dẫn tuyệt đối tới file CSV
-            // Tự động tìm đường dẫn từ thư mục chạy ứng dụng
             string csvPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "datahuanluyen.csv");
 
-            txtKetQuaDuDoan.Text = "⏳ Đang phân tích dữ liệu và huấn luyện mô hình AI... Vui lòng đợi.";
-            txtKetQuaDuDoan.Foreground = System.Windows.Media.Brushes.Gray;
+            txtKetQuaDuDoan.Text = "⏳ Đang huấn luyện 4 mô hình & phân tích...";
+            txtKetQuaDuDoan.Foreground = Brushes.Gray;
+            BorderBieuDoDuBao.Visibility = Visibility.Collapsed; // Ẩn biểu đồ cũ
 
-            System.Threading.Tasks.Task.Run(() =>
+            Task.Run(() =>
             {
-                // Gọi hàm dự báo (Không cần chỉ định namespace vì cùng namespace cha)
-                string ketQua = DoanhThuPredictor.TrainAndPredict(csvPath);
+                // Gọi hàm dự báo mới trả về ForecastReport
+                var report = DoanhThuPredictor.TrainAndPredict(csvPath);
 
                 Dispatcher.Invoke(() =>
                 {
-                    txtKetQuaDuDoan.Text = ketQua;
+                    txtKetQuaDuDoan.Text = report.LogText;
 
-                    if (ketQua.Contains("Lỗi") || ketQua.Contains("xảy ra"))
-                        txtKetQuaDuDoan.Foreground = System.Windows.Media.Brushes.Red;
+                    if (report.HistoryData != null && report.HistoryData.Count > 0)
+                    {
+                        txtKetQuaDuDoan.Foreground = Brushes.Green;
+
+                        // --- VẼ BIỂU ĐỒ ---
+                        BorderBieuDoDuBao.Visibility = Visibility.Visible;
+
+                        // 1. Dữ liệu Lịch sử (Năm 2025) - Màu Xanh/Xám
+                        var lineHistory = new LineSeries
+                        {
+                            Title = "Thực tế 2025",
+                            Values = new ChartValues<double>(report.HistoryData),
+                            Stroke = Brushes.Gray,
+                            Fill = Brushes.Transparent,
+                            PointGeometrySize = 10,
+                            DataLabels = true
+                        };
+
+                        // 2. Dữ liệu Dự báo (Nối tiếp) - Màu Đỏ Nổi Bật
+                        // Tạo mảng values cho dự báo: [null...null, T12, T1, T2] để nối dây
+                        var forecastValues = new ChartValues<double>();
+                        // Điền null cho 11 tháng đầu để không vẽ
+                        for (int i = 0; i < 11; i++) forecastValues.Add(double.NaN);
+
+                        // Thêm 3 điểm: T12(Nối), T1(Dự), T2(Dự)
+                        foreach (var val in report.ForecastData) forecastValues.Add(val);
+
+                        var lineForecast = new LineSeries
+                        {
+                            Title = "Dự báo AI 2026",
+                            Values = forecastValues,
+                            Stroke = Brushes.Red,
+                            Fill = Brushes.Transparent,
+                            PointGeometry = DefaultGeometries.Diamond,
+                            PointGeometrySize = 12,
+                            StrokeDashArray = new DoubleCollection { 4 }, // Nét đứt
+                            DataLabels = true,
+                            Foreground = Brushes.Red
+                        };
+
+                        // Cập nhật Chart
+                        ChartDuBao.Series = new SeriesCollection { lineHistory, lineForecast };
+                        AxisXDuBao.Labels = report.Labels;
+                    }
                     else
-                        txtKetQuaDuDoan.Foreground = System.Windows.Media.Brushes.Green;
+                    {
+                        txtKetQuaDuDoan.Foreground = Brushes.Red;
+                    }
                 });
             });
         }
