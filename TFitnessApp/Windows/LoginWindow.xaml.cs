@@ -36,62 +36,7 @@ namespace TFitnessApp.Windows
             try { SQLitePCL.Batteries_V2.Init(); } catch { }
             _dbAccess = new TruyCapDB();
             _ChuoiKetNoi = _dbAccess._ChuoiKetNoi;
-            TuDongCapNhatMatKhau();
             txtTenDangNhap.Focus();
-        }
-
-        private void TuDongCapNhatMatKhau()
-        {
-            try
-            {
-                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "TFitness.db");
-                int countUpdated = 0;
-
-                using (var connection = new SqliteConnection($"Data Source={dbPath}"))
-                {
-                    connection.Open();
-                    var users = new System.Collections.Generic.List<(string User, string Pass)>();
-                    using (var cmd = new SqliteCommand("SELECT TenDangNhap, MatKhau FROM TaiKhoan", connection))
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            users.Add((reader.GetString(0), reader.GetString(1)));
-                        }
-                    }
-
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        foreach (var u in users)
-                        {
-                            if (u.Pass.Length < 64)
-                            {
-                                string newHash = MaHoaSHA256(u.Pass);
-
-                                var updateCmd = new SqliteCommand(
-                                    "UPDATE TaiKhoan SET MatKhau = @newPass WHERE TenDangNhap = @user",
-                                    connection, transaction);
-
-                                updateCmd.Parameters.AddWithValue("@newPass", newHash);
-                                updateCmd.Parameters.AddWithValue("@user", u.User);
-                                updateCmd.ExecuteNonQuery();
-
-                                countUpdated++;
-                            }
-                        }
-                        transaction.Commit();
-                    }
-                }
-
-                if (countUpdated > 0)
-                {
-                    MessageBox.Show($"Đã tự động mã hóa thành công {countUpdated} tài khoản!", "Thông báo hệ thống");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi cập nhật DB: " + ex.Message);
-            }
         }
 
         // CÁC CHỨC NĂNG CHÍNH
