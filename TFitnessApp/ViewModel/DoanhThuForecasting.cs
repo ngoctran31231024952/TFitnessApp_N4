@@ -106,7 +106,7 @@ namespace TFitnessApp
 
                 results.Add(EvaluateRegression("FastTree", featurePipeline.Append(mlContext.Regression.Trainers.FastTree()), trainDataView, testDataView, fullDataView, dataList));
                 results.Add(EvaluateRegression("LightGBM", featurePipeline.Append(mlContext.Regression.Trainers.LightGbm()), trainDataView, testDataView, fullDataView, dataList));
-                results.Add(EvaluateRegression("SDCA", featurePipeline.Append(mlContext.Regression.Trainers.Sdca()), trainDataView, testDataView, fullDataView, dataList));
+                //results.Add(EvaluateRegression("SDCA", featurePipeline.Append(mlContext.Regression.Trainers.Sdca()), trainDataView, testDataView, fullDataView, dataList));
 
                 report.ModelResults = results;
 
