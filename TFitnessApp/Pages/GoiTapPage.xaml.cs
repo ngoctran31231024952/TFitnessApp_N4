@@ -360,32 +360,26 @@ namespace TFitnessApp
             List<GoiTap> list = new List<GoiTap>();
             // Câu lệnh SQL khởi tạo (Tìm theo từ khóa trước)
             string sql = "SELECT * FROM GoiTap WHERE (MaGoi LIKE @k OR TenGoi LIKE @k)";
-
             // --- CỘNG CHUỖI SQL DỰA VÀO ĐIỀU KIỆN LỌC ---
-
             // 1. Lọc theo khoảng giá
             if (minPrice.HasValue) sql += " AND GiaNiemYet >= @minP";
             if (maxPrice.HasValue) sql += " AND GiaNiemYet <= @maxP";
-
             // 2. Lọc theo tùy chọn PT (Có hoặc Không)
             if (!string.IsNullOrEmpty(ptOption))
             {
                 if (ptOption == "Có PT") sql += " AND SoBuoiPT > 0";
                 else if (ptOption == "Không PT") sql += " AND SoBuoiPT = 0";
             }
-
             // 3. Lọc theo thời hạn (1 tháng, 3 tháng,...)
             if (months.HasValue && months.Value > 0)
             {
                 sql += " AND ThoiHan = @months";
             }
-
             // 3. Lọc theo thời hạn (1 tháng, 3 tháng,...)
             if (!string.IsNullOrEmpty(specialService) && specialService != "Tất cả")
             {
                 sql += " AND DichVuDacBiet LIKE @special";
             }
-
             try
             {
                 using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
