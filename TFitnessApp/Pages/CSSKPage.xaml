@@ -1,9 +1,9 @@
 ﻿<UserControl x:Class="TFitnessApp.CSSKPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
     <UserControl.Resources>
@@ -12,18 +12,22 @@
         <FontFamily x:Key="LatoBold">/TFitnessApp;component/Fonts/#Lato Bold</FontFamily>
         <FontFamily x:Key="LatoSemibold">/TFitnessApp;component/Fonts/#Lato Semibold</FontFamily>
         <FontFamily x:Key="LatoLight">/TFitnessApp;component/Fonts/#Lato Light</FontFamily>
+
         <Style TargetType="TextBlock" x:Key="BaseTextStyle">
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
             <Setter Property="Foreground" Value="#333"/>
         </Style>
+
         <Style TargetType="TextBlock" x:Key="HeaderTextStyle" BasedOn="{StaticResource BaseTextStyle}">
             <Setter Property="FontFamily" Value="{StaticResource LatoBold}"/>
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
+
         <Style TargetType="TextBox">
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
+
         <Style TargetType="Button" x:Key="ActionButton">
             <Setter Property="Background" Value="#DC143C"/>
             <Setter Property="Foreground" Value="White"/>
@@ -36,8 +40,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="4" 
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -50,6 +54,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
         <Style TargetType="Button" x:Key="IconButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#666"/>
@@ -59,6 +64,7 @@
             <Setter Property="Padding" Value="5"/>
             <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"/>
         </Style>
+
         <Style x:Key="CloseFilterButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="30"/>
             <Setter Property="Height" Value="30"/>
@@ -71,8 +77,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="4" 
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -86,6 +92,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
         <Style x:Key="PaginationNavButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButton}">
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="30"/>
@@ -97,6 +104,7 @@
             <Setter Property="Margin" Value="5,0"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
+
     </UserControl.Resources>
 
     <Grid Background="#F5F5F5">
@@ -117,7 +125,7 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                         <Border BorderBrush="#DDD" BorderThickness="1"
-                                CornerRadius="20" Height="40" Padding="15,0" 
+                                CornerRadius="20" Height="40" Padding="15,0"
                                 Background="White" VerticalAlignment="Center" Width="300">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -125,87 +133,88 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox x:Name="TimKiemBox" 
+                                <TextBox x:Name="txbTimKiem"
                                          Grid.Column="0"
                                          Padding="0"
                                          BorderThickness="0"
                                          Foreground="#999"
-                                         GotFocus="TimKiemBox_GotFocus" 
-                                         LostFocus="TimKiemBox_LostFocus"/>
+                                         GotFocus="txbTimKiem_GotFocus"
+                                         LostFocus="txbTimKiem_LostFocus"/>
 
-                                <TextBlock Grid.Column="1" 
-                                           Text="🔍" 
+                                <TextBlock Grid.Column="1"
+                                           Text="🔍"
                                            Style="{StaticResource BaseTextStyle}"
-                                           VerticalAlignment="Center" 
-                                           Foreground="#999" 
-                                           Margin="0,0,10,0" 
+                                           VerticalAlignment="Center"
+                                           Foreground="#999"
+                                           Margin="0,0,10,0"
                                            FontSize="14"/>
                             </Grid>
                         </Border>
 
                         <Button Content="Tìm kiếm"
                                 Style="{StaticResource ActionButton}"
-                                Click="TimKiemButton_Click" 
-                                Margin="10,0,0,0" 
+                                Click="btnTimKiem_Click"
+                                Margin="10,0,0,0"
                                 VerticalAlignment="Center"
                                 Height="31"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Style="{StaticResource ActionButton}" Click="FilterButton_Click">
+                        <Button Style="{StaticResource ActionButton}" Click="btnLoc_Click">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE71C;" 
-                                           FontFamily="Segoe MDL2 Assets" 
-                                           VerticalAlignment="Center" 
-                                           Margin="0,0,5,0" 
+                                <TextBlock Text="&#xE71C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"
                                            FontSize="14" RenderTransformOrigin="0.546,0.457"/>
-                                <TextBlock Text="Lọc" VerticalAlignment="Center" 
-                                           FontFamily="{StaticResource LatoRegular}" 
+                                <TextBlock Text="Lọc" VerticalAlignment="Center"
+                                           FontFamily="{StaticResource LatoRegular}"
                                            Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="SelectAll_Click" Width="110">
+                        <Button Style="{StaticResource ActionButton}" Click="btnChonTatCa_Click" Width="110">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE73A;" 
-                                           FontFamily="Segoe MDL2 Assets" 
-                                           VerticalAlignment="Center" 
-                                           Margin="0,0,5,0" 
+                                <TextBlock Text="&#xE73A;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"
                                            FontSize="14"/>
-                                <TextBlock Text="Chọn tất cả" VerticalAlignment="Center" 
-                                           FontFamily="{StaticResource LatoRegular}" 
+                                <TextBlock Text="Chọn tất cả" VerticalAlignment="Center"
+                                           FontFamily="{StaticResource LatoRegular}"
                                            Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="Add_Click" Width="79">
+                        <Button Style="{StaticResource ActionButton}" Click="btnThem_Click" Width="79">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE710;" 
-                                           FontFamily="Segoe MDL2 Assets" 
-                                           VerticalAlignment="Center" 
-                                           Margin="0,0,5,0" 
+                                <TextBlock Text="&#xE710;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"
                                            FontSize="14"/>
-                                <TextBlock Text="Thêm" VerticalAlignment="Center" 
-                                           FontFamily="{StaticResource LatoRegular}" 
+                                <TextBlock Text="Thêm" VerticalAlignment="Center"
+                                           FontFamily="{StaticResource LatoRegular}"
                                            Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource ActionButton}" Click="Delete_Click" Width="70">
+                        <Button Style="{StaticResource ActionButton}" Click="btnXoaChon_Click" Width="70">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE74D;" 
-                                           FontFamily="Segoe MDL2 Assets" 
-                                           VerticalAlignment="Center" 
-                                           Margin="0,0,5,0" 
+                                <TextBlock Text="&#xE74D;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"
                                            FontSize="14"/>
-                                <TextBlock Text="Xóa" VerticalAlignment="Center" 
-                                           FontFamily="{StaticResource LatoRegular}" 
+                                <TextBlock Text="Xóa" VerticalAlignment="Center"
+                                           FontFamily="{StaticResource LatoRegular}"
                                            Foreground="White" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
-                <Border Grid.Row="2" BorderBrush="#E0E0E0" BorderThickness="1" 
+
+                <Border Grid.Row="2" BorderBrush="#E0E0E0" BorderThickness="1"
                         CornerRadius="5" Background="White">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -213,7 +222,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border Grid.Row="0" Background="#F9F9F9" BorderBrush="#E0E0E0" 
+                        <Border Grid.Row="0" Background="#F9F9F9" BorderBrush="#E0E0E0"
                                 BorderThickness="0,0,0,1" Padding="15,12">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -226,53 +235,53 @@
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="150"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="110"/>
                                 </Grid.ColumnDefinitions>
 
-                                <CheckBox Grid.Column="0" x:Name="ChonTatCaCheckBox" 
-                                          Checked="ChonTatCaCheckBox_Changed" 
-                                          Unchecked="ChonTatCaCheckBox_Changed" 
+                                <CheckBox Grid.Column="0" x:Name="chkChonTatCa"
+                                          Checked="chkChonTatCa_Changed"
+                                          Unchecked="chkChonTatCa_Changed"
                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" Text="Mã phiếu đo" 
+                                <TextBlock Grid.Column="1" Text="Mã phiếu đo"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="2" Text="Mã học viên" 
+                                <TextBlock Grid.Column="2" Text="Mã học viên"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="3" Text="Họ tên học viên" 
+                                <TextBlock Grid.Column="3" Text="Họ tên học viên"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="4" Text="Ngày đo" 
+                                <TextBlock Grid.Column="4" Text="Ngày đo"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="5" Text="Chiều cao" 
+                                <TextBlock Grid.Column="5" Text="Chiều cao"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="6" Text="Cân nặng" 
+                                <TextBlock Grid.Column="6" Text="Cân nặng"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="7" Text="BMI" 
+                                <TextBlock Grid.Column="7" Text="BMI"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="8" Text="TDEE" 
+                                <TextBlock Grid.Column="8" Text="TDEE"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="9" Text="Mục tiêu sức khỏe" 
+                                <TextBlock Grid.Column="9" Text="Mục tiêu sức khỏe"
                                            Style="{StaticResource HeaderTextStyle}" Foreground="#333"/>
-                                <TextBlock Grid.Column="11" Text="Thao tác" 
-                                           Style="{StaticResource HeaderTextStyle}" Foreground="#333" 
+                                <TextBlock Grid.Column="11" Text="Thao tác"
+                                           Style="{StaticResource HeaderTextStyle}" Foreground="#333"
                                            HorizontalAlignment="Center"/>
                             </Grid>
                         </Border>
 
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
-                            <ItemsControl x:Name="DanhSachChiSoControl">
+                            <ItemsControl x:Name="lstChiSo">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1" 
+                                        <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1"
                                                 Padding="15,12" Background="White">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#FAFAFA"/>
+                                                            <Setter Property="Background" Value="#F0F8FF"/>
                                                         </Trigger>
                                                         <DataTrigger Binding="{Binding DaChon}" Value="True">
-                                                            <Setter Property="Background" Value="#F0F0F0"/>
+                                                            <Setter Property="Background" Value="#E0F0FF"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -289,50 +298,49 @@
                                                     <ColumnDefinition Width="90"/>
                                                     <ColumnDefinition Width="80"/>
                                                     <ColumnDefinition Width="100"/>
-                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="150"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="110"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <CheckBox Grid.Column="0" IsChecked="{Binding DaChon, Mode=TwoWay}" 
+                                                <CheckBox Grid.Column="0" IsChecked="{Binding DaChon, Mode=TwoWay}"
                                                           VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                          Checked="DataGridRow_CheckBox_Changed"
-                                                          Unchecked="DataGridRow_CheckBox_Changed"/>
+                                                          Checked="chkDuLieu_Changed"
+                                                          Unchecked="chkDuLieu_Changed"/>
 
-                                                <TextBlock Grid.Column="1" Text="{Binding MaPhieuDo}" 
+                                                <TextBlock Grid.Column="1" Text="{Binding MaPhieuDo}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding MaHocVien}" 
+                                                <TextBlock Grid.Column="2" Text="{Binding MaHocVien}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding HoTenHocVien}" 
+                                                <TextBlock Grid.Column="3" Text="{Binding HoTenHocVien}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding NgayDo, StringFormat=dd/MM/yyyy}" 
+                                                <TextBlock Grid.Column="4" Text="{Binding NgayDo, StringFormat=dd/MM/yyyy}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="5" Text="{Binding ChieuCao}" 
+                                                <TextBlock Grid.Column="5" Text="{Binding ChieuCao}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="6" Text="{Binding CanNang}" 
+                                                <TextBlock Grid.Column="6" Text="{Binding CanNang}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="7" Text="{Binding BMI}" 
+                                                <TextBlock Grid.Column="7" Text="{Binding BMI}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="8" Text="{Binding TDEE}" 
+                                                <TextBlock Grid.Column="8" Text="{Binding TDEE}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <TextBlock Grid.Column="9" Text="{Binding MucTieuSucKhoe}" 
+                                                <TextBlock Grid.Column="9" Text="{Binding MucTieuSucKhoe}"
                                                            VerticalAlignment="Center" Style="{StaticResource BaseTextStyle}"/>
-                                                <StackPanel Grid.Column="11" Orientation="Horizontal" 
+                                                <StackPanel Grid.Column="11" Orientation="Horizontal"
                                                             HorizontalAlignment="Center" Margin="5,0">
-                                                    <Button Content="☰" FontFamily="Segoe MDL2 Assets" Width="50" Foreground="#DC3545"
-                                                            Style="{StaticResource IconButton}" 
-                                                            ToolTip="Xem chi tiết" Click="XemChiTiet_Click" 
-                                                            Tag="{Binding}" Margin="2,0"/>
+
                                                     <Button HorizontalAlignment="Center" VerticalAlignment="Center"
                                                             Margin="0.2" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand"
-                                                            Click="Edit_Click"  
+                                                            Click="btnSua_Click"
+                                                            ToolTip="Chỉnh sửa chỉ số sức khỏe"
                                                             Tag="{Binding}" Width="35" Height="35">
-                                                        <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"  
+                                                        <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
                                                               Fill="#DC3545" Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                     </Button>
                                                     <Button Content="✕" FontFamily="Segoe MDL2 Assets" Width="50" Foreground="#DC3545"
-                                                            Style="{StaticResource IconButton}" 
-                                                            ToolTip="Xóa" Click="DeleteSingle_Click" 
+                                                            Style="{StaticResource IconButton}"
+                                                            ToolTip="Xóa chỉ số này"
+                                                            Click="btnXoaDon_Click"
                                                             Tag="{Binding}" Margin="2,0"/>
                                                 </StackPanel>
                                             </Grid>
@@ -343,29 +351,34 @@
                         </ScrollViewer>
 
                     </Grid>
+
                 </Border>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" 
+
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
                             Margin="0,30,0,0">
-                    <Button Content="&lt;&lt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="FirstPage_Click" x:Name="FirstButton"/>
-                    <Button Content="&lt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="PreviousPage_Click" x:Name="PrevButton"/>
-                    <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" 
+                    <Button Content="&lt;&lt;" Style="{StaticResource PaginationNavButtonStyle}"
+                            Click="btnTrangDau_Click" x:Name="btnTrangDau"/>
+                    <Button Content="&lt;" Style="{StaticResource PaginationNavButtonStyle}"
+                            Click="btnTrangTruoc_Click" x:Name="btnTrangTruoc"/>
+                    <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4"
                             VerticalAlignment="Center" Margin="5,0" Padding="10,5">
-                        <TextBlock x:Name="PageInfoTextBlock" Text="Trang 1/1" 
-                                   Style="{StaticResource BaseTextStyle}" 
+                        <TextBlock x:Name="txbThongTinTrang" Text="Trang 1/1"
+                                   Style="{StaticResource BaseTextStyle}"
                                    VerticalAlignment="Center" Foreground="#333"/>
+
                     </Border>
-                    <Button Content="&gt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="NextPage_Click" x:Name="NextButton"/>
-                    <Button Content="&gt;&gt;" Style="{StaticResource PaginationNavButtonStyle}" 
-                            Click="LastPage_Click" x:Name="LastButton"/>
+                    <Button Content="&gt;" Style="{StaticResource PaginationNavButtonStyle}"
+                            Click="btnTrangSau_Click" x:Name="btnTrangSau"/>
+                    <Button Content="&gt;&gt;" Style="{StaticResource PaginationNavButtonStyle}"
+                            Click="btnTrangCuoi_Click" x:Name="btnTrangCuoi"/>
                 </StackPanel>
+
             </Grid>
+
         </ScrollViewer>
 
-        <Grid x:Name="FilterOverlay" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="100">
-            <Border Background="White" Width="600" MaxHeight="650" CornerRadius="8" 
+        <Grid x:Name="GrdOverlayLoc" Background="#80000000" Visibility="Collapsed">
+            <Border Background="White" Width="600" MaxHeight="650" CornerRadius="8"
                     VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Grid Margin="25">
                     <Grid.RowDefinitions>
@@ -375,13 +388,13 @@
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Margin="0,0,0,20">
-                        <TextBlock Text="Lọc dữ liệu" 
+                        <TextBlock Text="Lọc dữ liệu"
                                    Style="{StaticResource HeaderTextStyle}"
-                                   FontSize="18" FontWeight="Bold" 
+                                   FontSize="18" FontWeight="Bold"
                                    VerticalAlignment="Center"/>
-                        <Button Content="X" 
+                        <Button Content="X"
                                 Style="{StaticResource CloseFilterButtonStyle}"
-                                Click="CloseFilter_Click" 
+                                Click="DongLoc_Click"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Top"/>
                     </Grid>
@@ -395,56 +408,57 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Mã phiếu đo" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBlock Text="Mã phiếu đo" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterMaPhieuTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Mã học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocMaPhieu" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Mã học viên" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterMaHVTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Họ tên học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocMaHV" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Họ tên học viên" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterHoTenTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocHoTen" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterChieuCaoTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocChieuCao" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterCanNangTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBox x:Name="txbLocCanNang" Height="35" Padding="10,0" Margin="0,0,0,15"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterBMITextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocBMI" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterTDEETextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Tuổi" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocTDEE" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Mục tiêu sức khỏe" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterTuoiTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Mục tiêu sức khỏe" FontWeight="SemiBold" Margin="0,0,0,5" 
+                                <TextBox x:Name="txbLocMucTieu" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+                                <TextBlock Text="Ngày đo (dd/MM/yyyy)" FontWeight="SemiBold" Margin="0,0,0,5"
                                            Style="{StaticResource BaseTextStyle}"/>
-                                <TextBox x:Name="FilterMucTieuTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                                <TextBlock Text="Ngày đo (dd/MM/yyyy)" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                           Style="{StaticResource BaseTextStyle}"/>
-                                <DatePicker x:Name="FilterNgayDoDatePicker" Height="35" Margin="0,0,0,15" 
+                                <DatePicker x:Name="dpLocNgayDo" Height="35" Margin="0,0,0,15"
                                             FontFamily="{StaticResource LatoRegular}" />
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" 
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
                                 Margin="0,20,0,0">
-                        <Button Content="Hủy lọc" Width="100" Style="{StaticResource ActionButton}" 
-                                Click="CancelFilter_Click" />
-                        <Button Content="Áp dụng" Width="100" Style="{StaticResource ActionButton}" 
-                                Click="ApplyFilter_Click"/>
+                        <Button Content="Hủy lọc" Width="100" Style="{StaticResource ActionButton}"
+                                Click="HuyLoc_Click" />
+                        <Button Content="Áp dụng" Width="100" Style="{StaticResource ActionButton}"
+                                Click="ApDungLoc_Click"/>
                     </StackPanel>
+
                 </Grid>
+
             </Border>
+
         </Grid>
-        <Grid x:Name="PopupOverlay" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="101">
-            <Border Background="White" Width="500" MaxHeight="600" CornerRadius="8" 
+
+        <Grid x:Name="GrdOverlayPopup" Background="#80000000" Visibility="Collapsed">
+            <Border Background="White" Width="700" MaxHeight="650" CornerRadius="8"
                     VerticalAlignment="Center" HorizontalAlignment="Center">
 
                 <Grid Margin="25">
@@ -454,47 +468,77 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" x:Name="PopupTitle" Text="Thêm chỉ số sức khỏe" 
+                    <TextBlock Grid.Row="0" x:Name="txbTieuDePopup" Text="Thêm chỉ số sức khỏe"
                                Style="{StaticResource HeaderTextStyle}"
                                FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
 
-                        <StackPanel>
-                            <TextBlock Text="Mã học viên" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="MaHVTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
-                                     TextChanged="MaHVTextBox_TextChanged"/>
-                            <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="CanNangTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
-                                     TextChanged="CanNangTextBox_TextChanged"/>
-                            <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="ChieuCaoTextBox" Height="35" Padding="10,0" Margin="0,0,0,15"
-                                     TextChanged="ChieuCaoTextBox_TextChanged"/>
-                            <TextBlock Text="BMI" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="BMITextBoxPopUp" Height="35" Padding="10,0" Margin="0,0,0,15" 
-                                     IsReadOnly="True" Background="#F5F5F5"/>
-                            <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <TextBox x:Name="TDEETextBoxPopUp" Height="35" Padding="10,0" Margin="0,0,0,15"/>
-                            <TextBlock Text="Ngày đo" FontWeight="SemiBold" Margin="0,0,0,5" 
-                                       Style="{StaticResource BaseTextStyle}"/>
-                            <DatePicker x:Name="NgayDoDatePickerPopUp" Height="35" Margin="0,0,0,15" 
-                                        FontFamily="{StaticResource LatoRegular}"/>
-                        </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="450">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Mã học viên (HV)*" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="txbMaHV" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                                <TextBlock Text="Cân nặng (kg)*" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="txbCanNang" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                         TextChanged="txbCanNang_TextChanged"/>
+
+                                <TextBlock Text="Chiều cao (cm)*" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="txbChieuCao" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                         TextChanged="txbChieuCao_TextChanged"/>
+
+                                <TextBlock Text="BMI (Tự tính)" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="txbBMI" Height="35" Padding="10,0" Margin="0,0,0,15"
+                                         IsReadOnly="True" Background="#F5F5F5"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="TDEE (calo/ngày)" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <TextBox x:Name="txbTDEE" Height="35" Padding="10,0" Margin="0,0,0,15"/>
+
+                                <TextBlock Text="Mục tiêu sức khỏe*" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <ComboBox x:Name="cboMucTieuSK" Height="35" Margin="0,0,0,15"
+                                          VerticalContentAlignment="Center"
+                                          FontFamily="{StaticResource LatoRegular}"
+                                          SelectedValuePath="Content">
+                                    <ComboBoxItem Content="Tăng cơ"/>
+                                    <ComboBoxItem Content="Giảm cân"/>
+                                    <ComboBoxItem Content="Tăng cân"/>
+                                </ComboBox>
+
+                                <TextBlock Text="Ngày đo*" FontWeight="SemiBold" Margin="0,0,0,5"
+                                           Style="{StaticResource BaseTextStyle}"/>
+                                <DatePicker x:Name="dpNgayDo" Height="35" Margin="0,0,0,15"
+                                            FontFamily="{StaticResource LatoRegular}"/>
+                            </StackPanel>
+                        </Grid>
                     </ScrollViewer>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" 
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
                                 Margin="0,20,0,0">
-                        <Button Content="Hủy" Width="100" Style="{StaticResource ActionButton}" 
-                                Click="CancelPopup_Click"/>
-                        <Button Content="Lưu" Width="100" Style="{StaticResource ActionButton}" 
-                                Click="SavePopup_Click"/>
+                        <Button Content="Hủy" Width="100" Style="{StaticResource ActionButton}"
+                                Click="HuyPopup_Click"/>
+                        <Button Content="Lưu" Width="100" Style="{StaticResource ActionButton}"
+                                Click="LuuPopup_Click"/>
                     </StackPanel>
+
                 </Grid>
+
             </Border>
+
         </Grid>
+
     </Grid>
+
 </UserControl>
