@@ -38,7 +38,6 @@ namespace TFitnessApp
         {
             InitializeComponent();
             _hocVienRepository = new HocVienRepository();
-
             // Mặc định chọn 50 bản ghi/trang
             if (cboSoBanGhi != null && cboSoBanGhi.Items.Count > 2)
                 cboSoBanGhi.SelectedIndex = 2;

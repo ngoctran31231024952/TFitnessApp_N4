@@ -454,7 +454,6 @@ namespace TFitnessApp
             catch { }
             return list;
         }
-
         public bool KiemTraMaPTTonTai(string maPT)
         {
             using (SqliteConnection conn = TruyCapDB.TaoKetNoi())

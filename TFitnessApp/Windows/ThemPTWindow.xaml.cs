@@ -52,7 +52,6 @@ namespace TFitnessApp.Windows
             }
         }
 
-        // --- VALIDATION HELPERS ---
         private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
@@ -61,7 +60,6 @@ namespace TFitnessApp.Windows
         }
 
         private bool IsNumber(string text) { return Regex.IsMatch(text, @"^\d+$"); }
-        // --------------------------
 
         private void LoadExistingImage(string maPT)
         { /* Giữ nguyên code cũ load ảnh */

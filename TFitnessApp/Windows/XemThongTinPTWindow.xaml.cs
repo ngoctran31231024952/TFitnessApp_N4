@@ -22,7 +22,6 @@ namespace TFitnessApp.Windows
                 LoadImage(pt.MaPT);
             }
         }
-
         private void LoadImage(string maPT)
         {
             try
@@ -46,7 +45,6 @@ namespace TFitnessApp.Windows
             }
             catch { }
         }
-
         private void BtnDong_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

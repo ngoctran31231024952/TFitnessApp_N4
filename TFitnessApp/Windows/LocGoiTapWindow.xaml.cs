@@ -24,7 +24,7 @@ namespace TFitnessApp.Windows
             InitializeComponent();
         }
 
-        // Helper kiểm tra số thực dương (IsValidNumber -> KiemTraSoHopLe)
+        // kiểm tra số thực dương (IsValidNumber -> KiemTraSoHopLe)
         private bool KiemTraSoHopLe(string text)
         {
             // Cho phép số nguyên hoặc số thập phân, không âm

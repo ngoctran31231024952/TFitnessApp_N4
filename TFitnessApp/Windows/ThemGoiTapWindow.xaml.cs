@@ -39,7 +39,6 @@ namespace TFitnessApp.Windows
 
         #region Các phương thức hỗ trợ
         // Helper kiểm tra số
-        // IsNumber -> LaSoNguyen
         private bool LaSoNguyen(string text) { return Regex.IsMatch(text, @"^\d+$"); }
         // IsDecimal -> LaSoThuc
         private bool LaSoThuc(string text) { return double.TryParse(text, out _); }

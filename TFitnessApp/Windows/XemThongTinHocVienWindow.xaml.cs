@@ -133,7 +133,6 @@ namespace TFitnessApp.Windows
             }
             catch { }
         }
-
         private void BtnDong_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

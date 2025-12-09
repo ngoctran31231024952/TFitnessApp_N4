@@ -22,7 +22,6 @@ namespace TFitnessApp
         #region Trường Dữ liệu Nội bộ
         // Khai báo Repository để gọi xuống Database
         private GoiTapRepository _repository;
-
         // --- CÁC BIẾN DÙNG CHO PHÂN TRANG ---
         private List<GoiTap> _danhSachGoc = new List<GoiTap>();// Chứa toàn bộ dữ liệu tìm được
         private ObservableCollection<GoiTap> _danhSachHienThi = new ObservableCollection<GoiTap>();// Chỉ chứa dữ liệu của trang hiện tại (để binding lên Grid)

@@ -20,7 +20,6 @@ namespace TFitnessApp.Windows
                 txtTrangThai.Text = gt.TrangThai;
             }
         }
-
         private void BtnDong_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

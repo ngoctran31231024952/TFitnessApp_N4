@@ -67,7 +67,6 @@ namespace TFitnessApp.Windows
             combo.ItemsSource = filtered;
             combo.IsDropDownOpen = true; // Tự động mở danh sách gợi ý
         }
-
         // Nút Áp dụng Lọc
         private void BtnApDung_Click(object sender, RoutedEventArgs e)
         {

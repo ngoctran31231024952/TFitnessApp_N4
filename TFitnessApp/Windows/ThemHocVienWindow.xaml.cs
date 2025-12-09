@@ -160,7 +160,6 @@ namespace TFitnessApp.Windows
                 LoadNextMaHV();
                 return;
             }
-            // ------------------
 
             HocVien item = new HocVien
             {
