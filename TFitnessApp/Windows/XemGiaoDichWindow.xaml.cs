@@ -148,7 +148,7 @@ namespace TFitnessApp.Windows
             TaiThongTinBoSung();
 
             // Khởi tạo chế độ xem (mặc định là chế độ chỉ đọc)
-            SetEditMode(false);
+            ThietLapCheDoChinhSua(false);
         }
 
         // Gán các trường dữ liệu từ đối tượng MoDonDuLieuGiaoDich
@@ -245,7 +245,7 @@ namespace TFitnessApp.Windows
         }
 
         // Thiết lập chế độ chỉnh sửa cho các control
-        private void SetEditMode(bool isEdit)
+        private void ThietLapCheDoChinhSua(bool isEdit)
         {
             IsEditMode = isEdit;
 
@@ -278,7 +278,7 @@ namespace TFitnessApp.Windows
             if (!IsEditMode)
             {
                 // Chuyển sang chế độ chỉnh sửa
-                SetEditMode(true);
+                ThietLapCheDoChinhSua(true);
             }
             else
             {
@@ -338,7 +338,7 @@ namespace TFitnessApp.Windows
                             if (rowsAffected > 0)
                             {
                                 MessageBox.Show("Cập nhật giao dịch thành công!");
-                                SetEditMode(false);
+                                ThietLapCheDoChinhSua(false);
                             }
                             else
                             {

@@ -127,7 +127,7 @@ namespace TFitnessApp.Windows
             TaiThongTinDayDuTuDatabase();
 
             // Khởi tạo chế độ xem (mặc định là chế độ chỉ đọc)
-            SetEditMode(false);
+            ThietLapCheDoChinhSua(false);
         }
 
         // Gán các trường dữ liệu cơ bản từ đối tượng được truyền vào
@@ -187,7 +187,7 @@ namespace TFitnessApp.Windows
         #region Xử lý UI và Chế độ Chỉnh sửa
 
         // Đặt chế độ hiển thị cho các control nhập liệu (chỉ đọc/chỉnh sửa)
-        private void SetEditMode(bool isEdit)
+        private void ThietLapCheDoChinhSua(bool isEdit)
         {
             IsEditMode = isEdit;
 
@@ -224,11 +224,11 @@ namespace TFitnessApp.Windows
                         textBlock.Text = isEdit ? "Lưu" : "Sửa";
                 }
             }
-            UpdateTextBoxStyles();            // Cập nhật style cho các textbox (chuyển đổi giữa ReadOnlyStyle và EditableStyle)
+            CapNhatDinhDangTxtbox();            // Cập nhật style cho các textbox (chuyển đổi giữa ReadOnlyStyle và EditableStyle)
         }
 
         // Cập nhật Style (màu nền, border) cho các TextBox dựa trên IsEditMode
-        private void UpdateTextBoxStyles()
+        private void CapNhatDinhDangTxtbox()
         {
             var editableStyle = (Style)FindResource("EditableTextBoxStyle");
             var readOnlyStyle = (Style)FindResource("ReadOnlyTextBoxStyle");
@@ -270,7 +270,7 @@ namespace TFitnessApp.Windows
             if (!IsEditMode)
             {
                 // Chuyển sang chế độ chỉnh sửa
-                SetEditMode(true);
+                ThietLapCheDoChinhSua(true);
             }
             else
             {
@@ -375,7 +375,7 @@ namespace TFitnessApp.Windows
                             {
                                 MessageBox.Show("Cập nhật tài khoản thành công!", "Thành công",
                                     MessageBoxButton.OK, MessageBoxImage.Information);
-                                SetEditMode(false);
+                                ThietLapCheDoChinhSua(false);
 
                                 // Cập nhật lại đối tượng tài khoản (trong bộ nhớ)
                                 _taiKhoan.TenDangNhap = TenDangNhap;
