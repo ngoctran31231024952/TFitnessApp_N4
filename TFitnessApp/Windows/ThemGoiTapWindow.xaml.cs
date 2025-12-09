@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace TFitnessApp.Windows
 {
+    #region Khởi tạo
     public partial class ThemGoiTapWindow : Window
     {
         private GoiTapRepository _repository;
@@ -34,11 +35,17 @@ namespace TFitnessApp.Windows
                 cmbTrangThai.Text = gt.TrangThai;
             }
         }
+        #endregion
 
+        #region Các phương thức hỗ trợ
         // Helper kiểm tra số
-        private bool IsNumber(string text) { return Regex.IsMatch(text, @"^\d+$"); }
-        private bool IsDecimal(string text) { return double.TryParse(text, out _); }
+        // IsNumber -> LaSoNguyen
+        private bool LaSoNguyen(string text) { return Regex.IsMatch(text, @"^\d+$"); }
+        // IsDecimal -> LaSoThuc
+        private bool LaSoThuc(string text) { return double.TryParse(text, out _); }
+        #endregion
 
+        #region Xử lý sự kiện Lưu
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
             string maGoi = txtMaGoi.Text.Trim();
@@ -60,28 +67,28 @@ namespace TFitnessApp.Windows
             }
 
             // Kiểm tra Thời hạn (phải là số nguyên > 0)
-            if (!IsNumber(strThoiHan) || int.Parse(strThoiHan) <= 0)
+            if (!LaSoNguyen(strThoiHan) || int.Parse(strThoiHan) <= 0)
             {
                 MessageBox.Show("Thời hạn phải là số nguyên dương (tháng)!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
                 txtThoiHan.Focus(); return;
             }
 
             // Kiểm tra Giá (phải là số thực >= 0)
-            if (!IsDecimal(strGia) || double.Parse(strGia) < 0)
+            if (!LaSoThuc(strGia) || double.Parse(strGia) < 0)
             {
                 MessageBox.Show("Giá niêm yết phải là số hợp lệ và không âm!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
                 txtGia.Focus(); return;
             }
 
             // Kiểm tra Số buổi PT (phải là số nguyên >= 0)
-            if (!IsNumber(strSoBuoi) || int.Parse(strSoBuoi) < 0)
+            if (!LaSoNguyen(strSoBuoi) || int.Parse(strSoBuoi) < 0)
             {
                 MessageBox.Show("Số buổi PT phải là số nguyên không âm!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
                 txtSoBuoiPT.Focus(); return;
             }
 
-            // Kiểm tra trùng mã
-            if (!_isEditMode && _repository.CheckMaGoiExists(maGoi))
+            // Kiểm tra trùng mã (Gọi hàm KiemTraMaGoiTonTai thay cho CheckMaGoiExists)
+            if (!_isEditMode && _repository.KiemTraMaGoiTonTai(maGoi))
             {
                 MessageBox.Show($"Mã gói {maGoi} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -99,7 +106,8 @@ namespace TFitnessApp.Windows
                 TrangThai = cmbTrangThai.Text
             };
 
-            bool kq = _isEditMode ? _repository.UpdateGoiTap(gt) : _repository.AddGoiTap(gt);
+            // Gọi CapNhatGoiTap hoặc ThemGoiTap
+            bool kq = _isEditMode ? _repository.CapNhatGoiTap(gt) : _repository.ThemGoiTap(gt);
 
             if (kq)
             {
@@ -108,7 +116,7 @@ namespace TFitnessApp.Windows
                 this.Close();
             }
         }
-
+        #endregion
         private void BtnHuy_Click(object sender, RoutedEventArgs e) { this.Close(); }
     }
 }
