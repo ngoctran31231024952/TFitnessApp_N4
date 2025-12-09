@@ -10,7 +10,7 @@
       d:DesignHeight="700" d:DesignWidth="1100"
       Title="PTPage"
       FontFamily="Lato"
-      Loaded="Page_Loaded">
+      Loaded="SuKienTaiTrang">
 
     <Page.Resources>
         <SolidColorBrush x:Key="PrimaryRed" Color="#C71A1B"/>
@@ -192,7 +192,7 @@
                     <!-- Cột 2: Các nút hành động (Căn phải) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
 
-                        <Button Click="BtnFilter_Click" Style="{DynamicResource PrimaryActionButtonStyle}">
+                        <Button Click="BtnLoc_Click" Style="{DynamicResource PrimaryActionButtonStyle}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <fa:IconImage Icon="Filter" Width="14" Margin="0,0,8,0" Foreground="White"/>
                                 <TextBlock Text="Lọc" Foreground="White"/>
@@ -200,7 +200,7 @@
                         </Button>
 
                         <!-- NÚT LÀM MỚI (MỚI) -->
-                        <Button Click="BtnRefresh_Click" Style="{DynamicResource PrimaryActionButtonStyle}" Width="110">
+                        <Button Click="BtnLamMoi_Click" Style="{DynamicResource PrimaryActionButtonStyle}" Width="110">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <fa:IconImage Icon="Sync" Width="14" Margin="0,0,8,0" Foreground="White"/>
                                 <TextBlock Text="Làm mới" Foreground="White"/>
@@ -247,8 +247,8 @@
                         <DataGridTemplateColumn.HeaderTemplate>
                             <DataTemplate>
                                 <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                          Checked="SelectAll_Checked" 
-                                          Unchecked="SelectAll_Unchecked"
+                                          Checked="ChonTatCa_Checked" 
+                                          Unchecked="ChonTatCa_Unchecked"
                                           ToolTip="Chọn tất cả"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.HeaderTemplate>

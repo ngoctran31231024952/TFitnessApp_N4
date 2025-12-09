@@ -21,7 +21,7 @@ namespace TFitnessApp.Windows
             _repository = new PTRepository();
 
             // Load danh sách chi nhánh vào ComboBox
-            cmbChiNhanh.ItemsSource = _repository.GetAllChiNhanh();
+            cmbChiNhanh.ItemsSource = _repository.LayTatCaChiNhanh();
             if (cmbChiNhanh.Items.Count > 0) cmbChiNhanh.SelectedIndex = 0;
 
             if (pt != null)
@@ -48,7 +48,7 @@ namespace TFitnessApp.Windows
             }
             else
             {
-                txtMaPT.Text = _repository.GenerateNewMaPT();
+                txtMaPT.Text = _repository.TaoMaPTMoi();
             }
         }
 
@@ -130,7 +130,7 @@ namespace TFitnessApp.Windows
                 }
             }
 
-            if (!_isEditMode && _repository.CheckMaPTExists(maPT))
+            if (!_isEditMode && _repository.KiemTraMaPTTonTai(maPT))
             {
                 MessageBox.Show("Mã PT đã tồn tại! Vui lòng tải lại trang.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -147,7 +147,7 @@ namespace TFitnessApp.Windows
                 MaCN = cmbChiNhanh.SelectedValue?.ToString()
             };
 
-            bool result = _isEditMode ? _repository.UpdatePT(pt) : _repository.AddPT(pt);
+            bool result = _isEditMode ? _repository.CapNhatPT(pt) : _repository.ThemPT(pt);
 
             if (result)
             {

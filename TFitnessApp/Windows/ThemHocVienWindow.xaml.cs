@@ -27,6 +27,9 @@ namespace TFitnessApp.Windows
                 txtBtnAction.Text = "Lưu";
 
                 txtMaHV.Text = hv.MaHV;
+                txtMaHV.IsReadOnly = true;
+                txtMaHV.Background = System.Windows.Media.Brushes.LightGray;
+
                 txtHoTen.Text = hv.HoTen;
                 txtEmail.Text = hv.Email;
                 txtSDT.Text = hv.SDT;
@@ -91,7 +94,7 @@ namespace TFitnessApp.Windows
             catch { }
         }
 
-        private void LoadNextMaHV() { txtMaHV.Text = _repository.GenerateNewMaHV(); }
+        private void LoadNextMaHV() { txtMaHV.Text = _repository.TaoMaHVMoi(); }
 
         private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
         {
@@ -154,7 +157,7 @@ namespace TFitnessApp.Windows
                 }
             }
 
-            if (!_isEditMode && _repository.CheckMaHVExists(maHV))
+            if (!_isEditMode && _repository.KiemTraMaHVTonTai(maHV))
             {
                 MessageBox.Show($"Mã học viên {maHV} đã tồn tại!", "Trùng mã", MessageBoxButton.OK, MessageBoxImage.Warning);
                 LoadNextMaHV();
@@ -172,7 +175,7 @@ namespace TFitnessApp.Windows
                 DiaChi = ""
             };
 
-            bool result = _isEditMode ? _repository.UpdateHocVien(item) : _repository.AddHocVien(item);
+            bool result = _isEditMode ? _repository.CapNhatHocVien(item) : _repository.ThemHocVien(item);
 
             if (result)
             {
