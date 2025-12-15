@@ -28,9 +28,6 @@ namespace TFitnessApp.Windows
         private string _ngayTao;
         private string _trangThai;
 
-        // Biến để lưu mật khẩu gốc khi chỉnh sửa
-        private string _matKhauGoc;
-
         // Biến để kiểm tra xem có đang trong chế độ chỉnh sửa không
         private bool _isEditMode = false;
         #endregion
@@ -143,9 +140,7 @@ namespace TFitnessApp.Windows
             TenDangNhap = taiKhoan.TenDangNhap;
 
             // Không hiển thị mật khẩu thật (để bảo mật)
-            // Chỉ hiển thị placeholder khi không ở chế độ chỉnh sửa
             MatKhau = "••••••••";
-            _matKhauGoc = taiKhoan.MatKhau; // Lưu mật khẩu hiện tại (đã mã hóa) để sử dụng sau
 
             PhanQuyen = taiKhoan.PhanQuyen;
             TrangThai = taiKhoan.TrangThai;
@@ -207,17 +202,9 @@ namespace TFitnessApp.Windows
 
             if (txtMatKhau != null)
             {
-                txtMatKhau.IsReadOnly = !isEdit;
-                // Khi chuyển sang chế độ chỉnh sửa, xóa placeholder để người dùng nhập mật khẩu mới
-                if (isEdit && MatKhau == "••••••••")
-                {
-                    MatKhau = "";
-                }
-                // Khi thoát chế độ chỉnh sửa, hiển thị lại placeholder
-                else if (!isEdit && string.IsNullOrEmpty(MatKhau))
-                {
-                    MatKhau = "••••••••";
-                }
+                // Luôn đặt IsReadOnly = true để không cho phép chỉnh sửa mật khẩu
+                txtMatKhau.IsReadOnly = true;
+                // Giữ nguyên hiển thị placeholder, không thay đổi
             }
 
             if (txtHoTen != null)
@@ -259,7 +246,7 @@ namespace TFitnessApp.Windows
                 txtTenDangNhap.Style = IsEditMode ? editableStyle : readOnlyStyle;
 
             if (txtMatKhau != null)
-                txtMatKhau.Style = IsEditMode ? editableStyle : readOnlyStyle;
+                txtMatKhau.Style = readOnlyStyle; // Luôn dùng style chỉ đọc cho mật khẩu
 
             if (txtHoTen != null)
                 txtHoTen.Style = IsEditMode ? editableStyle : readOnlyStyle;
@@ -306,15 +293,6 @@ namespace TFitnessApp.Windows
                             MessageBoxButton.OK, MessageBoxImage.Error);
                         txtTenDangNhap.Focus();
                         return;
-                    }
-
-                    // Kiểm tra mật khẩu: nếu là placeholder hoặc rỗng, giữ mật khẩu cũ
-                    string matKhauDeLuu = _matKhauGoc; // Mặc định giữ mật khẩu cũ
-
-                    if (!string.IsNullOrEmpty(MatKhau) && MatKhau != "••••••••")
-                    {
-                        // Nếu người dùng nhập mật khẩu mới, mã hóa bằng SHA256
-                        matKhauDeLuu = MaHoaMatKhauSHA256(MatKhau);
                     }
 
                     if (string.IsNullOrEmpty(HoTen))
@@ -367,14 +345,13 @@ namespace TFitnessApp.Windows
                         return;
                     }
 
-                    // Cập nhật giá trị vào Database
+                    // Cập nhật giá trị vào Database (KHÔNG cập nhật mật khẩu)
                     using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                     {
                         conn.Open();
                         string query = @"
                             UPDATE TaiKhoan 
                             SET TenDangNhap = @TenDangNhap, 
-                                MatKhau = @MatKhau, 
                                 HoTen = @HoTen, 
                                 Email = @Email, 
                                 SDT = @SDT, 
@@ -385,7 +362,6 @@ namespace TFitnessApp.Windows
                         using (var command = new SqliteCommand(query, conn))
                         {
                             command.Parameters.AddWithValue("@TenDangNhap", TenDangNhap);
-                            command.Parameters.AddWithValue("@MatKhau", matKhauDeLuu); // Sử dụng mật khẩu đã xử lý
                             command.Parameters.AddWithValue("@HoTen", HoTen);
                             command.Parameters.AddWithValue("@Email", Email);
                             command.Parameters.AddWithValue("@SDT", SDT);
@@ -396,19 +372,12 @@ namespace TFitnessApp.Windows
                             int rowsAffected = command.ExecuteNonQuery();
                             if (rowsAffected > 0)
                             {
-                                // Cập nhật mật khẩu gốc nếu đã thay đổi
-                                if (matKhauDeLuu != _matKhauGoc)
-                                {
-                                    _matKhauGoc = matKhauDeLuu;
-                                }
-
                                 MessageBox.Show("Cập nhật tài khoản thành công!", "Thành công",
                                     MessageBoxButton.OK, MessageBoxImage.Information);
                                 ThietLapCheDoChinhSua(false);
 
                                 // Cập nhật lại đối tượng tài khoản (trong bộ nhớ)
                                 _taiKhoan.TenDangNhap = TenDangNhap;
-                                _taiKhoan.MatKhau = matKhauDeLuu;
                                 _taiKhoan.HoTen = HoTen;
                                 _taiKhoan.Email = Email;
                                 _taiKhoan.PhanQuyen = PhanQuyen;
@@ -526,28 +495,6 @@ namespace TFitnessApp.Windows
             catch (Exception)
             {
                 return false;
-            }
-        }
-
-        // Hàm mã hóa mật khẩu bằng SHA256
-        private string MaHoaMatKhauSHA256(string matKhau)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                // Chuyển mật khẩu thành mảng byte
-                byte[] bytes = Encoding.UTF8.GetBytes(matKhau);
-
-                // Mã hóa mảng byte
-                byte[] hashBytes = sha256.ComputeHash(bytes);
-
-                // Chuyển đổi byte array thành chuỗi hex
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    builder.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return builder.ToString();
             }
         }
         #endregion
