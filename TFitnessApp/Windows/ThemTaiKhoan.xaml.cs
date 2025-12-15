@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Microsoft.Data.Sqlite;
 using System.Text.RegularExpressions;
 using TFitnessApp.Database;
+using System.Text;
 
 namespace TFitnessApp.Windows
 {
@@ -172,14 +173,17 @@ namespace TFitnessApp.Windows
             {
                 // Tạo mã tài khoản và mật khẩu ngẫu nhiên
                 string maTaiKhoan = TaoMaTaiKhoan();
-                string matKhau = TaoMatKhau();
+                string matKhauGoc = TaoMatKhau(); // Mật khẩu gốc để hiển thị cho người dùng
+
+                // Mã hóa mật khẩu bằng SHA256
+                string matKhauMaHoa = MaHoaMatKhauSHA256(matKhauGoc);
 
                 using (SqliteConnection conn = TruyCapDB.TaoKetNoi())
                 {
                     conn.Open();
                     string query = @"
-                        INSERT INTO TaiKhoan (MaTK, HoTen, PhanQuyen, TenDangNhap, MatKhau, Email, SDT, NgayTao, TrangThai)
-                        VALUES (@MaTK, @HoTen, @PhanQuyen, @TenDangNhap, @MatKhau, @Email, @SDT, @NgayTao, @TrangThai)";
+                INSERT INTO TaiKhoan (MaTK, HoTen, PhanQuyen, TenDangNhap, MatKhau, Email, SDT, NgayTao, TrangThai)
+                VALUES (@MaTK, @HoTen, @PhanQuyen, @TenDangNhap, @MatKhau, @Email, @SDT, @NgayTao, @TrangThai)";
 
                     using (var command = new SqliteCommand(query, conn))
                     {
@@ -187,7 +191,7 @@ namespace TFitnessApp.Windows
                         command.Parameters.AddWithValue("@HoTen", HoTen);
                         command.Parameters.AddWithValue("@PhanQuyen", PhanQuyen);
                         command.Parameters.AddWithValue("@TenDangNhap", TenDangNhap);
-                        command.Parameters.AddWithValue("@MatKhau", matKhau);
+                        command.Parameters.AddWithValue("@MatKhau", matKhauMaHoa); // Lưu mật khẩu đã mã hóa
                         command.Parameters.AddWithValue("@Email", Email);
                         command.Parameters.AddWithValue("@SDT", SDT);
                         command.Parameters.AddWithValue("@NgayTao", DateTime.Now.ToString("yyyy-MM-dd"));
@@ -196,7 +200,8 @@ namespace TFitnessApp.Windows
                         int rowsAffected = command.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
-                            MessageBox.Show($"Tạo tài khoản thành công!\n\nMã tài khoản: {maTaiKhoan}\nMật khẩu: {matKhau}\n\nVui lòng ghi nhớ thông tin đăng nhập!",
+                            // Hiển thị mật khẩu gốc cho người dùng
+                            MessageBox.Show($"Tạo tài khoản thành công!\n\nMã tài khoản: {maTaiKhoan}\nMật khẩu: {matKhauGoc}\n\nVui lòng ghi nhớ thông tin đăng nhập!",
                                 "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                             this.Close();
                         }
@@ -212,6 +217,28 @@ namespace TFitnessApp.Windows
             {
                 MessageBox.Show($"Lỗi khi tạo tài khoản: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Hàm mã hóa mật khẩu bằng SHA256
+        private string MaHoaMatKhauSHA256(string matKhau)
+        {
+            using (System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                // Chuyển mật khẩu thành mảng byte
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(matKhau);
+
+                // Mã hóa mảng byte
+                byte[] hashBytes = sha256.ComputeHash(bytes);
+
+                // Chuyển đổi byte array thành chuỗi hex
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    builder.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return builder.ToString();
             }
         }
         #endregion
