@@ -18,7 +18,7 @@ TFitnessApp là một ứng dụng desktop được xây dựng bằng WPF (.NET
 ---
 ## MỤC TIÊU ĐẠT ĐƯỢC 
 
-Hỗ trợ nghiệp vụ toàn diện: Xây dựng một ứng dụng Desktop ổn định, hỗ trợ đầy đủ 11 nhóm chức năng nghiệp vụ cốt lõi (Quản lý Học viên, Gói tập, Hợp đồng, Lịch tập, Giao dịch, Điểm danh, v.v.).
+Hỗ trợ nghiệp vụ toàn diện: Xây dựng một ứng dụng Desktop ổn định, hỗ trợ đầy đủ 10 nhóm chức năng nghiệp vụ cốt lõi (Quản lý Học viên, Gói tập, Hợp đồng, Lịch tập, Giao dịch, Điểm danh, v.v.).
 
 Thiết kế Hiện đại: Phát triển giao diện người dùng (UI/UX) trực quan, hiện đại bằng WPF, với tông màu chủ đạo Đỏ/Trắng, phân quyền rõ ràng giữa Quản trị viên và Nhân viên.
 
