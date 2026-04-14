@@ -1,13 +1,22 @@
+**THÀNH VIÊN DỰ ÁN**
+
+Trần Thị Ngọc (nhóm trưởng)
+Nguyễn Thị Phương Oanh
+Hướng Ngọc Trâm
+Nguyễn Hoàng Yến Thi
+Nguyễn Thanh Xinh 
+
+---
 **MÔ TẢ DỰ ÁN**
 
-TFitnessApp là một ứng dụng desktop được xây dựng bằng WPF (.NET) và ngôn ngữ C# nhằm cung cấp một giải pháp quản lý cho các trung tâm gym quy mô vừa và nhỏ. Ứng dụng tập trung vào việc số hóa quy trình vận hành, loại bỏ sự phụ thuộc vào sổ sách hay Excel , từ đó nâng cao hiệu quả quản lý hội viên, hợp đồng, giao dịch và chất lượng dịch vụ.
+TFitnessApp là một ứng dụng desktop được xây dựng bằng WPF (.NET) và ngôn ngữ C# nhằm cung cấp một giải pháp quản lý cho các trung tâm gym quy mô vừa và nhỏ. Ứng dụng tập trung vào việc số hóa quy trình vận hành, loại bỏ sự phụ thuộc vào sổ sách hay Excel, từ đó nâng cao hiệu quả quản lý hội viên, hợp đồng, giao dịch và chất lượng dịch vụ.
 
 ---
 **MỤC TIÊU ĐẠT ĐƯỢC** 
 
 Hỗ trợ nghiệp vụ toàn diện: Xây dựng một ứng dụng Desktop ổn định, hỗ trợ đầy đủ 11 nhóm chức năng nghiệp vụ cốt lõi (Quản lý Học viên, Gói tập, Hợp đồng, Lịch tập, Giao dịch, Điểm danh, v.v.).
 
-Thiết kế Hiện đại: Phát triển giao diện người dùng (UI/UX) trực quan, hiện đại bằng WPF, với tông màu chủ đạo Đỏ/Trắng , phân quyền rõ ràng giữa Quản trị viên và Nhân viên.
+Thiết kế Hiện đại: Phát triển giao diện người dùng (UI/UX) trực quan, hiện đại bằng WPF, với tông màu chủ đạo Đỏ/Trắng, phân quyền rõ ràng giữa Quản trị viên và Nhân viên.
 
 Thiết kế cơ sở dữ liệu SQLite với 13 thực thể quan hệ chặt chẽ, đảm bảo tính toàn vẹn và hiệu quả truy xuất.
 
